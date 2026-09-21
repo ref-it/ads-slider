@@ -81,7 +81,6 @@ At minimum, configure:
 - `DB_DATABASE`
 - `DB_USERNAME`
 - `DB_PASSWORD`
-- `FONT_AWESOME_KIT_URL`
 - `OW_API_KEY`
 
 If you plan to use Reverb/WebSockets (recommended for live refresh after data updates), install the Reverb configuration:

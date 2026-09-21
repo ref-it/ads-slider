@@ -139,7 +139,6 @@
     <script type="module">
         $('div.alert').not('.alert-important').delay(3000).fadeOut(350);
     </script>
-    <script async src="{{ config('ads.fontAwesomeKitURL') }}" crossorigin="anonymous"></script>
     @yield('scripts')
 </body>
 

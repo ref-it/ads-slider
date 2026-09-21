@@ -1,3 +1,6 @@
+// Icons
+@use 'fontawesome' as *;
+
 // Bootstrap
 @import 'bootstrap/scss/bootstrap';
 //TODO: do I need bootstrap here? Yes
@@ -17,9 +20,9 @@
 }
 
 @font-face {
-    font-family: WebTrebuchet;
+    font-family: WebAdwaitaSans;
     font-display: swap;
-    src: url('/resources/assets/fonts/Trebuchet-MS.woff');
+    src: url('@fontsource/adwaita-sans/files/adwaita-sans-latin-400-normal.woff2') format('woff2');
 }
 
 html,
@@ -29,7 +32,7 @@ body {
     cursor: none;
     height: 100%;
     overflow: hidden;
-    font-family: "Trebuchet MS", WebTrebuchet, Helvetica, sans-serif;
+    font-family: "Adwaita Sans", WebAdwaitaSans, Helvetica, sans-serif;
 
     /* Prevent the blinking cursor */
     /* Safari / Chrome Kiosk engines */

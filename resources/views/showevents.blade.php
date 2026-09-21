@@ -12,7 +12,6 @@
 
     @include('layouts.favicon')
     <title>NEW Ads</title>
-    <script src="{{ config('ads.fontAwesomeKitURL') }}" crossorigin="anonymous"></script>
     @vite(['resources/js/slider.ts'])
 </head>
 
