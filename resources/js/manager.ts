@@ -8,6 +8,7 @@ export enum ScheduledSlideType {
     PICS = "PICS",
     VIDEOS = "VIDEOS",
     WEATHER = "WEATHER",
+    WEATHER_DAILY = "WEATHER_DAILY",
     MENUS = "MENUS",
     KARAOKE = "KARAOKE",
     ORDERSLIST = "ORDERSLIST",
@@ -47,6 +48,7 @@ export class Manager implements Mediator {
 
     private schedule: ScheduledSlideType[] =
         [ScheduledSlideType.WEATHER,
+        ScheduledSlideType.WEATHER_DAILY,
         ScheduledSlideType.ORDERSLIST,
         ScheduledSlideType.EVENTS,
         ScheduledSlideType.ORDERSLIST,
@@ -166,6 +168,10 @@ export class Manager implements Mediator {
         this.conf = monitorConfig;
         if (!monitorConfig.show_weather_forecast) {
             this.schedule = this.schedule.filter(slide => slide !== ScheduledSlideType.WEATHER);
+        }
+
+        if (!monitorConfig.show_weather_daily_forecast) {
+            this.schedule = this.schedule.filter(slide => slide !== ScheduledSlideType.WEATHER_DAILY);
         }
 
         if (!monitorConfig.show_menus) {

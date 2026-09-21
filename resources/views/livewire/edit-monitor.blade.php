@@ -48,13 +48,25 @@
 
                 <x-forms.inputs.checkbox disabled name="form.show_karaoke" label="{{__('Show karaoke'). ' (' . __('Currently deprecated') . ')'}}"/>
 
-                <x-forms.inputs.checkbox :disabled="!$hasOpenweatherApiKey" name="form.show_weather_forecast" label="{{__('Show weather forecast')}}">
-                    @if (!$hasOpenweatherApiKey)
+                <x-forms.inputs.checkbox :disabled="!$hasWeatherProviderConfigured" name="form.show_weather_forecast" label="{{__('Show weather forecast')}}">
+                    @if (!$hasWeatherProviderConfigured)
                         <x-forms.helpers.help>
                             @if ($realm && (auth()->user()->is_admin || auth()->user()->is_realm_admin))
-                                {{ __('Please set up the Openweather API Key in the') }} <a href="{{ route('realms.edit', $realm->id) }}">{{ __('settings') }}</a>.
+                                {{ __('Please set up a weather provider (OpenWeatherMap or DWD) in the') }} <a href="{{ route('realms.edit', $realm->id) }}">{{ __('settings') }}</a>.
                             @else
-                                {{ __('Please set up the Openweather API Key in the settings.') }}
+                                {{ __('Please set up a weather provider (OpenWeatherMap or DWD) in the settings.') }}
+                            @endif
+                        </x-forms.helpers.help>
+                    @endif
+                </x-forms.inputs.checkbox>
+
+                <x-forms.inputs.checkbox :disabled="!$hasDailyWeatherProviderConfigured" name="form.show_weather_daily_forecast" label="{{__('Show multi-day weather outlook')}}">
+                    @if (!$hasDailyWeatherProviderConfigured)
+                        <x-forms.helpers.help>
+                            @if ($realm && (auth()->user()->is_admin || auth()->user()->is_realm_admin))
+                                {{ __('Only available with DWD as weather provider. Please set it up in the') }} <a href="{{ route('realms.edit', $realm->id) }}">{{ __('settings') }}</a>.
+                            @else
+                                {{ __('Only available with DWD as weather provider. Please set it up in the settings.') }}
                             @endif
                         </x-forms.helpers.help>
                     @endif

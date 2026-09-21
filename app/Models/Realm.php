@@ -30,6 +30,48 @@ class Realm extends Model
         return $this->save();
     }
 
+    /**
+     * The provider actually usable to fetch weather data. Prefers the
+     * explicitly selected weather_provider, but falls back to whichever
+     * provider's fields are filled in (e.g. a DWD station ID entered without
+     * also selecting "DWD" from the provider dropdown, or a realm that
+     * predates the explicit selector) rather than reporting unconfigured.
+     */
+    public function effectiveWeatherProvider(): ?string
+    {
+        if ($this->weather_provider === 'dwd' && filled($this->dwd_station_id)) {
+            return 'dwd';
+        }
+
+        if ($this->weather_provider === 'openweathermap' && filled($this->ow_api_key) && filled($this->ow_city_id)) {
+            return 'openweathermap';
+        }
+
+        if (filled($this->dwd_station_id)) {
+            return 'dwd';
+        }
+
+        if (filled($this->ow_api_key) && filled($this->ow_city_id)) {
+            return 'openweathermap';
+        }
+
+        return null;
+    }
+
+    public function hasWeatherProviderConfigured(): bool
+    {
+        return filled($this->effectiveWeatherProvider());
+    }
+
+    /**
+     * The multi-day weather outlook is only available from DWD; OpenWeatherMap's
+     * free-tier forecast doesn't include native daily aggregates.
+     */
+    public function hasDailyWeatherProviderConfigured(): bool
+    {
+        return $this->effectiveWeatherProvider() === 'dwd';
+    }
+
     public static function getBroadcastChannelSecret(int $realmId): string
     {
         return substr(hash_hmac('sha256', 'realm_'.$realmId, config('app.key')), 0, 16);

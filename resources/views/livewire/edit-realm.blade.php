@@ -34,6 +34,14 @@
                     </div>
                 </div>
 
+                <x-forms.inputs.select name="form.weather_provider" label="{{__('Weather provider')}}">
+                    <x-slot:options>
+                        <option value="">—</option>
+                        <option value="openweathermap">OpenWeatherMap</option>
+                        <option value="dwd">DWD (Deutscher Wetterdienst)</option>
+                    </x-slot>
+                </x-forms.inputs.select>
+
                 <x-forms.inputs.text name="form.ow_api_key" placeholder="<your secret>" label="{{__('Openweather API key')}}">
                     <x-forms.helpers.help
                         text="{{__('Further information: https://openweathermap.org/appid')}}" />
@@ -42,6 +50,21 @@
                     <x-forms.helpers.help
                         text="{{__('Find your city ID at https://openweathermap.org/find')}}" />
                 </x-forms.inputs.text>
+
+                <div class="row align-items-end">
+                    <div class="col-md-9">
+                        <x-forms.inputs.text name="form.dwd_station_id" placeholder="10865" label="{{__('DWD station ID')}}">
+                            <x-forms.helpers.help
+                                text="{{__('Find your station ID at https://www.dwd.de/DE/leistungen/klimadatendeutschland/stationsliste.html, or determine it from the latitude/longitude above.')}}" />
+                        </x-forms.inputs.text>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <button class="btn btn-outline-secondary" type="button" wire:click="findNearestDwdStation"
+                            wire:loading.attr="disabled" wire:target="findNearestDwdStation">
+                            <i class="fas fa-fw fa-location-crosshairs"></i> {{ __('Find from coordinates') }}
+                        </button>
+                    </div>
+                </div>
 
                 <x-forms.inputs.text name="form.oidc_required_group" placeholder="{{__('e.g. ads-slider-users')}}" label="{{__('OIDC required group')}}">
                     <x-forms.helpers.help

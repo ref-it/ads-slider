@@ -6,6 +6,7 @@ use App\Events\SecurityAuditEvent;
 use App\Livewire\CreateEvent;
 use App\Livewire\CreateEventsImport;
 use App\Livewire\EditHappyHour;
+use App\Livewire\EditMonitor;
 use App\Livewire\EditPictureSlide;
 use App\Livewire\EditRealm;
 use App\Livewire\EditTemplate;
@@ -25,7 +26,9 @@ use App\Models\Template;
 use App\Models\User;
 use App\Models\Video;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event as EventFacade;
+use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -363,6 +366,76 @@ class LivewireComponentsTest extends TestCase
 
         $this->assertNull($this->realm->fresh()->orders_pull);
         EventFacade::assertDispatched(SecurityAuditEvent::class);
+    }
+
+    public function test_edit_realm_finds_nearest_dwd_station_from_coordinates(): void
+    {
+        Cache::flush();
+
+        Http::fake([
+            'https://www.dwd.de/*' => Http::response(
+                "ID    ICAO NAME                 LAT    LON     ELEV\n".
+                "----- ---- -------------------- -----  ------- -----\n".
+                "01001 ENJA JAN MAYEN             70.56   -8.40    10\n".
+                "10865 ---- MUENCHEN STADT        48.10   11.32   515\n",
+                200
+            ),
+        ]);
+
+        Livewire::actingAs($this->admin)
+            ->test(EditRealm::class, [
+                'realm' => $this->realm,
+            ])
+            ->set('form.lat', 48.14)
+            ->set('form.lon', 11.58)
+            ->set('form.weather_provider', 'dwd')
+            ->call('findNearestDwdStation')
+            ->assertSet('form.dwd_station_id', '10865')
+            ->call('updateRealm');
+
+        $this->realm->refresh();
+        $this->assertSame('dwd', $this->realm->weather_provider);
+        $this->assertSame('10865', $this->realm->dwd_station_id);
+        $this->assertTrue($this->realm->hasWeatherProviderConfigured());
+
+        Livewire::actingAs($this->admin)
+            ->test(EditMonitor::class)
+            ->assertSet('form.show_weather_forecast', true)
+            ->assertDontSee(__('Please set up a weather provider (OpenWeatherMap or DWD) in the settings.'));
+    }
+
+    public function test_edit_realm_enables_weather_forecast_when_dwd_station_id_set_without_selecting_provider(): void
+    {
+        Livewire::actingAs($this->admin)
+            ->test(EditRealm::class, [
+                'realm' => $this->realm,
+            ])
+            ->set('form.dwd_station_id', '10865')
+            ->call('updateRealm');
+
+        $this->realm->refresh();
+        $this->assertSame('10865', $this->realm->dwd_station_id);
+        $this->assertTrue($this->realm->hasWeatherProviderConfigured());
+
+        Livewire::actingAs($this->admin)
+            ->test(EditMonitor::class)
+            ->assertSet('form.show_weather_forecast', true);
+    }
+
+    public function test_edit_realm_requires_coordinates_to_find_dwd_station(): void
+    {
+        Http::fake();
+
+        Livewire::actingAs($this->admin)
+            ->test(EditRealm::class, [
+                'realm' => $this->realm,
+            ])
+            ->set('form.lat', '')
+            ->set('form.lon', '')
+            ->call('findNearestDwdStation')
+            ->assertSet('form.dwd_station_id', '');
+
+        Http::assertNothingSent();
     }
 
     public function test_events_import_create_and_update_components(): void

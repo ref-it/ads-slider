@@ -43,6 +43,7 @@ import { MarketingAfter } from './slides/MarketingAfter.js';
 import { InterruptionSlides, Manager, ScheduledSlideType } from './manager.js';
 import { EventStatuses, ScheduleReason } from './modules/eventStatus.js';
 import { WeatherForecastSlide } from './slides/WeatherForecastSlide.js';
+import { WeatherDailyForecastSlide } from './slides/WeatherDailyForecastSlide.js';
 import { PicsSlide } from './slides/PicsSlide.js';
 import { VidsSlide } from './slides/VidsSlide.js';
 import { EventsSlide } from './slides/EventsSlide.js';
@@ -118,6 +119,7 @@ const config: Config = {
   show_videos: !!data.m.show_videos,
   show_karaoke: false,// currently disabled !!data.m.show_karaoke,
   show_weather_forecast: !!data.m.show_weather_forecast,
+  show_weather_daily_forecast: !!data.m.show_weather_daily_forecast,
   use_animations: !!data.m.use_animations,
   show_marquee: false, // currently disabled !!data.m.show_marquee,
   show_event_while_is_happening: !!data.m.show_event_while_is_happening,
@@ -193,6 +195,7 @@ let schedulerWorker: Worker;
 let eventsSlide: EventsSlide | null;
 
 let weatherForecastSlide: WeatherForecastSlide | null;
+let weatherDailyForecastSlide: WeatherDailyForecastSlide | null;
 let picsSlide: PicsSlide | null;
 let vidsSlide: VidsSlide | null;
 let menuSlide: MenuSlide | null;
@@ -352,6 +355,7 @@ function updateData(data: ServerData): void {
 
   if (data?.weather) {
     prepareWeatherSlide(data.weather);
+    prepareWeatherDailySlide(data.weather);
   }
 
   if (ordersListSlide) {
@@ -532,6 +536,22 @@ function prepareWeatherSlide(data: WeatherData): void {
     getFormattedTime(sunSet.getHours(), sunSet.getMinutes()),
   );
 
+  // DWD doesn't provide a perceived temperature; don't show a second,
+  // identical-looking value next to the actual temperature. Also used to
+  // detect the data's source for the "Source: ..." line below, since DWD's
+  // hourly cloud cover isn't reliable enough to show either (unlike its
+  // daily sunshine total, shown on the daily slide instead).
+  const showFeelsLike = data.list.some(
+    (entry) => entry.main.feels_like !== undefined && entry.main.feels_like !== null,
+  );
+  $('#weatherHeader .feelsLikeLabel').toggle(showFeelsLike);
+  $('#weather').toggleClass('weather-dwd', !showFeelsLike);
+
+  const sourceName = showFeelsLike
+    ? _._('weather_source_owm', config.locale)
+    : _._('weather_source_dwd', config.locale);
+  $('#weatherSource').text(`${_._('weather_source_label', config.locale)}: ${sourceName}`);
+
   let currentDay = -1;
   for (let i = 0; i < data.list.length; i += 1) {
     const row = $('#templateWeather').clone();
@@ -568,12 +588,18 @@ function prepareWeatherSlide(data: WeatherData): void {
       .find('.weatherTemperature span:first-of-type')
       .text(infos.temp.toFixed(1))
       .css('color', getTemperatureColor(infos.temp));
-    row
-      .find('.weatherTemperature span.temp_feels')
-      .text(infos.feels_like.toFixed(1))
-      .css('color', getTemperatureColor(infos.feels_like));
+    if (infos.feels_like !== undefined && infos.feels_like !== null) {
+      row
+        .find('.weatherTemperature span.temp_feels')
+        .text(infos.feels_like.toFixed(1))
+        .css('color', getTemperatureColor(infos.feels_like))
+        .show();
+    } else {
+      row.find('.weatherTemperature span.temp_feels').hide();
+    }
     row.find('.weatherDescr').text(entry.weather[0].description);
     row.find('.weatherCloud span:first-of-type').text(entry.clouds.all);
+    row.find('.weatherCloud span.superscript').text('%');
     if (i % 2) {
       row.addClass('even');
     }
@@ -581,6 +607,64 @@ function prepareWeatherSlide(data: WeatherData): void {
     wRows.append(row);
   }
   weatherDataLastUpdate = getNow();
+}
+
+/**
+ * Fills in the multi-day weather outlook, one column per day. DWD-only:
+ * data.daily is absent for OpenWeatherMap-sourced data, in which case the
+ * slide keeps whatever it last showed (it stays hidden, see manager.ts).
+ */
+function prepareWeatherDailySlide(data: WeatherData): void {
+  if (!data.daily || data.daily.length === 0) {
+    return;
+  }
+
+  $('#dailyPlaceName').text(data.city.name);
+
+  const columns = $('#weatherDailyColumns');
+  columns.html('');
+
+  const todayLabel = new Date().toDateString();
+
+  data.daily.forEach((day, i) => {
+    const column = $('#templateWeatherDailyColumn').clone();
+    column.prop('id', `weather-daily-${i}`);
+
+    const date = day.date ? new Date(day.date) : null;
+    const isToday = date !== null && date.toDateString() === todayLabel;
+    column
+      .find('.dailyDate')
+      .text(isToday ? _._('today', config.locale) : date ? dayjs(date).format('ddd') : '');
+
+    const icon = day.weather[0]?.icon ?? 'unknown';
+    column
+      .find('.dailyIcon img')
+      .attr('data-icon', icon)
+      .attr(
+        'src',
+        `${config.base_root}img/amcharts_weather_icons/${config.use_animations ? 'animated' : 'static'}/${icon}.${config.use_animations ? 'svg' : 'png'}`,
+      );
+
+    column
+      .find('.dailyMax')
+      .text(day.temp_max !== null ? day.temp_max.toFixed(0) : '–')
+      .css('color', day.temp_max !== null ? getTemperatureColor(day.temp_max) : '');
+    column
+      .find('.dailyMin')
+      .text(day.temp_min !== null ? day.temp_min.toFixed(0) : '–')
+      .css('color', day.temp_min !== null ? getTemperatureColor(day.temp_min) : '');
+
+    if (day.sunshine !== null && day.sunshine !== undefined) {
+      column.find('.dailySunshine').show();
+      column.find('.dailySunshineValue').text((day.sunshine / 60).toFixed(1));
+      column.find('.dailySunshine span.superscript').text(_._('hour_abbr', config.locale));
+    } else {
+      column.find('.dailySunshine').hide();
+    }
+
+    column.show();
+    columns.append(column);
+  });
 }
 
 /**
@@ -759,6 +843,11 @@ function initalizeSlides(): void {
   if (config.show_weather_forecast) {
     weatherForecastSlide = new WeatherForecastSlide(manager, document.getElementById('weather') as HTMLDivElement);
     manager.registerSlide(weatherForecastSlide, ScheduledSlideType.WEATHER);
+  }
+
+  if (config.show_weather_daily_forecast) {
+    weatherDailyForecastSlide = new WeatherDailyForecastSlide(manager, document.getElementById('weather-daily') as HTMLDivElement);
+    manager.registerSlide(weatherDailyForecastSlide, ScheduledSlideType.WEATHER_DAILY);
   }
 
   if (config.show_pictures) {
@@ -1028,6 +1117,7 @@ function init(): void {
       console.log('[WS] WEATHER UPDATED');
       console.dir(response);
       prepareWeatherSlide(response.data);
+      prepareWeatherDailySlide(response.data);
       weatherOffline = false;
     });
   //alert(`alerts-${config.realm_id}`);

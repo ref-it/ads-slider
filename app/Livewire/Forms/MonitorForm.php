@@ -58,6 +58,9 @@ class MonitorForm extends Form
     public $show_weather_forecast = true;
 
     #[Validate('boolean')]
+    public $show_weather_daily_forecast = false;
+
+    #[Validate('boolean')]
     public $use_animations = true;
 
     #[Validate('boolean')]
@@ -79,9 +82,13 @@ class MonitorForm extends Form
         }
 
         $realm = $this->monitor->realm ?? Auth::user()->realm;
-        if (empty($realm?->ow_api_key)) {
+        if (! $realm?->hasWeatherProviderConfigured()) {
             $this->show_weather_forecast = false;
             $validated['show_weather_forecast'] = false;
+        }
+        if (! $realm?->hasDailyWeatherProviderConfigured()) {
+            $this->show_weather_daily_forecast = false;
+            $validated['show_weather_daily_forecast'] = false;
         }
 
         $this->monitor->fill($validated);
@@ -108,6 +115,7 @@ class MonitorForm extends Form
         $this->show_videos = $m->show_videos;
         $this->show_karaoke = $m->show_karaoke;
         $this->show_weather_forecast = $m->show_weather_forecast;
+        $this->show_weather_daily_forecast = $m->show_weather_daily_forecast;
         $this->use_animations = $m->use_animations;
         $this->show_marquee = $m->show_marquee;
         $this->show_event_while_is_happening = $m->show_event_while_is_happening;

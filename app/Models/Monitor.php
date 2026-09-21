@@ -28,6 +28,7 @@ class Monitor extends Authenticatable
         'show_videos' => 'boolean',
         'show_karaoke' => 'boolean',
         'show_weather_forecast' => 'boolean',
+        'show_weather_daily_forecast' => 'boolean',
         'use_animations' => 'boolean',
         'show_marquee' => 'boolean',
         'show_event_while_is_happening' => 'boolean',

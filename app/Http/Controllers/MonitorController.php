@@ -116,14 +116,14 @@ class MonitorController extends Controller
             ]
         );
 
-        if (! $monitor->realm->ow_city_id || ! $monitor->realm->ow_api_key) {
+        if (! $monitor->realm->hasWeatherProviderConfigured()) {
             $monitor->show_weather_forecast = false;
         }
 
         $data = $this->collectData($monitor);
         if ($monitor->show_weather_forecast) {
             try {
-                $data['weather'] = $this->getWeather($monitor->realm->ow_city_id);
+                $data['weather'] = $this->getWeather($monitor->realm);
             } catch (FileNotFoundException $ex) {
                 Log::channel('connections')->error('Weather data not found on the server');
             }
@@ -213,13 +213,19 @@ class MonitorController extends Controller
     /**
      * Returns an object containing the weather data read from the disk
      */
-    private function getWeather(?string $city_id): mixed
+    private function getWeather(Realm $realm): mixed
     {
-        if (! $city_id) {
-            throw new FileNotFoundException('City ID not found');
+        $filename = match ($realm->effectiveWeatherProvider()) {
+            'dwd' => "weather-dwd-{$realm->dwd_station_id}.json",
+            'openweathermap' => "weather-{$realm->ow_city_id}.json",
+            default => null,
+        };
+
+        if (! $filename) {
+            throw new FileNotFoundException('No weather provider configured');
         }
-        if (Storage::disk('local')->exists("weather-{$city_id}.json")) {
-            $fileContent = Storage::disk('local')->get("weather-{$city_id}.json");
+        if (Storage::disk('local')->exists($filename)) {
+            $fileContent = Storage::disk('local')->get($filename);
 
             return json_decode($fileContent);
         }

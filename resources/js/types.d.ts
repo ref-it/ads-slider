@@ -57,6 +57,7 @@ export interface Monitor {
   show_videos: boolean;
   show_karaoke: boolean;
   show_weather_forecast: boolean;
+  show_weather_daily_forecast: boolean;
   show_orderslist: boolean;
   use_animations: boolean;
   show_marquee: boolean;
@@ -147,7 +148,7 @@ export interface Forecast {
   dt: number;
   main: {
     temp: number;
-    feels_like: number;
+    feels_like: number | null; // Not provided by DWD
     pressure: number; // Pressure in hPa
     humidity: number; // in %
     temp_min: number; // Unit Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
@@ -170,11 +171,20 @@ export interface Forecast {
   dt_txt: string; // Time of data forecasted, ISO, UTC
 }
 
+export interface DailyForecast {
+  date: string | null; // YYYY-MM-DD
+  temp_min: number | null;
+  temp_max: number | null;
+  sunshine: number | null; // Total minutes of sunshine that day (DWD only)
+  weather: Weather[];
+}
+
 export interface WeatherData {
   cod: string;
   message: number;
   cnt: number;
   list: Forecast[];
+  daily?: DailyForecast[]; // Multi-day outlook (DWD only)
   city: City;
 }
 

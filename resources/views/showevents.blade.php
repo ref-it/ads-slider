@@ -200,7 +200,7 @@
                         </div>
                         <div class="weatherIcon table-header-cell">&nbsp;</div>
                         <div class="weatherTemperature table-header-cell">
-                            <i class="fas fa-temperature-low">&nbsp;</i>{{__('(feels)')}}
+                            <i class="fas fa-temperature-low">&nbsp;</i><span class="feelsLikeLabel">{{__('(feels)')}}</span>
                         </div>
                         <div class="weatherCloud table-header-cell">
                             <i class="fas fa-cloud">&nbsp;</i>
@@ -230,6 +230,35 @@
                 </div>
             </div>
             <div id="noWarranty">{{ __('Information without guarantee') }}</div>
+            <div id="weatherSource"></div>
+        </div>
+
+        <div id="weather-daily" style="display:none">
+            <div>
+                <div id="weatherDailyTitle">
+                    <div>{{ __('The weather in') }}&nbsp;</div>
+                    <div id="dailyPlaceName">Ilmenau</div>
+                </div>
+                <div id="weatherDailyColumns">
+
+                </div>
+                <div id="templateWeatherDailyColumn" class="dailyColumn" style="display: none">
+                    <div class="dailyDate">Mon</div>
+                    <div class="dailyIcon">
+                        <img src="https://openweathermap.org/img/wn/01d@2x.png" alt="?" data-icon="01d"
+                            onerror="this.onerror=null;if(this.dataset.icon){this.src='https://openweathermap.org/img/wn/'+this.dataset.icon+'@2x.png';this.dataset.icon = null;}" />
+                    </div>
+                    <div class="dailyTemps">
+                        <span class="dailyMax">23</span><span class="superscript">°C</span><br>
+                        <span class="dailyMin">12</span><span class="superscript">°C</span>
+                    </div>
+                    <div class="dailySunshine">
+                        <i class="fas fa-sun">&nbsp;</i><span class="dailySunshineValue">6.8</span><span class="superscript">h</span>
+                    </div>
+                </div>
+            </div>
+            <div id="noWarrantyDaily">{{ __('Information without guarantee') }}</div>
+            <div id="weatherSourceDaily">{{ __('Source') }}: {{ __('German Weather Service (DWD)') }}</div>
         </div>
 
         <div id="pics-container" style="display:none">

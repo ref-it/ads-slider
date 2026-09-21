@@ -38,6 +38,12 @@ class RealmForm extends Form
     #[Validate('nullable|max:20')]
     public $ow_city_id = '';
 
+    #[Validate('nullable|in:openweathermap,dwd')]
+    public $weather_provider = '';
+
+    #[Validate('nullable|max:20')]
+    public $dwd_station_id = '';
+
     #[Locked]
     public $orders_pull = '';
 
@@ -77,6 +83,8 @@ class RealmForm extends Form
         $this->ow_api_key = $realm->ow_api_key;
         $this->oidc_required_group = $realm->oidc_required_group;
         $this->ow_city_id = $realm->ow_city_id;
+        $this->weather_provider = $realm->weather_provider;
+        $this->dwd_station_id = $realm->dwd_station_id;
         $this->locale = $realm->locale;
         $this->orders_pull = $realm->orders_pull;
         $this->orders_link = $realm->orders_link;

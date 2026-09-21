@@ -6,6 +6,7 @@ use App\Events\SecurityAuditEvent;
 use App\Livewire\Forms\RealmForm;
 use App\Livewire\Traits\TrimStringsAndConvertEmptyStringsToNull;
 use App\Models\Realm;
+use App\Services\DwdStationCatalog;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
@@ -50,6 +51,42 @@ class EditRealm extends Component
             realmId: $this->form->realm->id
         ));
         $this->redirectRoute('realms.edit', $this->form->realm->id);
+    }
+
+    public function findNearestDwdStation(DwdStationCatalog $catalog)
+    {
+        if ($this->form->realm) {
+            $this->authorize('update', $this->form->realm);
+        } else {
+            $this->authorize('create', Realm::class);
+        }
+
+        if (blank($this->form->lat) || blank($this->form->lon)) {
+            flash(__('Please set the latitude and longitude first.'))->error();
+
+            return;
+        }
+
+        try {
+            $station = $catalog->findNearest((float) $this->form->lat, (float) $this->form->lon);
+        } catch (\Throwable $exception) {
+            Log::channel('crud')->error('DWD station catalogue could not be fetched', ['exception' => $exception]);
+            flash(__('Could not reach the DWD station catalogue. Please try again later.'))->error();
+
+            return;
+        }
+
+        if (! $station) {
+            flash(__('No DWD station found.'))->error();
+
+            return;
+        }
+
+        $this->form->dwd_station_id = $station['id'];
+        flash(__('Nearest DWD station found: :name (:distance km away)', [
+            'name' => $station['name'],
+            'distance' => $station['distance_km'],
+        ]))->success();
     }
 
     public function updateRealm()
