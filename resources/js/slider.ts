@@ -562,7 +562,7 @@ function prepareWeatherSlide(data: WeatherData): void {
     const infos = entry.main;
     const date = new Date(entry.dt * 1000);
 
-    column.find('.dailyDate').text(`${date.getHours()}:00`);
+    column.find('.dailyDate').text(getFormattedTime(date.getHours(), 0));
 
     column
       .find('.dailyIcon img')
