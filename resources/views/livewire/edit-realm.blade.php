@@ -42,6 +42,11 @@
                     <x-forms.helpers.help
                         text="{{__('Find your city ID at https://openweathermap.org/find')}}" />
                 </x-forms.inputs.text>
+
+                <x-forms.inputs.text name="form.oidc_required_group" placeholder="{{__('e.g. ads-slider-users')}}" label="{{__('OIDC required group')}}">
+                    <x-forms.helpers.help
+                        text="{{__('Users must belong to this group at the identity provider to gain access to this realm via OIDC login. Leave empty to disable OIDC access for this realm.')}}" />
+                </x-forms.inputs.text>
                 <x-forms.inputs.text name="form.orders_pull" readonly label="{{__('Orders pull')}}">
                     <x-forms.helpers.help
                         text="{{__('If a GET is done to this URL: :url Orders Link will be queried immediately and the results shown prominently. Keep the URL in good hands.',['url'=>route('realm.requestpull',['realm'=>$form->orders_pull?$form->orders_pull:'order_pull_example'])])}}" />

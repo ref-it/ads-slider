@@ -77,6 +77,19 @@
                             </div>
                         </div>
                     </form>
+
+                    @if (config('services.openidconnect.enabled'))
+                        <div class="d-flex align-items-center my-3">
+                            <hr class="flex-grow-1">
+                            <span class="mx-2 text-muted">{{ __('or sign in with') }}</span>
+                            <hr class="flex-grow-1">
+                        </div>
+                        <div class="d-grid">
+                            <a href="{{ route('oidc.redirect') }}" class="btn btn-outline-secondary">
+                                {{ config('services.openidconnect.provider_name') }}
+                            </a>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

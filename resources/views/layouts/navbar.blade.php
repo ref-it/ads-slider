@@ -285,6 +285,20 @@
                                 data-bs-title="{{ __('Edit Account') }}">
                                 <i class="fa-solid fa-fw fa-user-pen"></i>&nbsp;{{ __('Account') }}
                             </a>
+                            @if (Auth::user()->realms->count() > 1)
+                                <hr>
+                                <h6 class="dropdown-header">{{ __('Switch Realm') }}</h6>
+                                @foreach (Auth::user()->realms as $realm)
+                                    <form action="{{ route('realm.switch', $realm) }}" method="POST">
+                                        @csrf
+                                        <button type="submit"
+                                            class="dropdown-item {{ $realm->id === Auth::user()->realm_id ? 'active' : '' }}">
+                                            <i class="fa-solid fa-fw fa-building"></i>&nbsp;{{ $realm->name }}
+                                        </button>
+                                    </form>
+                                @endforeach
+                            @endif
+                            <hr>
                             <a class="dropdown-item text-danger" href="{{ route('logout') }}"
                                 onclick="event.preventDefault();
                                              document.getElementById('logout-form').submit();">

@@ -32,6 +32,9 @@ class RealmForm extends Form
     #[Validate('nullable|max:32')]
     public $ow_api_key = '';
 
+    #[Validate('nullable|max:255')]
+    public $oidc_required_group = '';
+
     #[Validate('nullable|max:20')]
     public $ow_city_id = '';
 
@@ -72,6 +75,7 @@ class RealmForm extends Form
         $this->lat = $realm->lat;
         $this->lon = $realm->lon;
         $this->ow_api_key = $realm->ow_api_key;
+        $this->oidc_required_group = $realm->oidc_required_group;
         $this->ow_city_id = $realm->ow_city_id;
         $this->locale = $realm->locale;
         $this->orders_pull = $realm->orders_pull;

@@ -12,6 +12,7 @@
 */
 
 use App\Http\Controllers\AlertController;
+use App\Http\Controllers\Auth\OidcController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventsImportController;
@@ -53,10 +54,20 @@ Route::get('Content/{monitor:api_token}/data.json', [MonitorController::class, '
 // Authentication routes
 Auth::routes(['register' => false, 'verify' => true]);
 
+// Optional OIDC login (the controller itself 404s unless services.openidconnect.enabled is true)
+Route::get('login/oidc/redirect', [OidcController::class, 'redirect'])->name('oidc.redirect');
+Route::get('login/oidc/callback', [OidcController::class, 'callback'])->name('oidc.callback');
+
+// Back-channel logout: server-to-server call from the IdP, not a browser request.
+Route::post('oidc/backchannel-logout', [OidcController::class, 'backchannelLogout'])
+    ->name('oidc.backchannel-logout')
+    ->withoutMiddleware(['web']);
+
 // Authenticated & verified users
 Route::middleware(['verified', 'auth'])->group(function () {
     // User profile
     Route::resource('users', UserController::class)->only(['edit', 'update']);
+    Route::post('realm-switch/{realm}', [UserController::class, 'switchRealm'])->name('realm.switch');
 
     // Events
     Route::get('/events', EventsList::class)->name('events.index');

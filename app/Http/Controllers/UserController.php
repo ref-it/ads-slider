@@ -107,4 +107,24 @@ class UserController extends Controller
     {
         //
     }
+
+    /**
+     * Switch the current user's active realm to one they have access to.
+     */
+    public function switchRealm(Realm $realm)
+    {
+        abort_unless(auth()->user()->realms->contains($realm->id), 403);
+
+        auth()->user()->update(['realm_id' => $realm->id]);
+
+        event(new SecurityAuditEvent(
+            action: 'user.realm_switched',
+            description: "User switched active realm to Realm ID: {$realm->id}",
+            realmId: $realm->id,
+        ));
+
+        flash(__('Switched to :realm_name', ['realm_name' => $realm->name]))->success();
+
+        return back();
+    }
 }
