@@ -520,11 +520,14 @@ function updateMenu(menu: Menu) {
 
 /**
  * @deprecated TODO: move to Slide
- * Fills in the given data in the weather slide
+ * Fills in the given data in the weather slide, one card per hour (styled
+ * like the daily slide's cards, see prepareWeatherDailySlide).
  */
 function prepareWeatherSlide(data: WeatherData): void {
-  const wRows = $('#weatherRows');
-  wRows.html('');
+  const columns = $('#weatherColumns');
+  // #sunRise/#sunSet live in the same row and aren't re-created, so only
+  // the per-hour cards from the last update are cleared out here.
+  columns.find('.hourColumn').remove();
 
   $('#placeName').text(data.city.name);
   const sunRise = new Date(data.city.sunrise * 1000);
@@ -536,76 +539,59 @@ function prepareWeatherSlide(data: WeatherData): void {
     getFormattedTime(sunSet.getHours(), sunSet.getMinutes()),
   );
 
-  // DWD doesn't provide a perceived temperature; don't show a second,
-  // identical-looking value next to the actual temperature. Also used to
-  // detect the data's source for the "Source: ..." line below, since DWD's
-  // hourly cloud cover isn't reliable enough to show either (unlike its
-  // daily sunshine total, shown on the daily slide instead).
+  // DWD doesn't provide a perceived temperature; used here to also detect
+  // which provider the data came from, since DWD's hourly cloud cover isn't
+  // reliable enough to show either (unlike its daily sunshine total, shown
+  // on the daily slide instead).
   const showFeelsLike = data.list.some(
     (entry) => entry.main.feels_like !== undefined && entry.main.feels_like !== null,
   );
-  $('#weatherHeader .feelsLikeLabel').toggle(showFeelsLike);
-  $('#weather').toggleClass('weather-dwd', !showFeelsLike);
+  // Toggled on #weatherColumns rather than #weather: Slide's start
+  // animation resets #weather's class attribute on every rotation
+  // (see Slide.displaySlideWithAnimation), which would otherwise wipe this.
+  $('#weatherColumns').toggleClass('weather-dwd', !showFeelsLike);
 
   const sourceName = showFeelsLike
     ? _._('weather_source_owm', config.locale)
     : _._('weather_source_dwd', config.locale);
   $('#weatherSource').text(`${_._('weather_source_label', config.locale)}: ${sourceName}`);
 
-  let currentDay = -1;
-  for (let i = 0; i < data.list.length; i += 1) {
-    const row = $('#templateWeather').clone();
-    row.prop('id', `weather_${i}`);
-    const entry = data.list[i];
+  data.list.forEach((entry, i) => {
+    const column = $('#templateWeatherColumn').clone();
+    column.prop('id', `weather_${i}`);
     const infos = entry.main;
     const date = new Date(entry.dt * 1000);
-    const day = date.getDay();
-    if (i === 0) {
-      currentDay = day;
-      if (day === new Date().getDay()) {
-        wRows.append($(`<h4>${_._('today', config.locale)}</h4>`));
-      } else {
-        wRows.append($(`<h4>${_._('tomorrow', config.locale)}</h4>`));
-      }
-    } else if (currentDay !== day) {
-      currentDay = day;
-      wRows.append($(`<h4>${_._('tomorrow', config.locale)}</h4>`));
-    }
-    const hours = date.getHours();
-    row.find('.time').text(`${hours}:00`);
-    // row.find(".weatherIcon img").attr("src", "https://openweathermap.org/img/wn/"+entry.weather[0].icon+"@2x.png");
 
-    // Show the weather icon, animated or not
-    row
-      .find('.weatherIcon img')
+    column.find('.dailyDate').text(`${date.getHours()}:00`);
+
+    column
+      .find('.dailyIcon img')
       .attr('data-icon', entry.weather[0].icon)
       .attr(
         'src',
         `${config.base_root}img/amcharts_weather_icons/${config.use_animations ? 'animated' : 'static'}/${entry.weather[0].icon}.${config.use_animations ? 'svg' : 'png'}`,
       );
 
-    row
-      .find('.weatherTemperature span:first-of-type')
-      .text(infos.temp.toFixed(1))
+    column
+      .find('.weatherTemp')
+      .text(infos.temp.toFixed(0))
       .css('color', getTemperatureColor(infos.temp));
     if (infos.feels_like !== undefined && infos.feels_like !== null) {
-      row
-        .find('.weatherTemperature span.temp_feels')
-        .text(infos.feels_like.toFixed(1))
-        .css('color', getTemperatureColor(infos.feels_like))
-        .show();
+      column
+        .find('.temp_feels')
+        .text(infos.feels_like.toFixed(0))
+        .css('color', getTemperatureColor(infos.feels_like));
+      column.find('.temp_feels_row').show();
     } else {
-      row.find('.weatherTemperature span.temp_feels').hide();
+      column.find('.temp_feels_row').hide();
     }
-    row.find('.weatherDescr').text(entry.weather[0].description);
-    row.find('.weatherCloud span:first-of-type').text(entry.clouds.all);
-    row.find('.weatherCloud span.superscript').text('%');
-    if (i % 2) {
-      row.addClass('even');
-    }
-    row.show();
-    wRows.append(row);
-  }
+
+    column.find('.weatherCloudValue').text(entry.clouds.all);
+
+    // #sunTimes should stay the rightmost column, so hour cards are
+    // inserted right before it instead of appended to the end.
+    column.show().insertBefore('#sunTimes');
+  });
   weatherDataLastUpdate = getNow();
 }
 

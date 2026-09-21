@@ -547,15 +547,22 @@ div#pics-container {
     background-color: #000000;
 }
 
-#weatherTitle {
-    line-height: 10vh;
-    font-size: 5vh;
-    display: inline-block;
+// Shared by the hourly and daily weather slides, so both titles read the
+// same: same size, bold, and at least as large as the card date labels.
+.weatherPageTitle {
+    font-size: 6.5vh;
+    font-weight: bold;
     color: white;
+    display: flex;
+    // Same gap below as .weatherColumnsRow has, so the heading-to-weather
+    // and weather-to-footer spacing match.
+    margin-bottom: 2rem;
 }
 
-#theWeather {
-    display: inline-block;
+.weatherPlaceName {
+    font-size: 6.5vh;
+    color: var(--main-color);
+    font-weight: bold;
 }
 
 .superscript {
@@ -564,37 +571,32 @@ div#pics-container {
     margin-left: 0.3rem;
 }
 
-#placeName {
-    color: var(--main-color);
-    max-width: 65vh;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: inline-block;
-    font-size: 7vh;
-    font-weight: bold;
-    vertical-align: bottom;
-}
-
+// One flex item within .weatherColumnsRow, so it gets the same 1rem gap to
+// the hour cards; sunrise/sunset stack inside it instead of sitting side by side.
 #sunTimes {
-    float: right;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1 1 0;
 }
 
-.sunTime time {
-    margin-left: 1vh;
+.sunTimeIcon {
+    font-size: 5.5vh;
+    margin-bottom: 1.5vh;
 }
 
-#sunSet {
-    margin-top: 1vh;
+.sunTimeColumn {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-.sunTime {
-    font-size: 4.5vh;
-    line-height: 4.5vh;
+.sunTimeColumn .dailyDate {
+    font-weight: normal;
 }
 
-.temp_feels {
-    font-size: 3.3vh;
+.sunTimeIcon i + i {
+    margin-left: 0.3rem;
 }
 
 .temp_feels::before {
@@ -605,149 +607,11 @@ div#pics-container {
     content: ')';
 }
 
-.time.table-header-cell {
-    width: 12vh;
-}
-
-.weatherIcon.table-header-cell {
-    width: 8vh;
-}
-
-.weatherTemperature.table-header-cell {
-    width: 23vh;
-}
-
-.weatherCloud.table-header-cell {
-    width: 12vh;
-}
-
-.weatherDescr.table-header-cell {
-    width: 45vh;
-}
-
-// DWD doesn't reliably provide a perceived temperature or hourly cloud
-// cover, so both columns are narrowed/hidden and their space reclaimed by
-// the description column. table-layout: fixed sizes every row from the
-// header row's widths, so this only needs to target the header cells.
-#weather.weather-dwd .weatherTemperature.table-header-cell {
-    width: 14vh;
-}
-
-#weather.weather-dwd .weatherCloud {
+// DWD doesn't reliably provide hourly cloud cover; the whole row is hidden
+// rather than showing misleading data (unlike its daily sunshine total,
+// shown on the daily slide instead).
+#weatherColumns.weather-dwd .weatherCloud {
     display: none;
-}
-
-#weather.weather-dwd .weatherDescr.table-header-cell {
-    width: 66vh;
-}
-
-// Higher specificity than .time/.weatherTemperature/.weatherCloud (which
-// right- or center-align their body cells) so every header icon is centered.
-#weatherHeader .table-header-cell {
-    text-align: center;
-}
-
-// Shared gap between weather table columns, kept identical on every
-// column but the last so the spacing reads as uniform.
-$weather-column-gap: 1rem;
-
-.time {
-    text-align: right;
-    padding-right: $weather-column-gap;
-}
-
-.weatherIcon {
-    padding-right: $weather-column-gap;
-}
-
-.weatherIcon img {
-    width: 8.9vh;
-}
-
-.weatherTemperature {
-    text-align: right;
-    padding-right: $weather-column-gap;
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-.weatherDescr {
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-.weatherCloud {
-    text-align: center;
-    padding-right: $weather-column-gap;
-}
-
-
-.resp-table {
-    width: 100%;
-    display: table;
-    font-size: 5vh;
-    table-layout: fixed;
-    border-collapse: collapse;
-}
-
-.resp-table-caption {
-    display: table-caption;
-    text-align: center;
-    font-weight: bold;
-}
-
-.resp-table-header {
-    display: table-header-group;
-    border-bottom: 0.5vh solid var(--main-color);
-    font-weight: bold;
-    font-size: 5vh;
-    line-height: 5vh;
-    max-height: 5vh;
-}
-
-.table-header-cell {
-    display: table-cell;
-    padding: 1vh;
-    text-align: center;
-    border-bottom: 0.5vh solid black;
-    overflow: hidden;
-}
-
-.resp-table-body {
-    display: table-row-group;
-}
-
-.resp-table-row {
-    display: table-row;
-    font-size: 5.5vh;
-    line-height: 8vh;
-    max-height: 10vh;
-    background-color: #303030;
-}
-
-.resp-table-row.even {
-    background-color: unset;
-}
-
-.table-body-cell {
-    display: table-cell;
-    overflow: hidden;
-}
-
-#noWarranty,
-#weatherSource {
-    color: gray;
-    font-size: 3vh;
-}
-
-#weather h4 {
-    margin-top: 0.7vh;
-    min-width: 100%;
-    font-weight: bolder;
-    font-size: 3.5vh;
-    border-bottom: 0.4vh solid var(--main-color);
-    padding-bottom: 1vh;
-    margin-bottom: 0;
 }
 
 /*Weather Daily Forecast*/
@@ -756,25 +620,9 @@ $weather-column-gap: 1rem;
     background-color: #000000;
 }
 
-// At least as large as .dailyDate (6.5vh), so the slide heading isn't
-// smaller than the weekday labels below it.
-#weatherDailyTitle {
-    font-size: 6.5vh;
-    font-weight: bold;
-    color: white;
-    display: flex;
-    // Same gap below as #weatherDailyColumns has, so the heading-to-weather
-    // and weather-to-footer spacing match.
-    margin-bottom: 2rem;
-}
-
-#dailyPlaceName {
-    font-size: 6.5vh;
-    color: var(--main-color);
-    font-weight: bold;
-}
-
-#weatherDailyColumns {
+// Shared by the hourly (#weatherColumns) and daily (#weatherDailyColumns)
+// card rows, so both slides lay out identically.
+.weatherColumnsRow {
     display: flex;
     justify-content: space-between;
     gap: 1rem;
@@ -792,7 +640,7 @@ $weather-column-gap: 1rem;
 
 .dailyDate {
     font-weight: bold;
-    font-size: 6.5vh;
+    font-size: 6vh;
     margin-bottom: 1.5vh;
     text-transform: capitalize;
 }
@@ -803,7 +651,7 @@ $weather-column-gap: 1rem;
 
 .dailyTemps {
     margin-top: 1.5vh;
-    font-size: 7vh;
+    font-size: 6.5vh;
 }
 
 // #c0c0c0 rather than opacity or CSS "gray" (#808080), which doesn't reach
@@ -819,7 +667,9 @@ $weather-column-gap: 1rem;
 
 .dailySunshine {
     margin-top: 1.5vh;
-    font-size: 5vh;
+    // Smaller than the other values so the icon, number and unit still fit
+    // on one line on narrower (e.g. 16:10) screens.
+    font-size: 4vh;
     color: #c0c0c0;
 }
 
@@ -827,6 +677,8 @@ $weather-column-gap: 1rem;
     margin-right: 0.5rem;
 }
 
+#noWarranty,
+#weatherSource,
 #noWarrantyDaily,
 #weatherSourceDaily {
     color: gray;
