@@ -36,29 +36,13 @@
                                 data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="{{ __('Past Events') }}">
                                 <i class="fa-solid fa-fw fa-person-cane"></i>&nbsp;{{ __('Events') }}
                             </a>
-                            <a class="dropdown-item text-primary" href="{{ route('events.create') }}"
-                                data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="{{ __('Create Event') }}">
-                                <i class="fa-solid fa-fw fa-plus"></i>&nbsp;{{ __('Events') }}
-                            </a>
-                            <hr>
                             <a class="dropdown-item" href="{{ route('templates.index') }}" data-bs-toggle="tooltip"
                                 data-bs-placement="left" data-bs-title="{{ __('List Templates') }}">
                                 <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Templates') }}
                             </a>
-                            <a class="dropdown-item  text-primary" href="{{ route('templates.create') }}"
-                                data-bs-toggle="tooltip" data-bs-placement="left"
-                                data-bs-title="{{ __('Create a Template') }}">
-                                <i class="fa-solid fa-fw fa-plus"></i>&nbsp;{{ __('Template') }}
-                            </a>
-                            <hr>
                             <a class="dropdown-item" href="{{ route('menus.index') }}" data-bs-toggle="tooltip"
                                 data-bs-placement="left" data-bs-title="{{ __('List Menus') }}">
                                 <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Menus') }}
-                            </a>
-                            <a class="dropdown-item text-primary" href="{{ route('menus.create') }}"
-                                data-bs-toggle="tooltip" data-bs-placement="left"
-                                data-bs-title="{{ __('Create a Menu') }}">
-                                <i class="fa-solid fa-fw fa-plus"></i>&nbsp;{{ __('Menu') }}
                             </a>
                         </div>
                     </li>
@@ -73,11 +57,6 @@
                                 data-bs-placement="left" data-bs-title="{{ __('List Monitors') }}">
                                 <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Monitors') }}
                             </a>
-                            <a class="dropdown-item text-primary" href="{{ route('monitors.create') }}"
-                                data-bs-toggle="tooltip" data-bs-placement="left"
-                                data-bs-title="{{ __('Create new Monitor') }}">
-                                <i class="fa-solid fa-fw fa-plus"></i>&nbsp;{{ __('Monitor ') }}
-                            </a>
                         </div>
                     </li>
                     <!-- Medias actions -->
@@ -91,20 +70,9 @@
                                 data-bs-placement="left" data-bs-title="{{ __('List Pictures') }}">
                                 <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Pictures') }}
                             </a>
-                            <a class="dropdown-item text-primary" href="{{ route('pics.create') }}"
-                                data-bs-toggle="tooltip" data-bs-placement="left"
-                                data-bs-title="{{ __('Upload a Picture') }}">
-                                <i class="fa-solid fa-fw fa-upload"></i>&nbsp;{{ __(' a Picture') }}
-                            </a>
-                            <hr>
                             <a class="dropdown-item" href="{{ route('videos.index') }}" data-bs-toggle="tooltip"
                                 data-bs-placement="left" data-bs-title="{{ __('List Videos') }}">
                                 <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Videos') }}
-                            </a>
-                            <a class="dropdown-item text-primary" href="{{ route('videos.create') }}"
-                                data-bs-toggle="tooltip" data-bs-placement="left"
-                                data-bs-title="{{ __('Upload a Video') }}">
-                                <i class="fa-solid fa-fw fa-upload"></i>&nbsp;{{ __(' a Video') }}
                             </a>
                         </div>
                     </li>
@@ -120,30 +88,13 @@
                                 data-bs-placement="left" data-bs-title="{{ __('List Slides') }}">
                                 <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Picture Slides') }}
                             </a>
-                            <a class="dropdown-item text-primary" href="{{ route('picSlides.create') }}"
-                                data-bs-toggle="tooltip" data-bs-placement="left"
-                                data-bs-title="{{ __('Create a Slide') }}">
-                                <i class="fa-solid fa-fw fa-plus"></i>&nbsp;{{ __('Picture Slide') }}
-                            </a>
-                            <hr>
                             <a class="dropdown-item" href="{{ route('vidSlides.index') }}" data-bs-toggle="tooltip"
                                 data-bs-placement="left" data-bs-title="{{ __('List Slides') }}">
                                 <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Video Slides') }}
                             </a>
-                            <a class="dropdown-item text-primary" href="{{ route('vidSlides.create') }}"
-                                data-bs-toggle="tooltip" data-bs-placement="left"
-                                data-bs-title="{{ __('Create a Slide') }}">
-                                <i class="fa-solid fa-fw fa-plus"></i>&nbsp;{{ __('Video Slide') }}
-                            </a>
-                            <hr>
                             <a class="dropdown-item" href="{{ route('canteens.index') }}" data-bs-toggle="tooltip"
                                 data-bs-placement="left" data-bs-title="{{ __('List Slides') }}">
                                 <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Canteens') }}
-                            </a>
-                            <a class="dropdown-item text-primary" href="{{ route('canteens.create') }}"
-                                data-bs-toggle="tooltip" data-bs-placement="left"
-                                data-bs-title="{{ __('Create a Slide') }}">
-                                <i class="fa-solid fa-fw fa-plus"></i>&nbsp;{{ __('Canteen') }}
                             </a>
                         </div>
                     </li>
@@ -179,11 +130,6 @@
                                     data-bs-toggle="tooltip" data-bs-placement="left"
                                     data-bs-title="{{ __('List Events Imports') }}">
                                     <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Events Imports') }}
-                                </a>
-                                <a class="dropdown-item text-primary" href="{{ route('eventsImports.create') }}"
-                                    data-bs-toggle="tooltip" data-bs-placement="left"
-                                    data-bs-title="{{ __('Create new Events Imports') }}">
-                                    <i class="fa-solid fa-fw fa-plus"></i>&nbsp;{{ __('Events Import') }}</i>
                                 </a>
                             </div>
                         </li>
