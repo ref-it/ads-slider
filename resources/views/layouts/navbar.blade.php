@@ -15,19 +15,25 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <!-- Left Side Of Navbar -->
             <ul class="navbar-nav me-auto">
-
-            </ul>
-
-            <!-- Right Side Of Navbar -->
-            <ul class="navbar-nav ms-auto">
                 @auth
+                    <!-- Monitors -->
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('monitors.*') ? 'active' : '' }}"
+                            href="{{ route('monitors.index') }}" data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" data-bs-title="{{ __('List Monitors') }}"
+                            @if (request()->routeIs('monitors.*')) aria-current="page" @endif>
+                            {{ __('Monitors') }}
+                        </a>
+                    </li>
                     <!-- Events actions -->
                     <li class="nav-item dropdown">
-                        <a id="dropDownEvents" class="nav-link dropdown-toggle" href="#" role="button"
+                        <a id="dropDownEvents"
+                            class="nav-link dropdown-toggle {{ request()->routeIs('events.*', 'templates.*', 'eventsImports.*') ? 'active' : '' }}"
+                            href="#" role="button"
                             data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                             {{ __('Events') }} <span class="caret"></span>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropDownEvents">
+                        <div class="dropdown-menu" aria-labelledby="dropDownEvents">
                             <a class="dropdown-item" href="{{ route('events.index') }}" data-bs-toggle="tooltip"
                                 data-bs-placement="left" data-bs-title="{{ __('List Events') }}">
                                 <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Events') }}
@@ -40,50 +46,53 @@
                                 data-bs-placement="left" data-bs-title="{{ __('List Templates') }}">
                                 <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Templates') }}
                             </a>
-                            <a class="dropdown-item" href="{{ route('menus.index') }}" data-bs-toggle="tooltip"
-                                data-bs-placement="left" data-bs-title="{{ __('List Menus') }}">
-                                <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Menus') }}
-                            </a>
+                            @if (Auth::user()->is_realm_admin)
+                                <hr>
+                                <a class="dropdown-item" href="{{ route('eventsImports.index') }}"
+                                    data-bs-toggle="tooltip" data-bs-placement="left"
+                                    data-bs-title="{{ __('List Events Imports') }}">
+                                    <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Events Imports') }}
+                                </a>
+                            @endif
                         </div>
                     </li>
-                    <!-- Monitor actions -->
-                    <li class="nav-item dropdown">
-                        <a id="dropDownMonitors" class="nav-link dropdown-toggle" href="#" role="button"
-                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                            {{ __('Monitors') }}<span class="caret"></span>
+                    <!-- Menus -->
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('menus.*') ? 'active' : '' }}"
+                            href="{{ route('menus.index') }}" data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" data-bs-title="{{ __('List Menus') }}"
+                            @if (request()->routeIs('menus.*')) aria-current="page" @endif>
+                            {{ __('Menus') }}
                         </a>
-                        <div class="dropdown-menu dropdown-menu-right" aria-label="Monitors">
-                            <a class="dropdown-item" href="{{ route('monitors.index') }}" data-bs-toggle="tooltip"
-                                data-bs-placement="left" data-bs-title="{{ __('List Monitors') }}">
-                                <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Monitors') }}
-                            </a>
-                        </div>
                     </li>
-                    <!-- Slides actions -->
-                    <li class="nav-item dropdown">
-                        <a id="dropDownSlides" class="nav-link dropdown-toggle" href="#" role="button"
-                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                            {{ __('Slides') }} <span class="caret"></span>
+                    <!-- Slides -->
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('slides.*') ? 'active' : '' }}"
+                            href="{{ route('slides.index') }}" data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" data-bs-title="{{ __('List Slides') }}"
+                            @if (request()->routeIs('slides.*')) aria-current="page" @endif>
+                            {{ __('Slides') }}
                         </a>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropDownSlides">
-                            <a class="dropdown-item" href="{{ route('slides.index') }}" data-bs-toggle="tooltip"
-                                data-bs-placement="left" data-bs-title="{{ __('List Slides') }}">
-                                <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Slides') }}
-                            </a>
-                            <a class="dropdown-item" href="{{ route('canteens.index') }}" data-bs-toggle="tooltip"
-                                data-bs-placement="left" data-bs-title="{{ __('List Slides') }}">
-                                <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Canteens') }}
-                            </a>
-                        </div>
+                    </li>
+                    <!-- Canteens -->
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('canteens.*') ? 'active' : '' }}"
+                            href="{{ route('canteens.index') }}" data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" data-bs-title="{{ __('List Canteens') }}"
+                            @if (request()->routeIs('canteens.*')) aria-current="page" @endif>
+                            {{ __('Canteens') }}
+                        </a>
                     </li>
                     @if (Auth::user()->is_realm_admin)
                         <!-- Admin actions -->
                         <li class="nav-item dropdown">
-                            <a id="dropDownAdmin" class="nav-link dropdown-toggle" href="#" role="button"
+                            <a id="dropDownAdmin"
+                                class="nav-link dropdown-toggle {{ request()->routeIs('alerts.*', 'register', 'log-viewer.*', 'realms.*') ? 'active' : '' }}"
+                                href="#" role="button"
                                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                                 {{ __('Admin') }} <span class="caret"></span>
                             </a>
-                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropDownAdmin">
+                            <div class="dropdown-menu" aria-labelledby="dropDownAdmin">
                                 <a class="dropdown-item text-danger" href="{{ route('alerts.index') }}"><i
                                         class="fa-solid fa-fw fa-bell"></i>&nbsp;{{ __('Send Alert') }}</a>
                                 <a class="dropdown-item text-warning" href="{{ route('register') }}"><i
@@ -103,16 +112,14 @@
                                         </a>
                                         @endif
                                 @endforeach
-                                    <hr>
-                                <a class="dropdown-item" href="{{ route('eventsImports.index') }}"
-                                    data-bs-toggle="tooltip" data-bs-placement="left"
-                                    data-bs-title="{{ __('List Events Imports') }}">
-                                    <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Events Imports') }}
-                                </a>
                             </div>
                         </li>
                     @endif
                 @endauth
+            </ul>
+
+            <!-- Right Side Of Navbar -->
+            <ul class="navbar-nav ms-auto">
                 <!-- Report an issue -->
                 <li class="nav-item">
                     <a class="nav-link" href="{{ config('ads.report_issue_url') }}" target="_blank"

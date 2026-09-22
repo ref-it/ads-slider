@@ -112,3 +112,55 @@ img.preview {
     width: 1.25em;
     display: inline-block;
 }
+
+// Highlight the navbar item for the section currently being viewed
+// (including a dropdown toggle when one of its sub-pages is active), with
+// the marker flush against the navbar's own visible bottom edge.
+//
+// Getting there takes two separate fixes:
+// 1. Bootstrap centers (rather than stretches) .container's children, then
+//    .navbar-collapse's children, so a nav-item is only as tall as its own
+//    text+padding and floats in the middle of the (taller) navbar. Forcing
+//    align-self/align-items: stretch down this chain makes .nav-link's own
+//    box reach the bottom of .navbar-collapse/.container.
+// 2. .container itself sits *inside* the navbar's own vertical padding
+//    (--bs-navbar-padding-y), so even a fully stretched .nav-link still
+//    stops short of the navbar's true outer edge by that amount - no
+//    descendant's size can reach into an ancestor's padding. The marker is
+//    therefore an absolutely positioned pseudo-element (not a border, which
+//    can't extend past its own box without changing the link's layout
+//    size), offset down by exactly that padding to bridge the remaining,
+//    fixed gap. It's a ::before, not ::after: dropdown toggles already use
+//    ::after for their caret arrow, and a same-element pseudo-element only
+//    exists once - reusing ::after would merge our positioning with the
+//    caret's border-triangle styling into one broken shape.
+// Scoped to the left-hand (.me-auto) nav, the only one that carries the
+// .active section markers - the right-hand nav is left centered as before.
+.navbar .navbar-collapse {
+    align-self: stretch;
+}
+
+.navbar .navbar-nav.me-auto {
+    align-self: stretch;
+    align-items: stretch;
+}
+
+.navbar .navbar-nav.me-auto .nav-item {
+    display: flex;
+}
+
+.navbar .navbar-nav.me-auto .nav-link {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.navbar-nav .nav-link.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(-1 * var(--bs-navbar-padding-y));
+    height: 3px;
+    background-color: var(--bs-primary);
+}
