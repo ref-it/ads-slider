@@ -6,6 +6,7 @@ use App\Events\SecurityAuditEvent;
 use App\Http\Controllers\EventController;
 use App\Models\Event;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -17,10 +18,17 @@ class EventsList extends Component
 
     public $search = '';
 
+    public bool $showPast = false;
+
     public function clearSearch()
     {
         $this->reset('search');
         $this->searchUpdates();
+    }
+
+    public function updatedShowPast(): void
+    {
+        $this->resetPage();
     }
 
     public function deleteEvent($eventID)
@@ -46,6 +54,12 @@ class EventsList extends Component
     #[Computed()]
     private function allEvents()
     {
+        if ($this->showPast) {
+            return Event::with(['schedule'])->ofRealm(auth()->user()->realm_id)->whereHas('schedule', function ($query) {
+                $query->where('end', '<', Carbon::today()->toDateString());
+            })->with(['user']);
+        }
+
         return EventController::getNotEndedEvents();
     }
 
@@ -64,7 +78,7 @@ class EventsList extends Component
     {
         return view(
             'livewire.events-list')
-            ->title(__('Future Events'))
-            ->layout('livewire.master', ['header' => __('Future Events')]);
+            ->title(__('Events'))
+            ->layout('livewire.master', ['header' => __('Events')]);
     }
 }

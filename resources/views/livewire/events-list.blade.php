@@ -26,6 +26,15 @@
                 <button wire:click="clearSearch" class="btn btn-secondary">{{ __('Clear Filter') }}</button>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-9">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="showPast"
+                        wire:model.live="showPast">
+                    <label class="form-check-label" for="showPast">{{ __('Show Past Events') }}</label>
+                </div>
+            </div>
+        </div>
         <hr>
         <div class="row">
             <div class="col col-lg-3 order-lg-1">

@@ -38,10 +38,6 @@
                                 data-bs-placement="left" data-bs-title="{{ __('List Events') }}">
                                 <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Events') }}
                             </a>
-                            <a class="dropdown-item text-secondary" href="{{ route('events.expired') }}"
-                                data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="{{ __('Past Events') }}">
-                                <i class="fa-solid fa-fw fa-person-cane"></i>&nbsp;{{ __('Events') }}
-                            </a>
                             <a class="dropdown-item" href="{{ route('templates.index') }}" data-bs-toggle="tooltip"
                                 data-bs-placement="left" data-bs-title="{{ __('List Templates') }}">
                                 <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Templates') }}

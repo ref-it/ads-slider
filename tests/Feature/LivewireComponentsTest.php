@@ -11,7 +11,6 @@ use App\Livewire\EditRealm;
 use App\Livewire\EditSlide;
 use App\Livewire\EditTemplate;
 use App\Livewire\EventsList;
-use App\Livewire\PastEventsList;
 use App\Livewire\UpdateEvent;
 use App\Livewire\UpdateEventsImport;
 use App\Models\Event;
@@ -27,6 +26,7 @@ use App\Models\User;
 use App\Models\Video;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event as EventFacade;
 use Illuminate\Support\Facades\Http;
@@ -142,7 +142,7 @@ class LivewireComponentsTest extends TestCase
         EventFacade::assertDispatched(SecurityAuditEvent::class);
     }
 
-    public function test_events_list_and_past_events_list_components(): void
+    public function test_events_list_component(): void
     {
         EventFacade::fake([SecurityAuditEvent::class]);
 
@@ -163,13 +163,30 @@ class LivewireComponentsTest extends TestCase
 
         $this->assertDatabaseMissing('events', ['id' => $event->id]);
         EventFacade::assertDispatched(SecurityAuditEvent::class);
+    }
 
-        // PastEventsList
+    public function test_events_list_component_toggles_past_events(): void
+    {
+        $futureEvent = Event::factory()->create([
+            'user_id' => $this->member->id,
+            'realm_id' => $this->realm->id,
+            'name' => 'Upcoming Gig',
+        ]);
+
+        $pastEvent = Event::factory()->create([
+            'user_id' => $this->member->id,
+            'realm_id' => $this->realm->id,
+            'name' => 'Old Gig',
+        ]);
+        $pastEvent->schedule->update(['end' => Carbon::yesterday()->toDateString()]);
+
         Livewire::actingAs($this->member)
-            ->test(PastEventsList::class)
-            ->set('search', 'Old')
-            ->call('clearSearch')
-            ->assertSet('search', '');
+            ->test(EventsList::class)
+            ->assertSee('Upcoming Gig')
+            ->assertDontSee('Old Gig')
+            ->set('showPast', true)
+            ->assertSee('Old Gig')
+            ->assertDontSee('Upcoming Gig');
     }
 
     // --- TEMPLATE LIVEWIRE TESTS ---

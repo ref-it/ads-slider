@@ -27,7 +27,6 @@ use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VideoController;
 use App\Livewire\EventsList;
-use App\Livewire\PastEventsList;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -69,7 +68,6 @@ Route::middleware(['verified', 'auth'])->group(function () {
 
     // Events
     Route::get('/events', EventsList::class)->name('events.index');
-    Route::get('/events/expired', PastEventsList::class)->name('events.expired');
     Route::get('/events/create/{template_id}', [EventController::class, 'create'])->name('events.create.template');
     Route::resource('events', EventController::class)->only(['create', 'edit']);
 
