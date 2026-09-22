@@ -11,11 +11,11 @@ use Illuminate\Support\Facades\Route;
 class RouteServiceProvider extends ServiceProvider
 {
     /**
-     * The path to the "home" route for your application.
+     * The path to redirect to after authentication.
      *
      * @var string
      */
-    public const HOME = '/home';
+    public const HOME = '/monitors';
 
     /**
      * Define your route model bindings, pattern filters, etc.

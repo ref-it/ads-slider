@@ -17,7 +17,6 @@ use App\Http\Controllers\Auth\OidcController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventsImportController;
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocalizationController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\MonitorController;
@@ -34,8 +33,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'home');
-Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::redirect('/', '/monitors');
 Route::get('lang/{locale}', [LocalizationController::class, 'index']);
 Route::get('status.json', function () {
     return ['status' => 'OK'];

@@ -349,9 +349,9 @@ class CoreControllersTest extends TestCase
         $response->assertStatus(200);
         $response->assertJson(['status' => 'OK']);
 
-        // Home
-        $response = $this->actingAs($this->member)->get('/home');
-        $response->assertStatus(200);
+        // Root redirects to the monitor overview
+        $response = $this->actingAs($this->member)->get('/');
+        $response->assertRedirect('/monitors');
 
         // Language switcher
         $response = $this->get('lang/de');
