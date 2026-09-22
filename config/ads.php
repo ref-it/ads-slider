@@ -7,4 +7,5 @@ return [
     'pic_basepath' => env('PIC_FOLDER', '/uploads/pics/'),
     'vid_basepath' => env('VID_FOLDER', '/uploads/videos/'),
     'menu_basepath' => env('MENU_FOLDER', '/uploads/menus/'),
+    'report_issue_url' => env('REPORT_ISSUE_URL', 'https://github.com/bedo2991/ads-slider/issues/new'),
 ];

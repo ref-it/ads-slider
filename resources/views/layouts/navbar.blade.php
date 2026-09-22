@@ -189,6 +189,13 @@
                         </li>
                     @endif
                 @endauth
+                <!-- Report an issue -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ config('ads.report_issue_url') }}" target="_blank"
+                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="{{ __('Report an issue') }}">
+                        <i class="fas fa-fw fa-bug"></i>
+                    </a>
+                </li>
                 <!-- Language toggler -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
@@ -216,8 +223,6 @@
                         @endswitch
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="https://forms.gle/6xfyQdciNVisXJ7HA" target="_blank">
-                                <i class="fas fa-fw fa-bug"></i>&nbsp;{{ __('Report an issue') }}</a></li>
                         <li><a class="dropdown-item" href="/lang/en">English</a></li>
                         <li><a class="dropdown-item" href="/lang/de">Deutsch</a></li>
                         <li><a class="dropdown-item" href="/lang/it">Italiano</a></li>
