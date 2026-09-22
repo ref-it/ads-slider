@@ -65,12 +65,17 @@
     margin-top: 8px;
 }
 
+// inline-flex (not table-cell) so the icon glyph centers reliably both
+// inline with surrounding text (eventsImports) and as a flex item inside
+// another flex container (events-list) - table-cell's vertical-align only
+// works in the former case, since flex items get their display blockified.
 .event-icon {
     width: 27px;
     height: 27px;
-    display: table-cell;
-    vertical-align: middle;
-    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
 }
 
 img.preview {
