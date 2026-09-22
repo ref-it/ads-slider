@@ -52,19 +52,10 @@ export class Manager implements Mediator {
         ScheduledSlideType.WEATHER_DAILY,
         ScheduledSlideType.ORDERSLIST,
         ScheduledSlideType.EVENTS,
-        ScheduledSlideType.ORDERSLIST,
         ScheduledSlideType.MENUS,
-        ScheduledSlideType.EVENTS,
-        ScheduledSlideType.ORDERSLIST,
         ScheduledSlideType.PICS,
         ScheduledSlideType.CANTEEN,
         ScheduledSlideType.VIDEOS,
-        ScheduledSlideType.ORDERSLIST,
-        ScheduledSlideType.EVENTS,
-        ScheduledSlideType.MENUS,
-        ScheduledSlideType.PICS,
-        ScheduledSlideType.CANTEEN,
-        ScheduledSlideType.ORDERSLIST,
             //ScheduledSlideType.KARAOKE,
         ];
 
@@ -325,7 +316,7 @@ export class Manager implements Mediator {
 
     /**
      * Skip the schedule execution to the given type
-     * @param type 
+     * @param type
      */
     skipScheduleTo(type: ScheduledSlideType) {
         this.scheduleIndex = this.schedule.indexOf(type);
