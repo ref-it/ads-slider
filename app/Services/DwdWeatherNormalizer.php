@@ -69,10 +69,20 @@ class DwdWeatherNormalizer
         $temperatures = $forecast['temperature'] ?? [];
         $icons = $forecast['icon'] ?? [];
 
-        $count = min(self::MAX_ENTRIES, count($temperatures), count($icons));
+        // $forecast['start'] is DWD's own fixed reference point for the
+        // array (not necessarily "now"), so index 0 always used to mean
+        // "start of the array" rather than "the upcoming hour" - showing
+        // hours that had already passed whenever "now" wasn't exactly at
+        // that reference point (e.g. always showing 00:00 onward).
+        $nowMs = time() * 1000;
+        $startIndex = $timeStep > 0 ? max(0, (int) floor(($nowMs - $start) / $timeStep)) : 0;
+
+        $available = min(count($temperatures), count($icons));
+        $count = min(self::MAX_ENTRIES, max(0, $available - $startIndex));
         $list = [];
 
-        for ($i = 0; $i < $count; $i++) {
+        for ($j = 0; $j < $count; $j++) {
+            $i = $startIndex + $j;
             $dt = (int) (($start + $i * $timeStep) / 1000);
             $temp = $temperatures[$i] !== null ? round($temperatures[$i] / 10, 1) : null;
             $icon = $this->resolveIcon((int) $icons[$i], $dt, $realm);

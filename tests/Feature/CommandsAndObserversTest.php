@@ -107,7 +107,10 @@ class CommandsAndObserversTest extends TestCase
             'https://app-prod-ws.warnwetter.de/*' => Http::response([
                 '10865' => [
                     'forecast1' => [
-                        'start' => 1000000000000,
+                        // Anchored to "now" (rather than a fixed past
+                        // epoch) so the normalizer's "start from the
+                        // current hour" window lands on index 0 here.
+                        'start' => now()->valueOf(),
                         'timeStep' => 3600000,
                         'temperature' => [141, 127, 128, 126, 124, 122],
                         'icon' => [8, 8, 8, 8, 8, 4],
@@ -163,7 +166,7 @@ class CommandsAndObserversTest extends TestCase
             'https://app-prod-ws.warnwetter.de/*' => Http::response([
                 '10865' => [
                     'forecast1' => [
-                        'start' => 1000000000000,
+                        'start' => now()->valueOf(),
                         'timeStep' => 3600000,
                         'temperature' => [141],
                         'icon' => [8],
@@ -199,7 +202,7 @@ class CommandsAndObserversTest extends TestCase
             'https://app-prod-ws.warnwetter.de/*' => Http::response([
                 '10865' => [
                     'forecast1' => [
-                        'start' => 1000000000000,
+                        'start' => now()->valueOf(),
                         'timeStep' => 3600000,
                         'temperature' => [141],
                         'icon' => [1],
