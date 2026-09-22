@@ -147,8 +147,13 @@ class MonitorController extends Controller
         ]);
     }
 
-    public function getJson(Monitor $monitor): JsonResponse
+    public function getJson(Request $request, Monitor $monitor): JsonResponse
     {
+        // Locale-dependent payloads (e.g. canteen menus) need this resolved
+        // the same way display() does, since this is a separate stateless
+        // request and won't otherwise inherit that locale.
+        App::setLocale($this->getLocale($request, $monitor));
+
         $monitor->last_ping = now();
         try {
             $monitor->saveQuietly();
@@ -300,17 +305,20 @@ class MonitorController extends Controller
         $data['m'] = $monitor->toArray();
         $data['m']['api_token'] = $monitor->api_token;
         $data['m']['channel_hash'] = Realm::getBroadcastChannelSecret($monitor->realm_id);
-        $data['e'] = EventController::getScheduledEvents($monitor->realm_id)->with(['menus:id,path', 'happy_hour'])->get()->sortBy(function ($event) {
-            return [
-                $event->real_start_date,
-                $event->start_time,
-            ];
-        })->values()->all();
+        $data['e'] = $monitor->show_events
+            ? EventController::getScheduledEvents($monitor->realm_id)->with(['menus:id,path', 'happy_hour'])->get()->sortBy(function ($event) {
+                return [
+                    $event->real_start_date,
+                    $event->start_time,
+                ];
+            })->values()->all()
+            : [];
 
         $pics = PictureSlideController::getScheduledPicturesOnMonitor($monitor);
         $data['p'] = $pics;
 
         $data['v'] = VideoSlideController::getScheduledVideosOnMonitor($monitor)?->get();
+        $data['ca'] = CanteenController::getScheduledCanteensOnMonitor($monitor);
         $data['ol'] = $this->getOrdersList($monitor);
         $data['menus'] = [];
 

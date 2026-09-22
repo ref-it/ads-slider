@@ -28,6 +28,8 @@
 
                 <x-forms.inputs.checkbox name="form.show_we_are_closed_marketing" label="{{__('Show -we are closed- message')}}"/>
 
+                <x-forms.inputs.checkbox name="form.show_events" label="{{__('Show events')}}"/>
+
                 <x-forms.inputs.checkbox name="form.show_event_while_is_happening" label="{{__('Show event while is happening')}}"/>
 
                 <x-forms.inputs.checkbox name="form.show_cancelled_events" label="{{__('Show cancelled events')}}"/>
@@ -41,6 +43,10 @@
                 <h4 class="mt-3">{{__('Media')}}</h4>
 
                 <x-forms.inputs.checkbox name="form.show_pictures" label="{{__('Show pictures')}}"/>
+
+                <x-forms.inputs.checkbox name="form.show_canteens" label="{{__('Show canteens')}}">
+                    <x-forms.helpers.help text="{{ __('Only canteens explicitly assigned to this monitor are shown.') }}" />
+                </x-forms.inputs.checkbox>
 
                 <x-forms.inputs.checkbox name="form.show_videos" label="{{__('Show videos')}}"/>
 

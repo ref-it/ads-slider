@@ -29,7 +29,7 @@ import $ from 'jquery';
 import _ from './localization.js';
 import '../sass/slider.scss';
 import './bootstrap.js';
-import type { Config, PictureSlide, VideoSlide, AdsEvent, InitialServerData, Menu, ElementWithRealStartDate, ServerData, WeatherData, OrderslistData } from './types.js';
+import type { Config, PictureSlide, VideoSlide, CanteenSlideData, AdsEvent, InitialServerData, Menu, ElementWithRealStartDate, ServerData, WeatherData, OrderslistData } from './types.js';
 import QR from 'qrcode';
 import isSameOrAfter from 'dayjs/esm/plugin/isSameOrAfter/index.js';
 import localizedFormat from 'dayjs/esm/plugin/localizedFormat/index.js';
@@ -45,6 +45,7 @@ import { EventStatuses, ScheduleReason } from './modules/eventStatus.js';
 import { WeatherForecastSlide } from './slides/WeatherForecastSlide.js';
 import { WeatherDailyForecastSlide } from './slides/WeatherDailyForecastSlide.js';
 import { PicsSlide } from './slides/PicsSlide.js';
+import { CanteenSlide } from './slides/CanteenSlide.js';
 import { VidsSlide } from './slides/VidsSlide.js';
 import { EventsSlide } from './slides/EventsSlide.js';
 import { PreparationSlide } from './slides/PreparationSlide.js';
@@ -112,10 +113,12 @@ const config: Config = {
   show_we_are_closing: !!data.m.show_we_are_closing,
   show_we_are_closed_marketing: !!data.m.show_we_are_closed_marketing,
   show_cancelled_events: !!data.m.show_cancelled_events,
+  show_events: !!data.m.show_events,
   show_menus: !!data.m.show_menus,
   show_orderslist: !!data.m.show_orderslist,
   show_happy_hours: !!data.m.show_happy_hours,
   show_pictures: !!data.m.show_pictures,
+  show_canteens: !!data.m.show_canteens,
   show_videos: !!data.m.show_videos,
   show_karaoke: false,// currently disabled !!data.m.show_karaoke,
   show_weather_forecast: !!data.m.show_weather_forecast,
@@ -197,6 +200,7 @@ let eventsSlide: EventsSlide | null;
 let weatherForecastSlide: WeatherForecastSlide | null;
 let weatherDailyForecastSlide: WeatherDailyForecastSlide | null;
 let picsSlide: PicsSlide | null;
+let canteenSlide: CanteenSlide | null;
 let vidsSlide: VidsSlide | null;
 let menuSlide: MenuSlide | null;
 let ordersListSlide: OrdersListSlide | null;
@@ -318,6 +322,11 @@ function updateData(data: ServerData): void {
   if (picsSlide) {
     pics = initDataWithStartAndEndDate(data.p) as PictureSlide[];
     picsSlide.setPictures(pics);
+  }
+
+  if (canteenSlide) {
+    const canteens = initDataWithStartAndEndDate(data.ca) as CanteenSlideData[];
+    canteenSlide.setCanteens(canteens);
   }
 
   if (vidsSlide) {
@@ -823,8 +832,10 @@ function pullTimeDeltaFromServer(): void {
 }
 
 function initalizeSlides(): void {
-  eventsSlide = new EventsSlide(manager, document.getElementById('event-slide') as HTMLDivElement);
-  manager.registerSlide(eventsSlide, ScheduledSlideType.EVENTS);
+  if (config.show_events) {
+    eventsSlide = new EventsSlide(manager, document.getElementById('event-slide') as HTMLDivElement);
+    manager.registerSlide(eventsSlide, ScheduledSlideType.EVENTS);
+  }
 
   if (config.show_weather_forecast) {
     weatherForecastSlide = new WeatherForecastSlide(manager, document.getElementById('weather') as HTMLDivElement);
@@ -839,6 +850,11 @@ function initalizeSlides(): void {
   if (config.show_pictures) {
     picsSlide = new PicsSlide(manager, document.getElementById('pics-container') as HTMLDivElement, config.base_root, config.api_token);
     manager.registerSlide(picsSlide, ScheduledSlideType.PICS);
+  }
+
+  if (config.show_canteens) {
+    canteenSlide = new CanteenSlide(manager, document.getElementById('canteen') as HTMLDivElement);
+    manager.registerSlide(canteenSlide, ScheduledSlideType.CANTEEN);
   }
 
   if (config.show_videos) {
@@ -1179,6 +1195,9 @@ function init(): void {
           break;
         case 'k':
           manager.skipScheduleTo(ScheduledSlideType.KARAOKE);
+          break;
+        case 'c':
+          manager.skipScheduleTo(ScheduledSlideType.CANTEEN);
           break;
         default:
         //

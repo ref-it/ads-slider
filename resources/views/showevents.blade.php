@@ -242,6 +242,11 @@
             <div id="weatherSourceDaily">{{ __('Source') }}: {{ __('German Weather Service (DWD)') }}</div>
         </div>
 
+        <div id="canteen" style="display:none" data-students-label="{{ __('Students') }}" data-employees-label="{{ __('Employees') }}" data-guests-label="{{ __('Guests') }}">
+            <div id="canteenTitle" class="weatherPageTitle"></div>
+            <div id="canteenItems" class="canteenItemsColumn"></div>
+        </div>
+
         <div id="pics-container" style="display:none">
             <!-- img id="current-pic" src="#" alt="" /-->
         </div>

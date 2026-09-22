@@ -30,6 +30,38 @@ export interface VideoSlide extends ElementWithRealStartDate {
   scheduleable_id: number;
 }
 
+export interface CanteenMealPrices {
+  students: number;
+  employees: number;
+  guests: number;
+}
+
+export interface CanteenMeal {
+  name: string;
+  additives: string[];
+  allergens: string[];
+  prices: CanteenMealPrices;
+  isVegetarian: boolean;
+  isVegan: boolean;
+}
+
+export interface CanteenMenu {
+  lunch: CanteenMeal[];
+  dinner: CanteenMeal[];
+  lastUpdated: number;
+}
+
+export interface Canteen {
+  id: number;
+  name: string;
+  menu: CanteenMenu | null;
+}
+
+export interface CanteenSlideData extends ElementWithRealStartDate {
+  scheduleable_id: number;
+  scheduleable: Canteen;
+}
+
 export interface ElementWithRealStartDate {
   real_start_date: string;
   real_end_date: string;
@@ -51,9 +83,11 @@ export interface Monitor {
   show_we_are_closing: boolean;
   show_we_are_closed_marketing: boolean;
   show_cancelled_events: boolean;
+  show_events: boolean;
   show_menus: boolean;
   show_happy_hours: boolean;
   show_pictures: boolean;
+  show_canteens: boolean;
   show_videos: boolean;
   show_karaoke: boolean;
   show_weather_forecast: boolean;
@@ -124,6 +158,7 @@ export interface AdsEvent extends ElementWithRealStartDate {
   not_closing: boolean;
   place: string;
   preparation_time: number | null;
+  rrule: string | null;
 }
 
 export interface City {
@@ -211,6 +246,7 @@ export interface ServerData {
   e: AdsEvent[];
   p: PictureSlide[];
   v: VideoSlide[];
+  ca: CanteenSlideData[];
   ol: OrderslistData;
   weather: WeatherData;
 }

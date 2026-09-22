@@ -41,7 +41,7 @@ export class EventsSlide extends Slide {
                 return false;
             }
             if (Manager.Instance.showEventsWhileHappening()) {
-                if (event.repeat) {
+                if (event.repeat || event.rrule) {
                     if (now.isSame(event.startDate, 'day')) {
                         return now.isBefore(event.endDate);
                     }
@@ -50,7 +50,7 @@ export class EventsSlide extends Slide {
                 return now.isBefore(event.endDate);
             }
 
-            if (event.repeat) {
+            if (event.repeat || event.rrule) {
                 if (now.isSame(event.startDate, 'day')) {
                     return now.isBefore(event.startDate);
                 }

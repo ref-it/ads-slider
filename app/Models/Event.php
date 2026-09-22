@@ -19,7 +19,7 @@ class Event extends Model
 
     protected $guarded = ['user_id', 'id', 'api_token', 'realm_id'];
 
-    protected $appends = ['real_start_date', 'real_end_date', 'start_time', 'end_time', 'start_date', 'end_date', 'repeat', 'recurrence_description'];
+    protected $appends = ['real_start_date', 'real_end_date', 'start_time', 'end_time', 'start_date', 'end_date', 'repeat', 'rrule', 'recurrence_description'];
 
     protected $hidden = ['user_id', 'created_at', 'updated_at', 'api_token', 'import_id', 'events_import_id'];
 
@@ -97,6 +97,15 @@ class Event extends Model
     public function getRepeatAttribute(): ?string
     {
         return $this->schedule?->repeat;
+    }
+
+    /**
+     * Get the event's RRULE string, if it recurs via the new recurrence
+     * editor rather than (or in addition to) the legacy weekday mask.
+     */
+    public function getRruleAttribute(): ?string
+    {
+        return $this->schedule?->rrule;
     }
 
     /**

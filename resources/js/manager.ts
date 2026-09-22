@@ -12,6 +12,7 @@ export enum ScheduledSlideType {
     MENUS = "MENUS",
     KARAOKE = "KARAOKE",
     ORDERSLIST = "ORDERSLIST",
+    CANTEEN = "CANTEEN",
 }
 
 export enum InterruptionSlides {
@@ -56,11 +57,13 @@ export class Manager implements Mediator {
         ScheduledSlideType.EVENTS,
         ScheduledSlideType.ORDERSLIST,
         ScheduledSlideType.PICS,
+        ScheduledSlideType.CANTEEN,
         ScheduledSlideType.VIDEOS,
         ScheduledSlideType.ORDERSLIST,
         ScheduledSlideType.EVENTS,
         ScheduledSlideType.MENUS,
         ScheduledSlideType.PICS,
+        ScheduledSlideType.CANTEEN,
         ScheduledSlideType.ORDERSLIST,
             //ScheduledSlideType.KARAOKE,
         ];
@@ -174,12 +177,20 @@ export class Manager implements Mediator {
             this.schedule = this.schedule.filter(slide => slide !== ScheduledSlideType.WEATHER_DAILY);
         }
 
+        if (!monitorConfig.show_events) {
+            this.schedule = this.schedule.filter(slide => slide !== ScheduledSlideType.EVENTS);
+        }
+
         if (!monitorConfig.show_menus) {
             this.schedule = this.schedule.filter(slide => slide !== ScheduledSlideType.MENUS);
         }
 
         if (!monitorConfig.show_pictures) {
             this.schedule = this.schedule.filter(slide => slide !== ScheduledSlideType.PICS);
+        }
+
+        if (!monitorConfig.show_canteens) {
+            this.schedule = this.schedule.filter(slide => slide !== ScheduledSlideType.CANTEEN);
         }
 
         if (!monitorConfig.show_videos) {

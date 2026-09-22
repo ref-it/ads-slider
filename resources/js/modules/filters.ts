@@ -50,7 +50,7 @@ export default class Filter2 {
     }
     const now = this.getNow();
     if (this.config.show_event_while_is_happening) {
-      if (event.repeat) {
+      if (event.repeat || event.rrule) {
         if (now.isSame(event.startDate, 'day')) {
           return now.isBefore(event.endDate);
         }
@@ -59,7 +59,7 @@ export default class Filter2 {
       return now.isBefore(event.endDate);
     }
 
-    if (event.repeat) {
+    if (event.repeat || event.rrule) {
       if (now.isSame(event.startDate, 'day')) {
         return now.isBefore(event.startDate);
       }

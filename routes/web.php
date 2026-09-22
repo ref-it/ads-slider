@@ -12,6 +12,7 @@
 */
 
 use App\Http\Controllers\AlertController;
+use App\Http\Controllers\CanteenController;
 use App\Http\Controllers\Auth\OidcController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\EventController;
@@ -93,6 +94,9 @@ Route::middleware(['verified', 'auth'])->group(function () {
 
     // Menus
     Route::resource('menus', MenuController::class)->only(['index', 'create', 'edit', 'update', 'destroy']);
+
+    // Canteens
+    Route::resource('canteens', CanteenController::class)->only(['index', 'create', 'edit']);
 
     // Monitors
     Route::resource('monitors', MonitorController::class)->except(['destroy', 'store', 'update']);

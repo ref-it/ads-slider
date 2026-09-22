@@ -40,6 +40,9 @@ class MonitorForm extends Form
     public $show_cancelled_events = true;
 
     #[Validate('boolean')]
+    public $show_events = true;
+
+    #[Validate('boolean')]
     public $show_menus = true;
 
     #[Validate('boolean')]
@@ -47,6 +50,9 @@ class MonitorForm extends Form
 
     #[Validate('boolean')]
     public $show_pictures = true;
+
+    #[Validate('boolean')]
+    public $show_canteens = false;
 
     #[Validate('boolean')]
     public $show_videos = true;
@@ -109,9 +115,11 @@ class MonitorForm extends Form
         $this->show_we_are_closing = $m->show_we_are_closing;
         $this->show_we_are_closed_marketing = $m->show_we_are_closed_marketing;
         $this->show_cancelled_events = $m->show_cancelled_events;
+        $this->show_events = $m->show_events;
         $this->show_menus = $m->show_menus;
         $this->show_happy_hours = $m->show_happy_hours;
         $this->show_pictures = $m->show_pictures;
+        $this->show_canteens = $m->show_canteens;
         $this->show_videos = $m->show_videos;
         $this->show_karaoke = $m->show_karaoke;
         $this->show_weather_forecast = $m->show_weather_forecast;

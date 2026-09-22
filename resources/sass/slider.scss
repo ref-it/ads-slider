@@ -718,6 +718,101 @@ div#pics-container {
     font-size: 3vh;
 }
 
+/* Canteen menu */
+// A flex/overflow-hidden height constraint here previously hid the whole
+// list on some screens instead of just clipping the last item - the
+// flex-basis:0 column ended up computing to near-zero height rather than
+// shrinking gracefully. A generous fixed padding-bottom is less elegant
+// but fails safely (content stays visible) if the estimate is imperfect.
+#canteen {
+    padding: 1.5rem;
+    background-color: #000000;
+}
+
+// Same card look as .dailyColumn, but a 2-column grid of boxes instead of
+// the weather slides' single horizontal row - fits more dishes per page
+// without the per-box height stacking up as much vertically.
+.canteenItemsColumn {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.canteenMealBox {
+    min-width: 0;
+    color: white;
+    // These boxes are much wider than tall, so equal padding on all sides
+    // reads as more vertical whitespace than horizontal; less top/bottom
+    // padding balances that out.
+    padding: 1rem 1.5rem;
+    border: 0.15rem solid gray;
+    border-radius: 0.5rem;
+    // Grid items stretch to the tallest box in their row by default, so
+    // when a neighbouring dish name wraps to more lines, this keeps the
+    // price row pinned to the bottom instead of floating right under a
+    // shorter name.
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.canteenMealName {
+    display: block;
+    font-size: 4vh;
+    font-weight: bold;
+}
+
+// All three prices in a row below the dish name/allergens, each with its
+// own label above it - flatter than stacking them in a tall right-hand
+// column, which kept overflowing into the clock at smaller screen sizes.
+.canteenPriceRow {
+    display: flex;
+    gap: 2rem;
+    // Minimum gap below the dish name; .canteenMealBox's space-between
+    // pushes this further down to the box's bottom edge when there's
+    // extra room (e.g. a shorter name next to a wrapped one in the grid).
+    margin-top: 1.5vh;
+}
+
+.canteenPriceEntry {
+    display: flex;
+    flex-direction: column;
+}
+
+.canteenPriceLabel {
+    white-space: nowrap;
+    font-size: 2.6vh;
+    color: gray;
+}
+
+.canteenPrice {
+    white-space: nowrap;
+    font-size: 4vh;
+    font-weight: bold;
+    color: #c0c0c0;
+}
+
+// Same size as the student price, just not bold - keeps the three prices
+// visually equal-weight in size while still marking the student price
+// (the target audience's own price) as the one that stands out.
+.canteenPrice--secondary {
+    font-weight: normal;
+}
+
+// Vegetarian/vegan dishes are marked by the box's border color instead of
+// a badge - yellow vs. green reads as a clearly different color rather
+// than two shades of the same one. Both verified >=7:1 contrast against
+// the black background (WCAG 1.4.11 non-text contrast needs only 3:1).
+// Muted gold rather than a saturated yellow, which read as too eye-catching.
+.canteenMealBox--vegetarian {
+    border-color: #c9a227;
+}
+
+.canteenMealBox--vegan {
+    border-color: #4caf50;
+}
+
+
 /* Event small */
 #event-slide-small {
     position: absolute;

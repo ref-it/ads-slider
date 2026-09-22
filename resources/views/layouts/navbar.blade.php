@@ -135,6 +135,16 @@
                                 data-bs-title="{{ __('Create a Slide') }}">
                                 <i class="fa-solid fa-fw fa-plus"></i>&nbsp;{{ __('Video Slide') }}
                             </a>
+                            <hr>
+                            <a class="dropdown-item" href="{{ route('canteens.index') }}" data-bs-toggle="tooltip"
+                                data-bs-placement="left" data-bs-title="{{ __('List Slides') }}">
+                                <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Canteens') }}
+                            </a>
+                            <a class="dropdown-item text-primary" href="{{ route('canteens.create') }}"
+                                data-bs-toggle="tooltip" data-bs-placement="left"
+                                data-bs-title="{{ __('Create a Slide') }}">
+                                <i class="fa-solid fa-fw fa-plus"></i>&nbsp;{{ __('Canteen') }}
+                            </a>
                         </div>
                     </li>
                     @if (Auth::user()->is_realm_admin)
