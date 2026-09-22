@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use App\Models\Event;
 use App\Models\EventsImport;
 use App\Models\Schedule;
+use App\Rules\ValidRrule;
+use App\Services\CaldavCalendarParser;
 use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
@@ -127,37 +129,53 @@ class ImportEvents extends Command implements Isolatable
         $validationErrorFound = false;
 
         $url = $in->import_url;
-        $client = new Client([
-            'verify' => config('app.env', 'production') == 'production' ? true : false,
-            'base_uri' => $url,
-        ]);
-        $response = null;
-        try {
-            $response = $client->get('');
-        } catch (Exception $e) {
-            $this->error("Guzzle error while contacting {$url}");
-            $this->error($e->getMessage());
-            Log::channel('events_imports')->error('Guzzle error: '.$e->getMessage());
 
-            return false;
-        }
-        if ($response->getStatusCode() != 200) {
-            $this->error("Contacting {$url} received the response code {$response->getStatusCode()}, expected HTTP 200");
-            Log::channel('events_imports')->error("Contacting {$url} received the response code {$response->getStatusCode()}, expected HTTP 200");
+        if ($in->isCaldav()) {
+            try {
+                $events = (new CaldavCalendarParser($in->id))->fetch($url, $in->caldav_username, $in->caldav_password);
+            } catch (\Throwable $e) {
+                $this->error("CalDAV error while contacting {$url}");
+                $this->error($e->getMessage());
+                Log::channel('events_imports')->error('CalDAV error: '.$e->getMessage());
 
-            return false;
-        }
-        $data = $response->getBody()->getContents();
-        $json = \json_decode($data, false);
-        if (is_null($json) || ! is_array($json->events)) {
-            $this->error("Something went wrong while parsing the events from the URL {$url}");
-            Log::channel('events_imports')->error("Something went wrong while parsing the events from the URL {$url}");
+                return false;
+            }
+            $events = array_map(static fn (array $event) => (object) $event, $events);
+        } else {
+            $client = new Client([
+                'verify' => config('app.env', 'production') == 'production' ? true : false,
+                'base_uri' => $url,
+            ]);
+            $response = null;
+            try {
+                $response = $client->get('');
+            } catch (Exception $e) {
+                $this->error("Guzzle error while contacting {$url}");
+                $this->error($e->getMessage());
+                Log::channel('events_imports')->error('Guzzle error: '.$e->getMessage());
 
-            return false;
+                return false;
+            }
+            if ($response->getStatusCode() != 200) {
+                $this->error("Contacting {$url} received the response code {$response->getStatusCode()}, expected HTTP 200");
+                Log::channel('events_imports')->error("Contacting {$url} received the response code {$response->getStatusCode()}, expected HTTP 200");
+
+                return false;
+            }
+            $data = $response->getBody()->getContents();
+            $json = \json_decode($data, false);
+            if (is_null($json) || ! is_array($json->events)) {
+                $this->error("Something went wrong while parsing the events from the URL {$url}");
+                Log::channel('events_imports')->error("Something went wrong while parsing the events from the URL {$url}");
+
+                return false;
+            }
+            $events = $json->events;
         }
+
         $receivedEventsIDs = [];
 
-        foreach ($json->events as $i => $event) {
+        foreach ($events as $i => $event) {
             $this->newLine();
             $this->info("Received event #{$i} '{$event->name}' ({$event->import_id})");
             $receivedEventsIDs[] = $event->import_id;
@@ -168,7 +186,7 @@ class ImportEvents extends Command implements Isolatable
             $checkEventExists = Event::where([
                 'import_id' => $event->import_id,
                 'realm_id' => $in->realm_id,
-            ])->first(['id', 'updated_at']);
+            ])->first(['id', 'updated_at', 'is_protected']);
             if ($checkEventExists) {
                 $this->info('Event was already imported before in realm '.$in->realm_id);
                 if (! $this->option('force') && $updatedOn->lte($checkEventExists->updated_at)) {
@@ -204,6 +222,9 @@ class ImportEvents extends Command implements Isolatable
                 'cancelled' => 'nullable|boolean',
                 'place' => 'nullable',
                 'link' => 'nullable|url:https',
+                'rrule' => ['nullable', 'string', new ValidRrule],
+                'exceptionDates' => 'nullable|array',
+                'exceptionDates.*' => 'date_format:Y-m-d',
             ]);
 
             if ($validator->fails()) {
@@ -224,16 +245,19 @@ class ImportEvents extends Command implements Isolatable
             // Internally, the event goes until the full minute ends. So if the end_time is 20:00, it means the event is running until 19:59.
             // The .59 is automatically added in a second time.
             $validatedData['end_time'] = Carbon::parse($validatedData['end_time'])->subMinute()->format('H:i');
+            $rrule = $validatedData['rrule'] ?? null;
+            $exceptionDates = array_values(array_unique($validatedData['exceptionDates'] ?? []));
             $scheduleData = [
                 'start' => $validatedData['start'],
                 'end' => $validatedData['end'],
                 'start_time' => $validatedData['start_time'],
                 'end_time' => $validatedData['end_time'],
                 'disabled' => false, // Default for new events
+                'rrule' => $rrule,
             ];
 
             // Remove schedule fields from event data
-            unset($validatedData['start'], $validatedData['end'], $validatedData['start_time'], $validatedData['end_time']);
+            unset($validatedData['start'], $validatedData['end'], $validatedData['start_time'], $validatedData['end_time'], $validatedData['rrule'], $validatedData['exceptionDates']);
 
             // set the actual values from the event
             $e->fill($validatedData);
@@ -262,17 +286,27 @@ class ImportEvents extends Command implements Isolatable
                 $schedule->user_id = $e->user_id;
                 $schedule->save();
 
+                if ($rrule) {
+                    foreach ($exceptionDates as $exceptionDate) {
+                        $schedule->exceptions()->create(['exception_date' => $exceptionDate]);
+                    }
+                }
+
                 $this->info('Added to the DB');
             } else {
                 $this->error('Could not store event');
             }
         } // foreach end
 
-        // Delete future imported events that were not present in the current import
+        // Delete future imported events that were not present in the current import.
+        // A recurring (rrule) schedule's "start" is its first-ever occurrence, which
+        // can be long in the past while the series itself is still ongoing, so those
+        // are always reconsidered regardless of "start".
         $toBeDeleted = Event::where('events_import_id', $in->id)
             ->whereNotIn('import_id', $receivedEventsIDs)
             ->whereHas('schedule', function ($q) {
-                $q->where('start', '>=', Carbon::today(config('app.timezone')));
+                $q->where('start', '>=', Carbon::today(config('app.timezone')))
+                    ->orWhereNotNull('rrule');
             })->get();
 
         $this->newLine();

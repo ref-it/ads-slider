@@ -19,7 +19,7 @@ class Event extends Model
 
     protected $guarded = ['user_id', 'id', 'api_token', 'realm_id'];
 
-    protected $appends = ['real_start_date', 'real_end_date', 'start_time', 'end_time', 'start_date', 'end_date', 'repeat'];
+    protected $appends = ['real_start_date', 'real_end_date', 'start_time', 'end_time', 'start_date', 'end_date', 'repeat', 'recurrence_description'];
 
     protected $hidden = ['user_id', 'created_at', 'updated_at', 'api_token', 'import_id', 'events_import_id'];
 
@@ -97,6 +97,15 @@ class Event extends Model
     public function getRepeatAttribute(): ?string
     {
         return $this->schedule?->repeat;
+    }
+
+    /**
+     * Human-readable recurrence summary (legacy digit mask or rrule), or
+     * null for a non-repeating event. See Schedule::getRecurrenceDescriptionAttribute().
+     */
+    public function getRecurrenceDescriptionAttribute(): ?string
+    {
+        return $this->schedule?->recurrence_description;
     }
 
     public function removeApiToken(): bool

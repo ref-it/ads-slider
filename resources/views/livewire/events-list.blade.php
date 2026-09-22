@@ -57,19 +57,7 @@
                         </div>
                         <p class="event-start">
                             {{ Carbon\Carbon::parse($event->real_start_date)->isoFormat('dddd LL') }}
-                            {{ $event->repeat
-                                    ? __('- Repeats on:') .
-                                        ' ' .
-                                        join(
-                                            ', ',
-                                            array_map(function ($el) {
-                                                if ($el === '7') {
-                                                    $el = 0;
-                                                }
-                                                return Carbon\Carbon::now()->next(intval($el))->dayName;
-                                            }, str_split($event->repeat)),
-                                        )
-                                    : '' }}
+                            {{ $event->recurrence_description }}
                         </p>
                         <p class="event-start_time"><i
                                 class="fas fa-fw fa-clock"></i>&nbsp;{{ substr($event->start_time, 0, 5) . ' - ' . substr($event->end_time, 0, 5) }}

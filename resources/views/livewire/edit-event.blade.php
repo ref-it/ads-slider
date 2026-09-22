@@ -48,7 +48,7 @@
                 <x-forms.inputs.time name="form.end_time" required label="{{ __('End Time') }}" />
                 <div x-data>
                     <template x-if="!$store.ui.isDeleting">
-                        <livewire:weekdays wire:model.live="form.repeat" name="form.repeat" label="{{ __('Repeat on…') }}" />
+                        <livewire:recurrence-editor wire:model.live="form.rrule" :exception-dates="$form->exceptionDates" />
                     </template>
                 </div>
                 <x-forms.inputs.date name="form.start" label="{{ __('Start') }}" />

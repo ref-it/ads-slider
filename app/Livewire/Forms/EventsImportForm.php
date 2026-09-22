@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms;
 
+use App\Enums\EventsImportSourceType;
 use App\Livewire\Traits\ErrorBanner;
 use App\Models\EventsImport;
 use Illuminate\Support\Facades\Log;
@@ -17,8 +18,17 @@ class EventsImportForm extends Form
     #[Validate('required|max:191')]
     public $import_name = '';
 
+    #[Validate('required|in:json,caldav')]
+    public $source_type = 'json';
+
     #[Validate('url|max:1852')]
     public $import_url = '';
+
+    #[Validate('nullable|max:191')]
+    public $caldav_username;
+
+    #[Validate('nullable|max:1852')]
+    public $caldav_password;
 
     #[Validate('boolean')]
     public $import_disabled = false;
@@ -59,7 +69,10 @@ class EventsImportForm extends Form
     {
         $this->eventsImport = $eventsImport;
         $this->import_name = $eventsImport->import_name;
+        $this->source_type = $eventsImport->source_type?->value ?? EventsImportSourceType::Json->value;
         $this->import_url = $eventsImport->import_url;
+        $this->caldav_username = $eventsImport->caldav_username;
+        $this->caldav_password = $eventsImport->caldav_password;
         $this->import_disabled = $eventsImport->import_disabled;
         $this->place = $eventsImport->place;
         $this->color = $eventsImport->color;

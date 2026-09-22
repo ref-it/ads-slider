@@ -6,7 +6,35 @@
         <div class="col-md-9">
             <form wire:submit="save">
                 <x-forms.inputs.text name="form.import_name" label="{{__('Import Name')}}" placeholder="{{__('My Import Name')}}" required />
-                <x-forms.inputs.url name="form.import_url" label="{{__('Import URL')}}" placeholder="{{__('https://link_to_published.json')}}" />
+
+                <x-forms.inputs.select name="form.source_type" label="{{__('Source Type')}}">
+                    <x-slot:options>
+                        <option value="json">{{ __('JSON Feed') }}</option>
+                        <option value="caldav">{{ __('CalDAV Calendar') }}</option>
+                    </x-slot>
+                </x-forms.inputs.select>
+
+                @if ($form->source_type === 'caldav')
+                    <x-forms.inputs.url name="form.import_url" label="{{__('Import URL')}}" placeholder="{{__('https://.../remote.php/dav/public-calendars/xxxx/?export')}}">
+                        <x-forms.helpers.help text="{{ __('The CalDAV/ICS resource URL, e.g. a public or private calendar export link.') }}" />
+                    </x-forms.inputs.url>
+
+                    <x-forms.inputs.text name="form.caldav_username" label="{{ __('CalDAV Username') }}">
+                        <x-forms.helpers.help text="{{ __('Leave empty for a publicly accessible calendar.') }}" />
+                    </x-forms.inputs.text>
+
+                    <div class="mb-3">
+                        <x-forms.helpers.label name="form.caldav_password" label="{{ __('CalDAV Password') }}" />
+                        <input id="form.caldav_password" wire:model.change="form.caldav_password" type="password"
+                            class="form-control @error('form.caldav_password') is-invalid @enderror" name="form.caldav_password" autocomplete="new-password">
+                        @error('form.caldav_password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                @else
+                    <x-forms.inputs.url name="form.import_url" label="{{__('Import URL')}}" placeholder="{{__('https://link_to_published.json')}}" />
+                @endif
+
                 <x-forms.inputs.checkbox name="form.import_disabled" label="{{__('Import Disabled')}}">
                     <x-forms.helpers.help text="{{__('When checked, the import from this URL is stopped')}}" />
                 </x-forms.inputs.checkbox>

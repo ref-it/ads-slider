@@ -5,7 +5,9 @@ namespace App\Livewire\Forms;
 use App\Livewire\Traits\ErrorBanner;
 use App\Models\Event;
 use App\Models\Menu;
+use App\Models\ScheduleException;
 use App\Models\Template;
+use App\Rules\ValidRrule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -28,8 +30,13 @@ class EventForm extends Form
     #[Validate('required|date_format:H:i')]
     public $end_time = '';
 
-    #[Validate('present|max:1234567|nullable|required_without:start,end|integer|not_regex:/([^1-7])/|not_regex:/(.).*\1/')]
-    public $repeat = '';
+    #[Validate(['nullable', 'string', new ValidRrule])]
+    public $rrule = '';
+
+    /**
+     * @var string[] 'Y-m-d' dates the recurrence should skip (RRULE EXDATE).
+     */
+    public $exceptionDates = [];
 
     #[Validate('present|date|nullable|required_with:end')]
     public $start;
@@ -100,7 +107,10 @@ class EventForm extends Form
         // Prioritize Schedule data
         $this->start_time = $event->schedule?->start_time ? substr($event->schedule->start_time, 0, 5) : null;
         $this->end_time = $event->schedule?->end_time ? substr($event->schedule->end_time, 0, 5) : null;
-        $this->repeat = $event->schedule?->repeat;
+        $this->rrule = $event->schedule?->rrule ?? '';
+        $this->exceptionDates = $event->schedule
+            ? $event->schedule->exceptions->map(fn (ScheduleException $e) => $e->exception_date->toDateString())->all()
+            : [];
         $this->start = $event->schedule?->start ? $event->schedule->start->format('Y-m-d') : null;
         $this->end = $event->schedule?->end ? $event->schedule->end->format('Y-m-d') : null;
 
@@ -147,7 +157,7 @@ class EventForm extends Form
             'end_time' => $this->end_time,
             'start' => $this->start,
             'end' => $this->end,
-            'repeat' => $this->repeat,
+            'rrule' => $this->rrule ?: null,
             'return_null_if_empty' => true, // Helper flag? No, just checking logic
             'disabled' => $this->disabled,
             'realm_id' => $this->event->realm_id ?? Auth::user()->realm_id,
@@ -189,10 +199,18 @@ class EventForm extends Form
             unset($scheduleData['return_null_if_empty']);
 
             // Save Schedule
-            $this->event->schedule()->updateOrCreate(
+            $schedule = $this->event->schedule()->updateOrCreate(
                 [], // Match by relationship
                 $scheduleData
             );
+
+            // Sync exception dates (RRULE EXDATE); irrelevant without an rrule.
+            $exceptionDates = $this->rrule ? array_unique($this->exceptionDates) : [];
+            $schedule->exceptions()->whereNotIn('exception_date', $exceptionDates)->delete();
+            $existing = $schedule->exceptions()->pluck('exception_date')->map(fn ($d) => $d->toDateString())->all();
+            foreach (array_diff($exceptionDates, $existing) as $date) {
+                $schedule->exceptions()->create(['exception_date' => $date]);
+            }
 
             DB::commit();
         } catch (\Exception $e) {

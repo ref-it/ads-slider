@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class UpdateEvent extends Component
@@ -22,6 +23,12 @@ class UpdateEvent extends Component
 
     #[Locked]
     public $avUpdating = false;
+
+    #[On('exception-dates-updated')]
+    public function syncExceptionDates(array $dates): void
+    {
+        $this->form->exceptionDates = $dates;
+    }
 
     public function mount(Event $event, $avUpdating)
     {
@@ -37,7 +44,7 @@ class UpdateEvent extends Component
     #[Computed]
     public function duration()
     {
-        return Schedule::calculateDuration($this->form->start, $this->form->end, $this->form->start_time, $this->form->end_time, $this->form->repeat);
+        return Schedule::calculateDuration($this->form->start, $this->form->end, $this->form->start_time, $this->form->end_time, null, null, $this->form->rrule, $this->form->exceptionDates);
     }
 
     public function save()
