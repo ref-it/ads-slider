@@ -205,8 +205,11 @@
                             <span class="temp_feels dailyMin">25</span><span class="superscript">°C</span>
                         </div>
                     </div>
-                    <div class="weatherCloud dailySunshine">
+                    <div class="weatherCloud weatherMetric">
                         <i class="fas fa-cloud">&nbsp;</i><span class="weatherCloudValue">55</span><span class="superscript">%</span>
+                    </div>
+                    <div class="weatherWind weatherMetric">
+                        <i class="fas fa-wind">&nbsp;</i><span class="weatherWindValue">12</span><span class="superscript">km/h</span>
                     </div>
                 </div>
             </div>
@@ -233,8 +236,11 @@
                         <span class="dailyMax">23</span><span class="superscript">°C</span><br>
                         <span class="dailyMin">12</span><span class="superscript">°C</span>
                     </div>
-                    <div class="dailySunshine">
+                    <div class="dailySunshine weatherMetric">
                         <i class="fas fa-sun">&nbsp;</i><span class="dailySunshineValue">6.8</span><span class="superscript">h</span>
+                    </div>
+                    <div class="dailyWind weatherMetric">
+                        <i class="fas fa-wind">&nbsp;</i><span class="dailyWindValue">12</span><span class="superscript">km/h</span>
                     </div>
                 </div>
             </div>

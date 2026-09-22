@@ -68,6 +68,12 @@ class DwdWeatherNormalizer
         $timeStep = (int) ($forecast['timeStep'] ?? 3600000);
         $temperatures = $forecast['temperature'] ?? [];
         $icons = $forecast['icon'] ?? [];
+        // Hourly wind is rarely populated by this endpoint (often null for
+        // every index); extracted anyway so it displays whenever DWD does
+        // provide it, same as the daily wind values below.
+        $windSpeeds = $forecast['windSpeed'] ?? [];
+        $windDirections = $forecast['windDirection'] ?? [];
+        $windGusts = $forecast['windGust'] ?? [];
 
         // $forecast['start'] is DWD's own fixed reference point for the
         // array (not necessarily "now"), so index 0 always used to mean
@@ -88,6 +94,15 @@ class DwdWeatherNormalizer
             $icon = $this->resolveIcon((int) $icons[$i], $dt, $realm);
             $description = self::ICONS[(int) $icons[$i]][$locale] ?? self::ICONS[(int) $icons[$i]]['en'] ?? 'unknown';
 
+            $wind = [
+                'speed' => $this->windSpeedMs($windSpeeds[$i] ?? null),
+                'deg' => $this->windDirectionDeg($windDirections[$i] ?? null),
+            ];
+            $gust = $this->windSpeedMs($windGusts[$i] ?? null);
+            if ($gust !== null) {
+                $wind['gust'] = $gust;
+            }
+
             $list[] = [
                 'dt' => $dt,
                 'main' => [
@@ -104,6 +119,7 @@ class DwdWeatherNormalizer
                 // DWD doesn't reliably provide hourly cloud cover either;
                 // left at 0 rather than showing misleading data.
                 'clouds' => ['all' => 0],
+                'wind' => $wind,
             ];
         }
 
@@ -145,6 +161,8 @@ class DwdWeatherNormalizer
                 'temp_max' => isset($day['temperatureMax']) ? round($day['temperatureMax'] / 10, 1) : null,
                 // Total sunshine for the day, in minutes (see normalize()).
                 'sunshine' => isset($day['sunshine']) ? (int) round($day['sunshine'] / 10) : null,
+                'wind_speed' => $this->windSpeedMs($day['windSpeed'] ?? null),
+                'wind_gust' => $this->windSpeedMs($day['windGust'] ?? null),
                 'weather' => [[
                     'id' => $code,
                     'main' => $description,
@@ -183,6 +201,23 @@ class DwdWeatherNormalizer
         $name = preg_replace(['/UE/', '/OE/', '/AE/'], ['Ü', 'Ö', 'Ä'], $station['name']);
 
         return mb_convert_case($name, MB_CASE_TITLE);
+    }
+
+    /**
+     * DWD's windSpeed/windGust values aren't documented, but follow the same
+     * "value x10" convention as every other field in this API (temperature,
+     * precipitation, ...) and DWD's own apps display wind in km/h, so these
+     * are assumed to be tenths of km/h. Converted to meter/sec here to match
+     * the OpenWeatherMap unit the rest of this normalizer produces.
+     */
+    private function windSpeedMs(?int $rawTenthsKmh): ?float
+    {
+        return $rawTenthsKmh !== null ? round($rawTenthsKmh / 36, 1) : null;
+    }
+
+    private function windDirectionDeg(?int $rawTenthsDeg): ?int
+    {
+        return $rawTenthsDeg !== null ? (int) round($rawTenthsDeg / 10) : null;
     }
 
     private function resolveIcon(int $code, int $dt, Realm $realm): string

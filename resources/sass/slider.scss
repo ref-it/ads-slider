@@ -649,15 +649,15 @@ div#pics-container {
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: 1fr;
-    gap: 1rem;
-    margin-bottom: 2rem;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
 }
 
 .dailyColumn {
     min-width: 0;
     text-align: center;
     color: white;
-    padding: 1.5rem;
+    padding: 1.25rem;
     border: 0.15rem solid gray;
     border-radius: 0.5rem;
 }
@@ -669,7 +669,7 @@ div#pics-container {
     // almost no margin, which read as off-center even though it was
     // technically centered.
     font-size: 5vh;
-    margin-bottom: 1.5vh;
+    margin-bottom: 1vh;
     text-transform: capitalize;
 }
 
@@ -680,7 +680,7 @@ div#pics-container {
 }
 
 .dailyTemps {
-    margin-top: 1.5vh;
+    margin-top: 1vh;
     font-size: 6.5vh;
 }
 
@@ -695,15 +695,20 @@ div#pics-container {
     color: #c0c0c0;
 }
 
-.dailySunshine {
-    margin-top: 1.5vh;
+// Shared look for the small secondary rows below the main temperature
+// (sunshine, cloud cover, wind, ...). Kept separate from .dailySunshine
+// itself, which JS also uses as a query target for that row specifically -
+// sharing this class there caused its selectors (e.g. for the sunshine
+// unit label) to also match the other rows.
+.weatherMetric {
+    margin-top: 1vh;
     // Smaller than the other values so the icon, number and unit still fit
     // on one line on narrower (e.g. 16:10) screens.
     font-size: 4vh;
     color: #c0c0c0;
 }
 
-.dailySunshine i {
+.weatherMetric i {
     margin-right: 0.5rem;
     // The sun icon's glyph fills more of its em-box than the surrounding
     // digits, so it reads as oversized at the same literal font-size.

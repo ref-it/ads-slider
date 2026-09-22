@@ -581,21 +581,30 @@ function prepareWeatherSlide(data: WeatherData): void {
         `${config.base_root}img/amcharts_weather_icons/${config.use_animations ? 'animated' : 'static'}/${entry.weather[0].icon}.${config.use_animations ? 'svg' : 'png'}`,
       );
 
-    column
-      .find('.weatherTemp')
-      .text(infos.temp.toFixed(0))
-      .css('color', getTemperatureColor(infos.temp));
+    // Rounded once and reused for both the label and its color, so a value
+    // that rounds up (e.g. 21.6) can't end up shown as "22" while still
+    // being colored as if it were 21.
+    const temp = Math.round(infos.temp);
+    column.find('.weatherTemp').text(temp).css('color', getTemperatureColor(temp));
     if (infos.feels_like !== undefined && infos.feels_like !== null) {
+      const feelsLike = Math.round(infos.feels_like);
       column
         .find('.temp_feels')
-        .text(infos.feels_like.toFixed(0))
-        .css('color', getTemperatureColor(infos.feels_like));
+        .text(feelsLike)
+        .css('color', getTemperatureColor(feelsLike));
       column.find('.temp_feels_row').show();
     } else {
       column.find('.temp_feels_row').hide();
     }
 
     column.find('.weatherCloudValue').text(entry.clouds.all);
+
+    if (entry.wind?.speed !== undefined && entry.wind?.speed !== null) {
+      column.find('.weatherWindValue').text((entry.wind.speed * 3.6).toFixed(0));
+      column.find('.weatherWind').show();
+    } else {
+      column.find('.weatherWind').hide();
+    }
 
     // #sunTimes should stay the rightmost column, so hour cards are
     // inserted right before it instead of appended to the end.
@@ -640,14 +649,16 @@ function prepareWeatherDailySlide(data: WeatherData): void {
         `${config.base_root}img/amcharts_weather_icons/${config.use_animations ? 'animated' : 'static'}/${icon}.${config.use_animations ? 'svg' : 'png'}`,
       );
 
+    const tempMax = day.temp_max !== null ? Math.round(day.temp_max) : null;
     column
       .find('.dailyMax')
-      .text(day.temp_max !== null ? day.temp_max.toFixed(0) : '–')
-      .css('color', day.temp_max !== null ? getTemperatureColor(day.temp_max) : '');
+      .text(tempMax !== null ? tempMax : '–')
+      .css('color', tempMax !== null ? getTemperatureColor(tempMax) : '');
+    const tempMin = day.temp_min !== null ? Math.round(day.temp_min) : null;
     column
       .find('.dailyMin')
-      .text(day.temp_min !== null ? day.temp_min.toFixed(0) : '–')
-      .css('color', day.temp_min !== null ? getTemperatureColor(day.temp_min) : '');
+      .text(tempMin !== null ? tempMin : '–')
+      .css('color', tempMin !== null ? getTemperatureColor(tempMin) : '');
 
     if (day.sunshine !== null && day.sunshine !== undefined) {
       column.find('.dailySunshine').show();
@@ -655,6 +666,13 @@ function prepareWeatherDailySlide(data: WeatherData): void {
       column.find('.dailySunshine span.superscript').text(_._('hour_abbr', config.locale));
     } else {
       column.find('.dailySunshine').hide();
+    }
+
+    if (day.wind_speed !== null && day.wind_speed !== undefined) {
+      column.find('.dailyWind').show();
+      column.find('.dailyWindValue').text((day.wind_speed * 3.6).toFixed(0));
+    } else {
+      column.find('.dailyWind').hide();
     }
 
     column.show();

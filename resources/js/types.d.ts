@@ -194,9 +194,9 @@ export interface Forecast {
   weather: Weather[];
   clouds: { all: number };
   wind: {
-    speed: number; // Wind speed. Unit Default: meter/sec, Metric: meter/sec, Imperial: miles/hour.
-    deg: number; // Wind direction, degrees (meteorological)
-    gust?: number; // Wind gust. Unit Default: meter/sec, Metric: meter/sec, Imperial: miles/hour.
+    speed: number | null; // Wind speed, meter/sec. Null when not provided (DWD, hourly).
+    deg: number | null; // Wind direction, degrees (meteorological)
+    gust?: number | null; // Wind gust, meter/sec.
   };
   visibility: number;
   pop: number;
@@ -211,6 +211,8 @@ export interface DailyForecast {
   temp_min: number | null;
   temp_max: number | null;
   sunshine: number | null; // Total minutes of sunshine that day (DWD only)
+  wind_speed: number | null; // Average wind speed for the day, meter/sec (DWD only)
+  wind_gust: number | null; // Wind gust, meter/sec (DWD only)
   weather: Weather[];
 }
 

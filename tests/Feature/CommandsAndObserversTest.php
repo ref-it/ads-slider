@@ -114,9 +114,12 @@ class CommandsAndObserversTest extends TestCase
                         'timeStep' => 3600000,
                         'temperature' => [141, 127, 128, 126, 124, 122],
                         'icon' => [8, 8, 8, 8, 8, 4],
+                        'windSpeed' => [180, null, 108, 108, 108, 108],
+                        'windDirection' => [2200, null, 900, 900, 900, 900],
+                        'windGust' => [360, null, 144, 144, 144, 144],
                     ],
                     'days' => [
-                        ['dayDate' => '2026-09-21', 'temperatureMin' => 102, 'temperatureMax' => 173, 'sunshine' => 5220, 'icon' => 4],
+                        ['dayDate' => '2026-09-21', 'temperatureMin' => 102, 'temperatureMax' => 173, 'sunshine' => 5220, 'icon' => 4, 'windSpeed' => 144, 'windGust' => 288],
                         ['dayDate' => '2026-09-22', 'temperatureMin' => 75, 'temperatureMax' => 158, 'sunshine' => 4110, 'icon' => 2],
                     ],
                 ],
@@ -142,10 +145,22 @@ class CommandsAndObserversTest extends TestCase
             $first = $event->data['list'][0] ?? null;
             $firstDay = $event->data['daily'][0] ?? null;
 
+            $secondHour = $event->data['list'][1] ?? null;
+            $secondDay = $event->data['daily'][1] ?? null;
+
             return $first
                 && $first['main']['temp'] === 14.1
                 // DWD doesn't provide a perceived temperature.
                 && $first['main']['feels_like'] === null
+                // 180 tenths of km/h => 5.0 m/s; 2200 tenths of a degree => 220°.
+                && $first['wind']['speed'] === 5.0
+                && $first['wind']['deg'] === 220
+                && $first['wind']['gust'] === 10.0
+                // Hourly wind is null for this index; omitted rather than showing 0.
+                && $secondHour
+                && $secondHour['wind']['speed'] === null
+                && $secondHour['wind']['deg'] === null
+                && ! array_key_exists('gust', $secondHour['wind'])
                 // The nearest DWD station's name (title-cased, umlauts restored), not the realm's own name.
                 && $event->data['city']['name'] === 'Düsseldorf'
                 && $firstDay
@@ -154,7 +169,14 @@ class CommandsAndObserversTest extends TestCase
                 && $firstDay['temp_max'] === 17.3
                 // 5220 tenths of a minute of sunshine => 522 minutes.
                 && $firstDay['sunshine'] === 522
-                && $firstDay['weather'][0]['icon'] === '04d';
+                // 144 tenths of km/h => 4.0 m/s; 288 tenths of km/h => 8.0 m/s.
+                && $firstDay['wind_speed'] === 4.0
+                && $firstDay['wind_gust'] === 8.0
+                && $firstDay['weather'][0]['icon'] === '04d'
+                // No wind data provided for this day.
+                && $secondDay
+                && $secondDay['wind_speed'] === null
+                && $secondDay['wind_gust'] === null;
         });
     }
 
