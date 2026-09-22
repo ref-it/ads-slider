@@ -1,26 +1,25 @@
 @extends('layouts.app')
 @section('content')
 <div class="container">
-    <h2>{{ __('All Monitors') }}</h2>
+    <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center gap-2 mb-3">
+        <h2 class="mb-0">{{ __('All Monitors') }}</h2>
+        <a href="{{ route('monitors.create') }}">
+            <button class="btn btn-primary"><i class="fas fa-fw fa-plus"></i>&nbsp;{{ __('Create New Monitor') }}</button>
+        </a>
+    </div>
     <div class="row">
-        <div class="col col-lg-3 order-lg-1">
-            <a href="{{ route('monitors.create') }}">
-                <button class="btn btn-primary btn-block">{{ __('Create New Monitor') }}</button>
-            </a>
-            <p>{{ __('Click on a monitor to edit or delete it.') }}</p>
-            <p>{{ __('Click on a link under a monitor element to see the result.') }}</p>
-        </div>
-        <div class="col-lg-9 order-lg-0">
+        <div class="col-12">
+            <div class="row row-cols-1 row-cols-xl-2 g-3">
                 @forelse ($monitors as $monitor)
-                <div class="card mb-3">
-                    <div class="card-header d-flex w-100 justify-content-between align-items-center">
+                <div class="col">
+                <div class="card">
+                    <div class="card-header">
                         <span class="fw-bolder">
                             @if ($monitor->trashed())
                             <i data-bs-toggle="tooltip" data-bs-title="{{ __('Deleted') }}" class="fas fa-fw fa-trash-can-arrow-up"></i>
                             @endif
                             {{ $monitor->name }}
                         </span>
-                        <small>{{ $monitor->user->name }}</small>
                     </div>
                     <div class="card-body">
                     <div class="d-flex flex-wrap justify-content-center gap-3 pb-3 mb-3 border-bottom">
@@ -214,9 +213,13 @@
                         </a>
                     </div>
                 </div>
+                </div>
                 @empty
-                <h3>{{ __('No monitors yet, what about adding one?') }}</h3>
+                <div class="col">
+                    <h3>{{ __('No monitors yet, what about adding one?') }}</h3>
+                </div>
                 @endforelse
+            </div>
         </div>
     </div>
     <div class="row justify-content-center">
