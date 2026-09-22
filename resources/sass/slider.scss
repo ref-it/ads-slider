@@ -20,27 +20,27 @@
 }
 
 @font-face {
-    font-family: WebRedHatText;
+    font-family: WebInriaSans;
     font-weight: 400;
     font-style: normal;
     font-display: swap;
-    src: url('@fontsource/red-hat-text/files/red-hat-text-latin-400-normal.woff2') format('woff2');
+    src: url('@fontsource/inria-sans/files/inria-sans-latin-400-normal.woff2') format('woff2');
 }
 
 @font-face {
-    font-family: WebRedHatText;
+    font-family: WebInriaSans;
     font-weight: 400;
     font-style: italic;
     font-display: swap;
-    src: url('@fontsource/red-hat-text/files/red-hat-text-latin-400-italic.woff2') format('woff2');
+    src: url('@fontsource/inria-sans/files/inria-sans-latin-400-italic.woff2') format('woff2');
 }
 
 @font-face {
-    font-family: WebRedHatText;
+    font-family: WebInriaSans;
     font-weight: 700;
     font-style: normal;
     font-display: swap;
-    src: url('@fontsource/red-hat-text/files/red-hat-text-latin-700-normal.woff2') format('woff2');
+    src: url('@fontsource/inria-sans/files/inria-sans-latin-700-normal.woff2') format('woff2');
 }
 
 html,
@@ -50,7 +50,7 @@ body {
     cursor: none;
     height: 100%;
     overflow: hidden;
-    font-family: "Red Hat Text", WebRedHatText, Helvetica, sans-serif;
+    font-family: "Inria Sans", WebInriaSans, Helvetica, sans-serif;
     font-variant-numeric: tabular-nums;
 
     /* Prevent the blinking cursor */

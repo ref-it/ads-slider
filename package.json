@@ -34,7 +34,7 @@
     },
     "dependencies": {
         "@fontsource/adwaita-sans": "^5.3.0",
-        "@fontsource/red-hat-text": "^5.3.0",
+        "@fontsource/inria-sans": "^5.3.0",
         "@fortawesome/fontawesome-free": "^7.3.1",
         "@popperjs/core": "^2.11.8",
         "@types/qrcode": "^1.5.5",
