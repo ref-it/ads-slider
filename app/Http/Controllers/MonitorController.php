@@ -314,10 +314,10 @@ class MonitorController extends Controller
             })->values()->all()
             : [];
 
-        $pics = PictureSlideController::getScheduledPicturesOnMonitor($monitor);
+        $pics = SlideController::getScheduledPicturesOnMonitor($monitor);
         $data['p'] = $pics;
 
-        $data['v'] = VideoSlideController::getScheduledVideosOnMonitor($monitor)?->get();
+        $data['v'] = SlideController::getScheduledVideosOnMonitor($monitor)?->get();
         $data['ca'] = CanteenController::getScheduledCanteensOnMonitor($monitor);
         $data['ol'] = $this->getOrdersList($monitor);
         $data['menus'] = [];

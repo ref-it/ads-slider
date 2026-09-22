@@ -64,42 +64,97 @@ class NotExistingRoutesTest extends TestCase
         route('monitors.update', 1);
     }
 
-    // VIDSLIDES
-    public function test_vid_slides_destroy(): void
+    // SLIDES
+    public function test_slides_destroy(): void
     {
         $this->expectException(RouteNotFoundException::class);
-        route('vidSlides.destroy', 1);
+        route('slides.destroy', 1);
     }
 
-    public function test_vid_slides_store(): void
+    public function test_slides_store(): void
     {
         $this->expectException(RouteNotFoundException::class);
-        route('vidSlides.store', 1);
+        route('slides.store', 1);
     }
 
-    public function test_vid_slides_update(): void
+    public function test_slides_update(): void
     {
         $this->expectException(RouteNotFoundException::class);
-        route('vidSlides.update', 1);
+        route('slides.update', 1);
     }
 
-    // PIC_SLIDES
-    public function test_pic_slides_destroy(): void
+    // PICS - managed entirely through their Slide, no standalone CRUD
+    public function test_pics_index(): void
     {
         $this->expectException(RouteNotFoundException::class);
-        route('picSlides.destroy', 1);
+        route('pics.index');
     }
 
-    public function test_pic_slides_store(): void
+    public function test_pics_create(): void
     {
         $this->expectException(RouteNotFoundException::class);
-        route('picSlides.store', 1);
+        route('pics.create');
     }
 
-    public function test_pic_slides_update(): void
+    public function test_pics_store(): void
     {
         $this->expectException(RouteNotFoundException::class);
-        route('picSlides.update', 1);
+        route('pics.store');
+    }
+
+    public function test_pics_edit(): void
+    {
+        $this->expectException(RouteNotFoundException::class);
+        route('pics.edit', 1);
+    }
+
+    public function test_pics_update(): void
+    {
+        $this->expectException(RouteNotFoundException::class);
+        route('pics.update', 1);
+    }
+
+    public function test_pics_destroy(): void
+    {
+        $this->expectException(RouteNotFoundException::class);
+        route('pics.destroy', 1);
+    }
+
+    // VIDEOS - managed entirely through their Slide, no standalone CRUD
+    public function test_videos_index(): void
+    {
+        $this->expectException(RouteNotFoundException::class);
+        route('videos.index');
+    }
+
+    public function test_videos_create(): void
+    {
+        $this->expectException(RouteNotFoundException::class);
+        route('videos.create');
+    }
+
+    public function test_videos_store(): void
+    {
+        $this->expectException(RouteNotFoundException::class);
+        route('videos.store');
+    }
+
+    public function test_videos_edit(): void
+    {
+        $this->expectException(RouteNotFoundException::class);
+        route('videos.edit', 1);
+    }
+
+    public function test_videos_update(): void
+    {
+        $this->expectException(RouteNotFoundException::class);
+        route('videos.update', 1);
+    }
+
+    public function test_videos_destroy(): void
+    {
+        $this->expectException(RouteNotFoundException::class);
+        route('videos.destroy', 1);
     }
 
     // EVENTS_IMPORT

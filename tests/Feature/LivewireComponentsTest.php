@@ -7,10 +7,9 @@ use App\Livewire\CreateEvent;
 use App\Livewire\CreateEventsImport;
 use App\Livewire\EditHappyHour;
 use App\Livewire\EditMonitor;
-use App\Livewire\EditPictureSlide;
 use App\Livewire\EditRealm;
+use App\Livewire\EditSlide;
 use App\Livewire\EditTemplate;
-use App\Livewire\EditVideoSlide;
 use App\Livewire\EventsList;
 use App\Livewire\PastEventsList;
 use App\Livewire\UpdateEvent;
@@ -19,6 +18,7 @@ use App\Models\Event;
 use App\Models\EventsImport;
 use App\Models\HappyHour;
 use App\Models\Menu;
+use App\Models\Monitor;
 use App\Models\Picture;
 use App\Models\Realm;
 use App\Models\Schedule;
@@ -26,6 +26,7 @@ use App\Models\Template;
 use App\Models\User;
 use App\Models\Video;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event as EventFacade;
 use Illuminate\Support\Facades\Http;
@@ -270,71 +271,111 @@ class LivewireComponentsTest extends TestCase
     }
 
     // --- SLIDES LIVEWIRE TESTS ---
+    // A Picture/Video belongs to exactly one Slide: it is always created by
+    // uploading a new file (no "use existing media" picker any more), and
+    // edited/deleted entirely through its Slide.
 
-    public function test_edit_picture_slide_and_video_slide_components(): void
+    public function test_edit_slide_component_uploads_new_picture(): void
     {
-        $picture = Picture::factory()->create(['realm_id' => $this->realm->id]);
-        $video = Video::factory()->create(['realm_id' => $this->realm->id]);
+        $upload = UploadedFile::fake()->image('slide.jpg', 800, 600);
 
-        // Picture Slide Create
         Livewire::actingAs($this->member)
-            ->test(EditPictureSlide::class, [
-                'action' => 'create',
-                'allPictures' => [$picture],
-                'selected_picture' => $picture->id,
+            ->test(EditSlide::class, [
+                'type' => 'picture',
             ])
             ->set('form.start_time', '08:00')
             ->set('form.end_time', '22:00')
-            ->call('createPictureSlide')
+            ->set('form.media_name', 'Uploaded Slide Picture')
+            ->set('form.media_upload', $upload)
+            ->call('createSlide')
             ->assertHasNoErrors()
-            ->assertRedirect(route('picSlides.index'));
+            ->assertRedirect(route('slides.index'));
 
-        $picSlide = Schedule::where('scheduleable_type', 'PI')->where('scheduleable_id', $picture->id)->first();
-        $this->assertNotNull($picSlide);
+        $picture = Picture::where('name', 'Uploaded Slide Picture')->first();
+        $this->assertNotNull($picture);
+        $this->assertDatabaseHas('schedules', [
+            'scheduleable_type' => 'PI',
+            'scheduleable_id' => $picture->id,
+        ]);
+    }
 
-        // Picture Slide Update & Delete
+    public function test_edit_slide_component_uploads_new_video(): void
+    {
+        $upload = UploadedFile::fake()->create('clip.mp4', 500, 'video/mp4');
+
         Livewire::actingAs($this->member)
-            ->test(EditPictureSlide::class, [
-                'action' => 'edit',
-                'allPictures' => [$picture],
-                'picSlide' => $picSlide,
-            ])
-            ->set('form.start_time', '09:00')
-            ->call('updatePictureSlide')
-            ->assertHasNoErrors()
-            ->call('deletePictureSlide')
-            ->assertRedirect(route('picSlides.index'));
-
-        $this->assertDatabaseMissing('schedules', ['id' => $picSlide->id]);
-
-        // Video Slide Create
-        Livewire::actingAs($this->member)
-            ->test(EditVideoSlide::class, [
-                'allVideos' => [$video],
-                'selected_video' => $video->id,
+            ->test(EditSlide::class, [
+                'type' => 'video',
             ])
             ->set('form.start_time', '10:00')
             ->set('form.end_time', '20:00')
-            ->call('createVideoSlide')
+            ->set('form.media_name', 'Uploaded Slide Video')
+            ->set('form.media_upload', $upload)
+            ->call('createSlide')
             ->assertHasNoErrors()
-            ->assertRedirect(route('vidSlides.index'));
+            ->assertRedirect(route('slides.index'));
 
-        $vidSlide = Schedule::where('scheduleable_type', 'VI')->where('scheduleable_id', $video->id)->first();
-        $this->assertNotNull($vidSlide);
+        $video = Video::where('name', 'Uploaded Slide Video')->first();
+        $this->assertNotNull($video);
+        $this->assertDatabaseHas('schedules', [
+            'scheduleable_type' => 'VI',
+            'scheduleable_id' => $video->id,
+        ]);
+    }
 
-        // Video Slide Update & Delete
+    public function test_edit_slide_component_updates_inline_media_fields(): void
+    {
+        $picture = Picture::factory()->create([
+            'realm_id' => $this->realm->id,
+            'name' => 'Old Name',
+            'duration' => 15,
+        ]);
+        $monitor = Monitor::factory()->create(['realm_id' => $this->realm->id]);
+        $slide = Schedule::factory()->create([
+            'scheduleable_type' => 'PI',
+            'scheduleable_id' => $picture->id,
+            'realm_id' => $this->realm->id,
+            'user_id' => $this->member->id,
+        ]);
+
         Livewire::actingAs($this->member)
-            ->test(EditVideoSlide::class, [
-                'allVideos' => [$video],
-                'vidSlide' => $vidSlide,
-            ])
-            ->set('form.start_time', '11:00')
-            ->call('updateVideoSlide')
+            ->test(EditSlide::class, ['slide' => $slide])
+            ->set('form.media_name', 'Updated Picture Name')
+            ->set('form.media_duration', 30)
+            ->set('form.media_bg_color', '#445566')
+            ->set('form.media_color', '#112233')
+            ->set('form.media_monitors', [$monitor->id])
+            ->call('updateSlide')
             ->assertHasNoErrors()
-            ->call('deleteVideoSlide')
-            ->assertRedirect(route('vidSlides.index'));
+            ->assertRedirect(route('slides.index'));
 
-        $this->assertDatabaseMissing('schedules', ['id' => $vidSlide->id]);
+        $picture->refresh();
+        $this->assertEquals('Updated Picture Name', $picture->name);
+        $this->assertEquals(30, $picture->duration);
+        $this->assertEquals('#445566', $picture->bg_color);
+        $this->assertEquals('#112233', $picture->color);
+        $this->assertTrue($picture->monitors->contains($monitor->id));
+    }
+
+    public function test_edit_slide_component_delete_also_deletes_its_media(): void
+    {
+        $picture = Picture::factory()->create(['realm_id' => $this->realm->id]);
+        $source = $picture->sources->first();
+        $slide = Schedule::factory()->create([
+            'scheduleable_type' => 'PI',
+            'scheduleable_id' => $picture->id,
+            'realm_id' => $this->realm->id,
+            'user_id' => $this->member->id,
+        ]);
+
+        Livewire::actingAs($this->member)
+            ->test(EditSlide::class, ['slide' => $slide])
+            ->call('deleteSlide')
+            ->assertRedirect(route('slides.index'));
+
+        $this->assertDatabaseMissing('schedules', ['id' => $slide->id]);
+        $this->assertDatabaseMissing('pictures', ['id' => $picture->id]);
+        $this->assertDatabaseMissing('picture_sources', ['id' => $source->id]);
     }
 
     // --- REALM & EVENTS IMPORT LIVEWIRE TESTS ---

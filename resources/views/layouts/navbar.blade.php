@@ -59,24 +59,6 @@
                             </a>
                         </div>
                     </li>
-                    <!-- Medias actions -->
-                    <li class="nav-item dropdown">
-                        <a id="dropDownMedia" class="nav-link dropdown-toggle" href="#" role="button"
-                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                            {{ __('Media') }} <span class="caret"></span>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropDownMedia">
-                            <a class="dropdown-item" href="{{ route('pics.index') }}" data-bs-toggle="tooltip"
-                                data-bs-placement="left" data-bs-title="{{ __('List Pictures') }}">
-                                <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Pictures') }}
-                            </a>
-                            <a class="dropdown-item" href="{{ route('videos.index') }}" data-bs-toggle="tooltip"
-                                data-bs-placement="left" data-bs-title="{{ __('List Videos') }}">
-                                <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Videos') }}
-                            </a>
-                        </div>
-                    </li>
-
                     <!-- Slides actions -->
                     <li class="nav-item dropdown">
                         <a id="dropDownSlides" class="nav-link dropdown-toggle" href="#" role="button"
@@ -84,13 +66,9 @@
                             {{ __('Slides') }} <span class="caret"></span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropDownSlides">
-                            <a class="dropdown-item" href="{{ route('picSlides.index') }}" data-bs-toggle="tooltip"
+                            <a class="dropdown-item" href="{{ route('slides.index') }}" data-bs-toggle="tooltip"
                                 data-bs-placement="left" data-bs-title="{{ __('List Slides') }}">
-                                <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Picture Slides') }}
-                            </a>
-                            <a class="dropdown-item" href="{{ route('vidSlides.index') }}" data-bs-toggle="tooltip"
-                                data-bs-placement="left" data-bs-title="{{ __('List Slides') }}">
-                                <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Video Slides') }}
+                                <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Slides') }}
                             </a>
                             <a class="dropdown-item" href="{{ route('canteens.index') }}" data-bs-toggle="tooltip"
                                 data-bs-placement="left" data-bs-title="{{ __('List Slides') }}">

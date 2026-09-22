@@ -3,8 +3,7 @@
 namespace Tests\Feature;
 
 use App\Events\SecurityAuditEvent;
-use App\Http\Controllers\PictureSlideController;
-use App\Http\Controllers\VideoSlideController;
+use App\Http\Controllers\SlideController;
 use App\Livewire\CreateMenu;
 use App\Models\Menu;
 use App\Models\Monitor;
@@ -13,7 +12,6 @@ use App\Models\Realm;
 use App\Models\Schedule;
 use App\Models\User;
 use App\Models\Video;
-use App\Providers\ItemUpdated;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
@@ -51,115 +49,9 @@ class MediaControllersTest extends TestCase
     }
 
     // --- PICTURE CONTROLLER TESTS ---
-
-    public function test_picture_index_and_create_views(): void
-    {
-        $response = $this->get(route('pics.index'));
-        $response->assertStatus(200);
-        $response->assertViewIs('pics.index');
-
-        $response = $this->get(route('pics.create'));
-        $response->assertStatus(200);
-        $response->assertViewIs('pics.create');
-        $response->assertViewHas('monitors');
-    }
-
-    public function test_picture_store_creates_picture_and_source(): void
-    {
-        $image = UploadedFile::fake()->image('test_pic.jpg', 800, 600);
-
-        $response = $this->post(route('pics.store'), [
-            'name' => 'Sunset Overdrive',
-            'duration' => 20,
-            'upload' => $image,
-            'monitors' => [$this->monitor->id],
-        ]);
-
-        $response->assertRedirect(route('pics.index'));
-
-        $picture = Picture::where('name', 'Sunset Overdrive')->first();
-        $this->assertNotNull($picture);
-        $this->assertEquals(20, $picture->duration);
-        $this->assertEquals($this->realm->id, $picture->realm_id);
-        $this->assertNotNull($picture->bg_color);
-        $this->assertNotNull($picture->color);
-
-        $this->assertCount(1, $picture->sources);
-        $this->assertEquals(800, $picture->sources->first()->width);
-        $this->assertEquals(600, $picture->sources->first()->height);
-
-        $this->assertTrue($picture->monitors->contains($this->monitor->id));
-        Storage::disk('public')->assertExists(config('ads.pic_basepath').$picture->sources->first()->path);
-    }
-
-    public function test_picture_edit_and_update(): void
-    {
-        Event::fake([ItemUpdated::class]);
-
-        $picture = Picture::factory()->create([
-            'user_id' => $this->user->id,
-            'realm_id' => $this->realm->id,
-            'name' => 'Old Name',
-            'duration' => 15,
-        ]);
-
-        // Create a slide for this picture to verify event broadcast
-        Schedule::factory()->create([
-            'scheduleable_type' => 'PI',
-            'scheduleable_id' => $picture->id,
-            'realm_id' => $this->realm->id,
-            'user_id' => $this->user->id,
-        ]);
-
-        $response = $this->get(route('pics.edit', $picture->id));
-        $response->assertStatus(200);
-        $response->assertViewIs('pics.edit');
-
-        $response = $this->put(route('pics.update', $picture->id), [
-            'name' => 'Updated Picture Name',
-            'duration' => 30,
-            'color' => '#112233',
-            'bg_color' => '#445566',
-            'clock_location' => 3,
-            'monitors' => [$this->monitor->id],
-        ]);
-
-        $response->assertRedirect(route('pics.index'));
-
-        $picture->refresh();
-        $this->assertEquals('Updated Picture Name', $picture->name);
-        $this->assertEquals(30, $picture->duration);
-        $this->assertEquals('#112233', $picture->color);
-        $this->assertEquals('#445566', $picture->bg_color);
-        $this->assertEquals(3, $picture->sources->first()->clock_location);
-
-        Event::assertDispatched(ItemUpdated::class);
-    }
-
-    public function test_picture_destroy_deletes_files_and_dispatches_audit_event(): void
-    {
-        Event::fake([SecurityAuditEvent::class]);
-
-        $picture = Picture::factory()->create([
-            'user_id' => $this->user->id,
-            'realm_id' => $this->realm->id,
-            'name' => 'To Delete Picture',
-        ]);
-
-        $source = $picture->sources->first();
-        Storage::disk('public')->put(config('ads.pic_basepath').$source->path, 'image-content');
-
-        $response = $this->delete(route('pics.destroy', $picture->id));
-        $response->assertStatus(200);
-        $response->assertJson(['status' => 'success']);
-
-        $this->assertDatabaseMissing('pictures', ['id' => $picture->id]);
-        Storage::disk('public')->assertMissing(config('ads.pic_basepath').$source->path);
-
-        Event::assertDispatched(SecurityAuditEvent::class, function (SecurityAuditEvent $event) use ($picture) {
-            return $event->action === 'picture.deleted' && $event->context['picture_id'] === $picture->id;
-        });
-    }
+    // Pictures no longer have standalone index/create/edit/destroy routes -
+    // they are managed entirely through their Slide (see LivewireComponentsTest).
+    // Only pics.show and the source-management endpoints remain.
 
     public function test_picture_sources_management(): void
     {
@@ -169,12 +61,20 @@ class MediaControllersTest extends TestCase
         ]);
         $firstSource = $picture->sources->first();
 
-        // 1. Add second source
+        $slide = Schedule::factory()->create([
+            'scheduleable_type' => 'PI',
+            'scheduleable_id' => $picture->id,
+            'realm_id' => $this->realm->id,
+            'user_id' => $this->user->id,
+        ]);
+
+        // 1. Add second source (redirects back to wherever the request came
+        // from, i.e. the slide edit page)
         $secondImage = UploadedFile::fake()->image('second.png', 1920, 1080);
-        $response = $this->post(route('pics.storeSource', $picture->id), [
+        $response = $this->from(route('slides.edit', $slide->id))->post(route('pics.storeSource', $picture->id), [
             'upload' => $secondImage,
         ]);
-        $response->assertRedirect(route('pics.edit', $picture->id));
+        $response->assertRedirect(route('slides.edit', $slide->id));
         $this->assertEquals(2, $picture->sources()->count());
 
         $secondSource = $picture->sources()->where('id', '!=', $firstSource->id)->first();
@@ -199,78 +99,9 @@ class MediaControllersTest extends TestCase
     }
 
     // --- VIDEO CONTROLLER TESTS ---
-
-    public function test_video_index_and_create_views(): void
-    {
-        $response = $this->get(route('videos.index'));
-        $response->assertStatus(200);
-        $response->assertViewIs('videos.index');
-
-        $response = $this->get(route('videos.create'));
-        $response->assertStatus(200);
-        $response->assertViewIs('videos.create');
-    }
-
-    public function test_video_store_and_update(): void
-    {
-        Event::fake([ItemUpdated::class]);
-
-        $videoFile = UploadedFile::fake()->create('clip.mp4', 500, 'video/mp4');
-
-        $response = $this->post(route('videos.store'), [
-            'name' => 'Promo Video',
-            'upload' => $videoFile,
-            'monitors' => [$this->monitor->id],
-        ]);
-
-        $response->assertRedirect(route('videos.index'));
-
-        $video = Video::where('name', 'Promo Video')->first();
-        $this->assertNotNull($video);
-        $this->assertEquals($this->realm->id, $video->realm_id);
-        $this->assertTrue($video->monitors->contains($this->monitor->id));
-        Storage::disk('public')->assertExists(config('ads.vid_basepath').$video->path);
-
-        // Edit view
-        $response = $this->get(route('videos.edit', $video->id));
-        $response->assertStatus(200);
-
-        // Update video
-        $response = $this->put(route('videos.update', $video->id), [
-            'name' => 'Updated Promo Video',
-            'color' => '#AABBCC',
-            'bg_color' => '#DDEEFF',
-            'clock_location' => 1,
-            'monitors' => [$this->monitor->id],
-        ]);
-
-        $response->assertRedirect(route('videos.index'));
-        $video->refresh();
-        $this->assertEquals('Updated Promo Video', $video->name);
-        $this->assertEquals('#AABBCC', $video->color);
-        $this->assertEquals(1, $video->clock_location);
-    }
-
-    public function test_video_destroy_dispatches_audit_event(): void
-    {
-        Event::fake([SecurityAuditEvent::class]);
-
-        $video = Video::factory()->create([
-            'user_id' => $this->user->id,
-            'realm_id' => $this->realm->id,
-            'name' => 'Video To Delete',
-        ]);
-
-        $response = $this->delete(route('videos.destroy', $video->id));
-        $response->assertStatus(200);
-        $response->assertJson(['status' => 'success']);
-
-        $this->assertDatabaseMissing('videos', ['id' => $video->id]);
-
-        Event::assertDispatched(SecurityAuditEvent::class, function (SecurityAuditEvent $event) use ($video) {
-            return $event->action === 'video.deleted' && $event->context['video_id'] === $video->id;
-        });
-    }
+    // Videos no longer have standalone index/create/edit/destroy routes -
+    // they are managed entirely through their Slide (see LivewireComponentsTest).
+    // Only videos.show remains.
 
     // --- MENU CONTROLLER TESTS ---
 
@@ -349,9 +180,9 @@ class MediaControllersTest extends TestCase
         });
     }
 
-    // --- SLIDE CONTROLLERS (PICTURE SLIDES & VIDEO SLIDES) ---
+    // --- SLIDE CONTROLLER (PICTURE & VIDEO SLIDES, UNIFIED) ---
 
-    public function test_picture_and_video_slide_controllers_views(): void
+    public function test_slide_controller_views(): void
     {
         $picture = Picture::factory()->create([
             'user_id' => $this->user->id,
@@ -376,31 +207,17 @@ class MediaControllersTest extends TestCase
             'user_id' => $this->user->id,
         ]);
 
-        // Picture Slides
-        $response = $this->get(route('picSlides.index'));
+        $response = $this->get(route('slides.index'));
         $response->assertStatus(200);
 
         $this->withoutExceptionHandling();
-        $response = $this->get(route('picSlides.create'));
+        $response = $this->get(route('slides.create'));
         $response->assertStatus(200);
 
-        $response = $this->get('/picSlides/create/'.$picture->id);
+        $response = $this->get(route('slides.edit', $picSlide->id));
         $response->assertStatus(200);
 
-        $response = $this->get(route('picSlides.edit', $picSlide->id));
-        $response->assertStatus(200);
-
-        // Video Slides
-        $response = $this->get(route('vidSlides.index'));
-        $response->assertStatus(200);
-
-        $response = $this->get(route('vidSlides.create'));
-        $response->assertStatus(200);
-
-        $response = $this->get('/vidSlides/create/'.$video->id);
-        $response->assertStatus(200);
-
-        $response = $this->get(route('vidSlides.edit', $vidSlide->id));
+        $response = $this->get(route('slides.edit', $vidSlide->id));
         $response->assertStatus(200);
     }
 
@@ -446,11 +263,11 @@ class MediaControllersTest extends TestCase
         ];
         $this->monitor->save();
 
-        $pics = PictureSlideController::getScheduledPicturesOnMonitor($this->monitor);
+        $pics = SlideController::getScheduledPicturesOnMonitor($this->monitor);
         $this->assertNotNull($pics);
         $this->assertGreaterThanOrEqual(1, $pics->count());
 
-        $videos = VideoSlideController::getScheduledVideosOnMonitor($this->monitor);
+        $videos = SlideController::getScheduledVideosOnMonitor($this->monitor);
         $this->assertNotNull($videos);
         $this->assertGreaterThanOrEqual(1, $videos->get()->count());
     }

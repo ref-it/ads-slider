@@ -21,12 +21,11 @@ use App\Http\Controllers\LocalizationController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\MonitorController;
 use App\Http\Controllers\PictureController;
-use App\Http\Controllers\PictureSlideController;
 use App\Http\Controllers\RealmController;
+use App\Http\Controllers\SlideController;
 use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VideoController;
-use App\Http\Controllers\VideoSlideController;
 use App\Livewire\EventsList;
 use App\Livewire\PastEventsList;
 use Illuminate\Http\Request;
@@ -77,18 +76,15 @@ Route::middleware(['verified', 'auth'])->group(function () {
     // Templates
     Route::resource('templates', TemplateController::class)->only(['index', 'create', 'edit']);
 
-    // Pictures & Picture Slides
-    Route::resource('pics', PictureController::class)->except(['show']);
+    // Picture sources (per-slide media formats; the picture itself is managed
+    // entirely through its Slide, see below)
     Route::post('pics/{pic}/source', [PictureController::class, 'storeSource'])->name('pics.storeSource');
     Route::put('pics/source/{source}', [PictureController::class, 'updateSource'])->name('pics.updateSource');
     Route::delete('pics/source/{source}', [PictureController::class, 'destroySource'])->name('pics.destroySource');
-    Route::get('/picSlides/create/{picture_id}', [PictureSlideController::class, 'create']);
-    Route::resource('picSlides', PictureSlideController::class)->only(['index', 'create', 'edit']);
 
-    // Videos & Video Slides
-    Route::resource('videos', VideoController::class)->except(['show']);
-    Route::get('/vidSlides/create/{video_id}', [VideoSlideController::class, 'create']);
-    Route::resource('vidSlides', VideoSlideController::class)->only(['index', 'create', 'edit']);
+    // Slides (picture & video, unified) - a Picture/Video belongs to exactly
+    // one Slide and is created/edited/deleted through it, not separately.
+    Route::resource('slides', SlideController::class)->only(['index', 'create', 'edit']);
 
     // Menus
     Route::resource('menus', MenuController::class)->only(['index', 'create', 'edit', 'update', 'destroy']);
