@@ -209,7 +209,7 @@ export class EventsSlide extends Slide {
         addAnimationOnce(leftPartContainer, 'fadeInLeft');
 
         const startDate = document.getElementById('start') as HTMLDivElement;
-        startDate.innerText = getDisplayDate(e.startDate, Manager.Instance.getLocale());
+        startDate.innerText = getDisplayDate(e.startDate, Manager.Instance.getLocale(), true);
 
         const startTime = document.getElementById('start-time') as HTMLDivElement;
         startTime.innerText = e.startDate.format('LT') + (Manager.Instance.getLocale() === 'de' ? ' Uhr' : '');
