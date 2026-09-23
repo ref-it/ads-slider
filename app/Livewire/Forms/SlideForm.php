@@ -6,8 +6,10 @@ use App\Livewire\Traits\ErrorBanner;
 use App\Models\Monitor;
 use App\Models\Picture;
 use App\Models\Schedule;
+use App\Models\ScheduleException;
 use App\Models\Video;
 use App\Providers\ItemUpdated;
+use App\Rules\ValidRrule;
 use App\Traits\UploadTrait;
 use Carbon\Carbon;
 use ColorThief\ColorThief;
@@ -35,8 +37,13 @@ class SlideForm extends Form
     #[Validate('present|required_with:start|date|nullable|after_or_equal:start')]
     public $end = null;
 
-    #[Validate('present|max:1234567|nullable|required_without:start,end|integer|not_regex:/([^1-7])/|not_regex:/(.).*\1/')]
-    public $repeat = null;
+    #[Validate(['nullable', 'string', new ValidRrule])]
+    public $rrule = '';
+
+    /**
+     * @var string[] 'Y-m-d' dates the recurrence should skip (RRULE EXDATE).
+     */
+    public $exceptionDates = [];
 
     #[Validate('boolean')]
     public $disabled = false;
@@ -89,7 +96,8 @@ class SlideForm extends Form
         $this->end_time = Carbon::parse($schedule->end_time)->format('H:i');
         $this->start = $schedule->start?->toDateString();
         $this->end = $schedule->end?->toDateString();
-        $this->repeat = $schedule->repeat;
+        $this->rrule = $schedule->rrule ?? '';
+        $this->exceptionDates = $schedule->exceptions->map(fn (ScheduleException $e) => $e->exception_date->toDateString())->all();
         $this->disabled = $schedule->disabled;
         $this->media_type = $schedule->scheduleable_type === 'VI' ? 'video' : 'picture';
 
@@ -170,7 +178,7 @@ class SlideForm extends Form
             'end_time' => $validated['end_time'],
             'start' => $validated['start'],
             'end' => $validated['end'],
-            'repeat' => $validated['repeat'],
+            'rrule' => $this->rrule ?: null,
             'disabled' => $validated['disabled'] ?? false,
         ]);
 
@@ -179,6 +187,14 @@ class SlideForm extends Form
         $this->schedule->realm_id = auth()->user()->realm_id;
         $this->schedule->user_id = auth()->id();
         $this->schedule->save();
+
+        // Sync exception dates (RRULE EXDATE); irrelevant without an rrule.
+        $exceptionDates = $this->rrule ? array_unique($this->exceptionDates) : [];
+        $this->schedule->exceptions()->whereNotIn('exception_date', $exceptionDates)->delete();
+        $existing = $this->schedule->exceptions()->pluck('exception_date')->map(fn ($d) => $d->toDateString())->all();
+        foreach (array_diff($exceptionDates, $existing) as $date) {
+            $this->schedule->exceptions()->create(['exception_date' => $date]);
+        }
 
         event(new ItemUpdated($this->media_type === 'picture' ? 'ps' : 'vs', (object) [
             'id' => $this->schedule->id,

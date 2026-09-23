@@ -10,6 +10,7 @@ use App\Models\Picture;
 use App\Models\Schedule;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -22,6 +23,12 @@ class EditSlide extends Component
     public $monitors = [];
 
     public $action = 'create';
+
+    #[On('exception-dates-updated')]
+    public function syncExceptionDates(array $dates): void
+    {
+        $this->form->exceptionDates = $dates;
+    }
 
     public function mount($type = null, ?Schedule $slide = null)
     {
