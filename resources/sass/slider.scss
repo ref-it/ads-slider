@@ -274,25 +274,95 @@ div.fatal-error {
 }
 
 /*Final-round*/
+// Same left-edge band style as Happy Hour: label bottom, countdown top,
+// both positioned explicitly rather than via flex order (flex-direction:
+// column with a writing-mode: vertical-rl child is unreliable across
+// browsers).
 #final-round-container {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
     text-align: center;
 }
 
-.finalText {
-    font-size: 14vh;
+#final-round-band {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 11vw;
+    height: 100%;
+    background-color: #262626;
+    overflow: hidden;
 }
 
-.countdown {
+#final-round-band>div.countdown {
     position: absolute;
-    font-size: 39vh;
-    line-height: 39vh;
-    font-weight: bolder;
-    height: 39vh;
-    width: 110vh;
-    left: 50%;
-    margin-left: -55vh;
+    left: 0;
+    top: 2vh;
+    bottom: auto;
+    margin-left: 0;
+    width: 100%;
+    height: auto;
+    text-align: center;
+    font-size: 5vh;
+    line-height: normal;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+#final-round-band-label-wrap {
+    position: absolute;
+    left: 0;
     bottom: 4vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+// font-size is in vh, not vw: with writing-mode: vertical-rl the text runs
+// along the screen's height, so sizing it off the width could make it taller
+// than the band itself.
+#final-round-band-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    color: var(--text-color);
+    font-size: 11vh;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+#final-round-countdown-track {
+    position: absolute;
+    left: 11vw;
+    top: 0;
+    width: 0.6vw;
+    height: 100%;
+    background-color: #404040;
     overflow: hidden;
+}
+
+#final-round-countdown-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--main-color);
+    transition: height 1s linear;
+}
+
+#final-round-content {
+    position: fixed;
+    left: 13vw;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
 }
 
 /*Final 15 minutes*/
@@ -402,84 +472,229 @@ div.fatal-error {
 }
 
 /*Preparations*/
-#preparations .event-name {
+// Same left-edge band style as Happy Hour/Final-round, but the icon (not a
+// vertical label) sits at the bottom of the band, horizontal and upright.
+#preparations {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    text-align: center;
+}
+
+#preparations-band {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 11vw;
+    height: 100%;
+    background-color: #262626;
+    overflow: hidden;
+}
+
+#preparations-band>div.countdown {
+    position: absolute;
+    left: 0;
+    top: 2vh;
+    bottom: auto;
+    margin-left: 0;
+    width: 100%;
+    height: auto;
+    text-align: center;
+    font-size: 5vh;
+    line-height: normal;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+#preparations-icon {
+    position: absolute;
+    left: 0;
+    bottom: 4vh;
+    width: 100%;
+    text-align: center;
+    color: var(--text-color);
+    font-size: 11vh;
+}
+
+#preparations-countdown-track {
+    position: absolute;
+    left: 11vw;
+    top: 0;
+    width: 0.6vw;
+    height: 100%;
+    background-color: #404040;
+    overflow: hidden;
+}
+
+#preparations-countdown-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--main-color);
+    transition: height 1s linear;
+}
+
+#preparations-content {
+    position: fixed;
+    left: 13vw;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+// Same box for both: autosizeText() computes the rendered font-size from
+// this box's height/width, so matching constraints here is what actually
+// keeps the two event names the same size (a shared font-size wouldn't,
+// since autosizeText overrides it with an inline style anyway).
+#preparations .event-name,
+#final-round-content .event-name {
     font-weight: bold;
     line-height: 90%;
     margin: 2vh auto 0 auto;
     text-align: center;
-    justify-content: center;
     max-height: 41vh;
     height: 41vh;
-    width: 98%;
-    max-width: 98%;
+    width: 90%;
+    max-width: 90%;
     display: block;
-    align-items: center;
     overflow: hidden;
-    text-shadow: 3px 6px 4px #cec9c9;
-}
-
-#preparations-icon {
-    color: #ffffff;
-    display: block;
-    font-size: 10vh;
-    position: absolute;
-    top: 45vh;
-    left: 54vh;
-}
-
-#in {
-    font-size: 12vh;
-    line-height: 12vh;
-    position: absolute;
-    left: 3vh;
-    top: 49vh;
 }
 
 /* Happy Hour*/
 #happy-hour-container {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
     text-align: center;
 }
 
-.happyhour {
-    font-size: 15vh;
-    line-height: 17vh;
+// Static label band, always full height. The countdown and the label are
+// positioned explicitly (not via flex order) because flex-direction: column
+// combined with a writing-mode: vertical-rl child is unreliable across
+// browsers - it was rendering the label at the top and the countdown at the
+// bottom, the opposite of the DOM order.
+#happy-hour-band {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 11vw;
+    height: 100%;
+    background-color: #262626;
+    overflow: hidden;
+}
+
+// Overrides every property the generic .countdown rule sets (it's written
+// for the full-screen Last Call/preparations countdown: bottom-anchored,
+// left: 50% + a negative margin-left to self-center, fixed width/height) -
+// left unset, those leaked through and pushed this countdown off-screen.
+#happy-hour-band>div.countdown {
+    position: absolute;
+    left: 0;
+    top: 2vh;
+    bottom: auto;
+    margin-left: 0;
+    width: 100%;
+    height: auto;
+    text-align: center;
+    font-size: 5vh;
+    line-height: normal;
     font-weight: bold;
+    white-space: nowrap;
+}
+
+#happy-hour-band-label-wrap {
+    position: absolute;
+    left: 0;
+    bottom: 4vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+// font-size is in vh, not vw: with writing-mode: vertical-rl the text runs
+// along the screen's height, so sizing it off the width could make it taller
+// than the band itself.
+#happy-hour-band-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    color: var(--text-color);
+    font-size: 11vh;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+// Full-height track for the countdown, reduced to a thin border between the
+// band and the rest of the slide, always visible so the drained (already
+// elapsed) part stands out against the slide's black background.
+#happy-hour-countdown-track {
+    position: absolute;
+    left: 11vw;
+    top: 0;
+    width: 0.6vw;
+    height: 100%;
+    background-color: #404040;
+    overflow: hidden;
+}
+
+// Red fill, shrinks from the top down as the Happy Hour countdown runs out
+// (height is set from Countdown.ts).
+#happy-hour-countdown-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--main-color);
+    transition: height 1s linear;
+}
+
+#happy-hour-content {
+    position: fixed;
+    left: 13vw;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
 }
 
 #happy-hour-drink {
     color: var(--main-color);
-    font-size: 11vh;
-    line-height: 16vh;
+    font-size: 18vh;
+    line-height: 21vh;
+    font-weight: bold;
     margin-top: 2vh;
+    padding: 0 3vw;
     word-break: normal;
     word-wrap: break-word;
-    text-shadow: 3px 6px 4px #cec9c9;
 }
 
 #happy-hour-priceline {
-    font-size: 9vh;
-    line-height: 11vh;
+    font-size: 14vh;
+    line-height: 16vh;
+    margin-top: 3vh;
 }
 
 #happy-hour-extra {
-    font-size: 5vh;
+    font-size: 6vh;
 }
 
-#happy-hour-container>div.countdown {
-    font-size: 34vh;
-    font-weight: normal;
-}
-
-#happy-hour-container>div.countdown>span.hours {
-    vertical-align: text-top;
-    font-size: 10vh;
-    position: relative;
-    top: -9vh;
-    left: -1vh;
-}
-
-#happy-hour-container>div.countdown>span.hours::after {
-    content: 'h';
+// The colon lives in ::after so it disappears along with the hours span
+// once less than an hour remains (JS hides .hours via display:none then).
+#happy-hour-band>div.countdown>span.hours::after {
+    content: ':';
 }
 
 /*Menu*/

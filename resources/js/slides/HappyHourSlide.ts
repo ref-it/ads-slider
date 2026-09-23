@@ -9,9 +9,9 @@ export class HappyHourSlide extends UnskippableSlide {
     private countdown: Countdown | null = null;
     private deadline: dayjs.Dayjs | null = null;
 
-    private initSlide(deadline: dayjs.Dayjs) {
+    private initSlide(deadline: dayjs.Dayjs, start: dayjs.Dayjs) {
         this.deadline = deadline;
-        this.countdown = new Countdown(this.deadline.format('YYYY-MM-DDTHH:mm:ss'), this.div.querySelector('.seconds') as HTMLSpanElement, this.div.querySelector('.minutes') as HTMLSpanElement, this.div.querySelector('.hours') as HTMLSpanElement, null);
+        this.countdown = new Countdown(this.deadline.format('YYYY-MM-DDTHH:mm:ss'), this.div.querySelector('.seconds') as HTMLSpanElement, this.div.querySelector('.minutes') as HTMLSpanElement, this.div.querySelector('.hours') as HTMLSpanElement, null, this.div.querySelector('#happy-hour-countdown-bar') as HTMLDivElement, start.format('YYYY-MM-DDTHH:mm:ss'));
     }
 
     initHappyHour(hh: HappyHour | null) {
@@ -19,7 +19,7 @@ export class HappyHourSlide extends UnskippableSlide {
             this.notifyMediator(SlideEvents.NOTHING);
             return;
         }
-        this.initSlide(dayjs(hh.end));
+        this.initSlide(dayjs(hh.end), dayjs(hh.start));
         (this.div.querySelector('#price') as HTMLSpanElement).innerText = hh.price;
         (this.div.querySelector('#happy-hour-drink') as HTMLDivElement).innerText = hh.drink;
         (this.div.querySelector('#happy-hour-extra') as HTMLDivElement).innerText = hh.info;

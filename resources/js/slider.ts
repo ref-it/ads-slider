@@ -925,7 +925,7 @@ function startFromEvent(schedule: SchedulerItem, forceRefresh = false) {
         if (!e)
           throw new Error(`Event with ID ${schedule.event_id} not found`);
         prepSlide.initSlide(e.name, e.icon);
-        prepSlide.setDeadline(e.startDate);
+        prepSlide.setDeadline(e.startDate, e.startDate.subtract(e.preparation_time ?? 30, 'minutes'));
         manager.startSlide(prepSlide, forceRefresh);
       }
       break;
@@ -943,7 +943,7 @@ function startFromEvent(schedule: SchedulerItem, forceRefresh = false) {
         const e = getEventById(schedule.event_id);
         if (!e)
           throw new Error(`Event with ID ${schedule.event_id} not found`);
-        lastCallSlide.initSlide(e.endDate.subtract(15, 'minutes'));
+        lastCallSlide.initSlide(e.endDate.subtract(15, 'minutes'), e.endDate.subtract(30, 'minutes'), e.name);
         manager.startSlide(lastCallSlide, forceRefresh);
       }
       break;

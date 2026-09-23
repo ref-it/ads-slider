@@ -38,8 +38,18 @@
         </div>
 
         <div id="final-round-container" style="display:none">
-            <div class="finalText animate__animated animate__jello animate__infinite animate__slow">{{__('Final round!')}}</div>
-            <div class="countdown"><span class="minutes">&nbsp;</span>:<span class="seconds">&nbsp;</span></div>
+            <div id="final-round-band">
+                <div class="countdown"><span class="minutes">&nbsp;</span>:<span class="seconds">&nbsp;</span></div>
+                <div id="final-round-band-label-wrap">
+                    <span id="final-round-band-label">{{__('Final round!')}}</span>
+                </div>
+            </div>
+            <div id="final-round-countdown-track">
+                <div id="final-round-countdown-bar"></div>
+            </div>
+            <div id="final-round-content">
+                <div class="event-name"></div>
+            </div>
         </div>
 
         <div id="orderslist-container" style="display:none">
@@ -107,20 +117,34 @@
         </div>
 
         <div id="preparations" style="display:none">
-            <div class="event-name"></div>
-            <i id="preparations-icon"></i>
-            <div id="in">{{__('in')}}</div>
-            <div class="countdown"><span class="minutes">&nbsp;</span>:<span class="seconds">&nbsp;</span></div>
+            <div id="preparations-band">
+                <div class="countdown"><span class="minutes">&nbsp;</span>:<span class="seconds">&nbsp;</span></div>
+                <i id="preparations-icon"></i>
+            </div>
+            <div id="preparations-countdown-track">
+                <div id="preparations-countdown-bar"></div>
+            </div>
+            <div id="preparations-content">
+                <div class="event-name"></div>
+            </div>
         </div>
 
         <div id="happy-hour-container" style="display:none">
-            <div class="happyhour animate__animated animate__jello animate__infinite animate__slow">{{__('Happy Hour!')}}</div>
-            <div id="happy-hour-drink"></div>
-            <div id="happy-hour-priceline"><span>für</span>&nbsp;<span id="price"></span></div>
-            <div id="happy-hour-extra">&nbsp;</div>
-            <div class="countdown">
-                <span class="hours">&nbsp;</span>
-                <span class="minutes">&nbsp;</span>:<span class="seconds">&nbsp;</span>
+            <div id="happy-hour-band">
+                <div class="countdown">
+                    <span class="hours">&nbsp;</span><span class="minutes">&nbsp;</span>:<span class="seconds">&nbsp;</span>
+                </div>
+                <div id="happy-hour-band-label-wrap">
+                    <span id="happy-hour-band-label">{{__('Happy Hour!')}}</span>
+                </div>
+            </div>
+            <div id="happy-hour-countdown-track">
+                <div id="happy-hour-countdown-bar"></div>
+            </div>
+            <div id="happy-hour-content">
+                <div id="happy-hour-drink"></div>
+                <div id="happy-hour-priceline"><span id="price"></span></div>
+                <div id="happy-hour-extra">&nbsp;</div>
             </div>
         </div>
 
