@@ -1,4 +1,5 @@
 {
+    "Close": "Schließen",
     "The realm has been updated": "Der Bereich wurde aktualisiert",
     "The realm has been created": "Der Bereich wurde erstellt",
     "The events import has been updated": "Der Import von Veranstaltungen wurde aktualisiert",
@@ -437,7 +438,7 @@
     "Karaoke": "Karaoke",
     "Imported - Edited": "Importiert - Bearbeitet",
     "No final round": "No final rounds",
-    "All Menus": "Alle Menüs",
+    "All Menus": "Menüs",
     "Create New Menu": "Neues Menü erstellen",
     "Used in these Events": "Verwendet in diesen Veranstaltungen",
     "Currently not used in any event.": "Derzeit in keine Veranstaltung verwendet.",

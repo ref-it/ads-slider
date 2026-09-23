@@ -1,4 +1,5 @@
 {
+    "Close": "Close",
     "The realm has been updated": "The realm has been updated",
     "The realm has been created": "The realm has been created",
     "The events import has been updated": "The events import has been updated",
@@ -437,7 +438,7 @@
     "Karaoke": "Karaoke",
     "Imported - Edited": "Imported - Edited",
     "No final round": "No final round",
-    "All Menus": "All Menus",
+    "All Menus": "Menus",
     "Create New Menu": "Create New Menu",
     "Used in these Events": "Used in these Events",
     "Currently not used in any event.": "Currently not used in any event.",

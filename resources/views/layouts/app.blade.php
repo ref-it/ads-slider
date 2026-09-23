@@ -106,17 +106,23 @@
 
 
 
-        @if (session('error'))
-            <div class="alert alert-danger">
-                <strong>{{ __('An error has occurred') }}</strong><br>
-                {{ session('error') }}
-            </div>
-        @endif
-        @if (session('success'))
-            <div class="alert alert-success">
-                <strong>{{ __('Success!') }}</strong><br>
-                {{ session('success') }}
-            </div>
+        @if (session('error') || session('success'))
+        <div class="container mt-3">
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>{{ __('An error has occurred') }}</strong><br>
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('Close') }}"></button>
+                </div>
+            @endif
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <strong>{{ __('Success!') }}</strong><br>
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('Close') }}"></button>
+                </div>
+            @endif
+        </div>
         @endif
 
         @include('flash::message')
