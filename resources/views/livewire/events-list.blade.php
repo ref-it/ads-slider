@@ -71,8 +71,11 @@
                     <div class="d-flex flex-wrap column-gap-3 row-gap-1 mb-2">
                         <span class="event-start"><i
                                 class="fas fa-fw fa-calendar"></i>&nbsp;{{ Carbon\Carbon::parse($event->real_start_date)->isoFormat('dddd LL') }}
-                            {{ $event->recurrence_description }}
                         </span>
+                        @if ($event->recurrence_description)
+                        <span class="event-recurrence"><i
+                                class="fas fa-fw fa-calendar"></i>&nbsp;{{ $event->recurrence_description }}</span>
+                        @endif
                         <span class="event-start_time"><i
                                 class="fas fa-fw fa-clock"></i>&nbsp;{{ substr($event->start_time, 0, 5) . ' - ' . substr($event->end_time, 0, 5) }}
                         </span>

@@ -23,20 +23,11 @@
                     </div>
                     <p class="event-start">{{ $slide->start ? $slide->start->format('M d, Y') : '' }}
                         {{ $slide->end ? ' - ' . $slide->end->format('M d, Y') : '' }}
-                        {{ $slide->repeat
-                                    ? __('- Repeats on:') .
-                                        ' ' .
-                                        join(
-                                            ', ',
-                                            array_map(function ($el) {
-                                                if ($el === '7') {
-                                                    $el = 0;
-                                                }
-                                                return Carbon\Carbon::now()->next(intval($el))->dayName;
-                                            }, str_split($slide->repeat)),
-                                        )
-                                    : '' }}
                     </p>
+                    @if ($slide->recurrence_description)
+                    <p class="event-recurrence"><i
+                            class="fas fa-fw fa-calendar"></i>&nbsp;{{ $slide->recurrence_description }}</p>
+                    @endif
                     <p class="event-start_time"><i
                             class="fas fa-fw fa-clock"></i>&nbsp;{{ substr($slide->start_time, 0, 5) }}-{{ substr($slide->end_time, 0, 5) }}
                     </p>

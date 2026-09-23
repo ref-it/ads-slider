@@ -59,17 +59,18 @@ class Schedule extends Model
     }
 
     /**
-     * A human-readable summary of the recurrence, e.g. "- Repeats on: Monday,
-     * Wednesday" for both the legacy digit mask and an rrule that reduces to
-     * a plain weekly pattern; a generic fallback for anything else (custom
+     * A human-readable summary of the recurrence, e.g. "Monday, Wednesday"
+     * for both the legacy digit mask and an rrule that reduces to a plain
+     * weekly pattern; a generic fallback for anything else (custom
      * interval/monthly/exceptions - not worth spelling out in a list view).
+     * Callers prefix this with a recurrence icon rather than a text label.
      */
     public function getRecurrenceDescriptionAttribute(): ?string
     {
         if ($this->rrule) {
             $digits = WeekdayMaskConverter::fromRrule($this->rrule);
 
-            return $digits !== null ? self::describeWeekdayDigits($digits) : __('- Repeats');
+            return $digits !== null ? self::describeWeekdayDigits($digits) : __('Repeats');
         }
 
         if ($this->repeat) {
@@ -81,7 +82,7 @@ class Schedule extends Model
 
     private static function describeWeekdayDigits(string $digits): string
     {
-        return __('- Repeats on:').' '.implode(', ', array_map(function ($el) {
+        return implode(', ', array_map(function ($el) {
             $n = $el === '7' ? 0 : (int) $el;
 
             return Carbon::now()->next($n)->dayName;
