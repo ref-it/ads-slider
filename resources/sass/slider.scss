@@ -94,6 +94,8 @@ hr {
     position: fixed;
     left: 0;
     top: 0;
+    padding: 1.5rem;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: space-around;
@@ -129,16 +131,23 @@ hr {
     margin-bottom: 2vh;
 }
 
+// Mirrors .weatherPageTitle (same size/weight, same margin-bottom) as
+// closely as the menu's single dynamic title span allows.
+.menuPageTitle {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
 .menu-name {
     display: inline-block;
     width: 100vh;
     color: var(--main-color);
-    font-size: 10.5vh;
-    margin-bottom: 2vh;
+    font-size: 6.5vh;
+    font-weight: bold;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-
 }
 
 .menu-icon {
@@ -698,20 +707,25 @@ div.fatal-error {
 }
 
 /*Menu*/
+// rem (not vh) on all sides to exactly match #weather's padding, regardless
+// of viewport size.
 #menu-container {
-    padding-left: 1.8vh;
-    padding-right: 1.8vh;
+    padding: 1.5rem;
 }
 
 .menu_item {
     font-size: 4.5vh;
-    border-bottom: 1px solid #ffffff;
+    color: #ffffff;
     clear: both;
 }
 
+// Separator only between entries, not below the last one.
+.menu_item:not(:last-child) {
+    border-bottom: 1px solid #555555;
+}
+
 .menu_item.odd {
-    color: #80ffff;
-    border-bottom: 1px solid #80ffff;
+    color: #c0c0c0;
 }
 
 .menu_item span {

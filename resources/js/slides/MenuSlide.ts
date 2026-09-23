@@ -1,7 +1,6 @@
 import { Manager, SlideEvents } from "../manager.js";
 import Filter2 from "../modules/filters.js";
 import { AdsEvent, Menu, MenuSimple, Product } from "../types.js";
-import { addAnimationOnce } from "../utilities/animations.js";
 import { Slide } from "./Slide.js";
 import dayjs from 'dayjs/esm/index.js';
 
@@ -131,7 +130,6 @@ export class MenuSlide extends Slide {
         }
         const menuName = mc.querySelector('.menu-name') as HTMLSpanElement;
         menuName.innerText = menu.category_name;
-        addAnimationOnce(menuName, 'jackInTheBox');
 
         const icon = mc.querySelector('.menu-icon') as HTMLSpanElement;
         icon.removeAttribute('class');
@@ -175,8 +173,9 @@ export class MenuSlide extends Slide {
         });
         console.debug('[Menu] Extra rows in the menu', extraRows);
         let fontSize = 47.0 / (pr.length + extraRows);
-        if (fontSize > 7.5) {
-            fontSize = 7;
+        if (fontSize > 6.5) {
+            // Never larger than the heading (.menu-name/.weatherPageTitle is 6.5vh).
+            fontSize = 6.5;
         }
 
         (mc.querySelectorAll('.menu_item') as NodeListOf<HTMLDivElement>).forEach((item) => {

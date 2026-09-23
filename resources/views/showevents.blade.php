@@ -77,7 +77,7 @@
 
 
         <div id="menu-container" style="display:none">
-            <div><span class="menu-name">
+            <div class="menuPageTitle"><span class="menu-name">
                     <!-- -->
                 </span><span class="menu-icon">
                     <!-- -->
