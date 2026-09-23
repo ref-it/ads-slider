@@ -1,5 +1,5 @@
 import dayjs from 'dayjs/esm/index.js'
-import { AdsEvent } from '../types.js'
+import { AdsEvent, HappyHour } from '../types.js'
 
 
 export enum EventStatuses {
@@ -85,15 +85,7 @@ export default class EventStatus {
     return this.hasThirtyMinutesAfter() ? this.event.endDate.add(30, 'minutes') : null;
   }
 
-  hasHappyHour(): boolean {
-    return (!!this.event.happy_hour && !this.event.cancelled);
-  }
-
-  happyHourStart(): dayjs.Dayjs | null {
-    return this.hasHappyHour() ? dayjs(this.event.happy_hour?.start) : null;
-  }
-
-  happyHourEnd(): dayjs.Dayjs | null {
-    return this.hasHappyHour() ? dayjs(this.event.happy_hour?.end) : null;
+  happyHours(): HappyHour[] {
+    return (!this.event.cancelled && this.event.happy_hours) ? this.event.happy_hours : [];
   }
 }

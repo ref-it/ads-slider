@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -203,11 +203,11 @@ class Event extends Model
     }
 
     /**
-     * get the happy hour owned by the event
+     * get the happy hours owned by the event
      */
-    public function happy_hour(): HasOne
+    public function happy_hours(): HasMany
     {
-        return $this->hasOne(HappyHour::class);
+        return $this->hasMany(HappyHour::class);
     }
 
     protected static function booted()
@@ -221,7 +221,7 @@ class Event extends Model
 
         static::deleted(function ($event) {
             $event->schedule()->delete();
-            $event->happy_hour()->delete();
+            $event->happy_hours()->delete();
         });
     }
 

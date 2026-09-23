@@ -306,7 +306,7 @@ class MonitorController extends Controller
         $data['m']['api_token'] = $monitor->api_token;
         $data['m']['channel_hash'] = Realm::getBroadcastChannelSecret($monitor->realm_id);
         $data['e'] = $monitor->show_events
-            ? EventController::getScheduledEvents($monitor->realm_id)->with(['menus:id,path', 'happy_hour'])->get()->sortBy(function ($event) {
+            ? EventController::getScheduledEvents($monitor->realm_id)->with(['menus:id,path', 'happy_hours'])->get()->sortBy(function ($event) {
                 return [
                     $event->real_start_date,
                     $event->start_time,

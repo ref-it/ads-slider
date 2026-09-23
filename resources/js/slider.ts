@@ -934,7 +934,8 @@ function startFromEvent(schedule: SchedulerItem, forceRefresh = false) {
         const e = getEventById(schedule.event_id);
         if (!e)
           throw new Error(`Event with ID ${schedule.event_id} not found`);
-        happyHourSlide.initHappyHour(e.happy_hour);
+        const hh = e.happy_hours.find(h => h.id === schedule.happy_hour_id) ?? null;
+        happyHourSlide.initHappyHour(hh);
         manager.startSlide(happyHourSlide, forceRefresh);
       }
       break;

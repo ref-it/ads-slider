@@ -15,65 +15,103 @@ class EditHappyHour extends Component
 
     public HappyHourForm $hhForm;
 
+    public Event $event;
+
     public bool $isManagerUpdating = false;
 
-    public function mount(Event $event, bool $isManagerUpdating): void
+    public function mount(Event $event, bool $isManagerUpdating, ?HappyHour $happyHour = null): void
     {
+        $this->event = $event;
         $this->hhForm->setParentEvent($event);
         $this->isManagerUpdating = $isManagerUpdating;
+
+        if ($happyHour) {
+            $this->hhForm->loadHappyHour($happyHour);
+        } else {
+            $this->hhForm->fillDefaults();
+        }
+    }
+
+    private function backToEvent()
+    {
+        if ($this->isManagerUpdating) {
+            return $this->redirectRoute('events.avedit', ['event' => $this->event->id, 'api_token' => $this->event->api_token]);
+        }
+
+        return $this->redirectRoute('events.edit', ['event' => $this->event->id]);
     }
 
     public function createHappyHour()
     {
-        $this->authorize('create', [HappyHour::class, $this->hhForm->event]);
+        $this->authorize('create', [HappyHour::class, $this->event]);
         $this->hhForm->saveHappyHour();
-        $this->hhForm->setSuccessMessage('Happy hour created', false);
+        flash(__('Happy hour created'))->success();
+
+        return $this->backToEvent();
     }
 
     public function createHappyHourAsManager()
     {
-        $this->authorize('createAsManager', [HappyHour::class, $this->hhForm->event]);
+        $this->authorize('createAsManager', [HappyHour::class, $this->event]);
         $this->hhForm->saveHappyHour();
-        $this->hhForm->setSuccessMessage('Happy hour created', false);
+        flash(__('Happy hour created'))->success();
+
+        return $this->backToEvent();
     }
 
     public function updateHappyHour()
     {
-        $this->authorize('update', $this->hhForm->event->happy_hour);
+        $hh = $this->event->happy_hours()->findOrFail($this->hhForm->happyHourId);
+        $this->authorize('update', $hh);
         $this->hhForm->saveHappyHour();
-        $this->hhForm->setSuccessMessage('Happy hour updated', false);
+        flash(__('Happy hour updated'))->success();
+
+        return $this->backToEvent();
     }
 
     public function updateHappyHourAsManager()
     {
-        $this->authorize('updateAsManager', [$this->hhForm->event->happy_hour, $this->hhForm->event]);
+        $hh = $this->event->happy_hours()->findOrFail($this->hhForm->happyHourId);
+        $this->authorize('updateAsManager', [$hh, $this->event]);
         $this->hhForm->saveHappyHour();
-        $this->hhForm->setSuccessMessage('Happy hour updated', false);
+        flash(__('Happy hour updated'))->success();
+
+        return $this->backToEvent();
     }
 
     public function deleteHappyHour()
     {
-        $this->authorize('delete', $this->hhForm->event->happy_hour);
-        $hh = $this->hhForm->event->happy_hour;
-        $eventName = $this->hhForm->event->name;
-        $this->hhForm->deleteHappyHour();
-        event(
-            new SecurityAuditEvent(
-                action: 'happy_hour.deleted',
-                description: "Happy hour '{$hh->name}' (ID: {$hh->id}) of event '{$eventName}' deleted by user ID: ".auth()->id(),
-                userId: auth()->id(),
-                realmId: $hh->realm_id,
-                context: ['happy_hour_id' => $hh->id, 'name' => $hh->name]
-            )
-        );
-        $this->hhForm->setSuccessMessage('Happy hour deleted', false);
+        $hh = $this->event->happy_hours()->findOrFail($this->hhForm->happyHourId);
+        $this->authorize('delete', $hh);
+        $this->auditDelete($hh);
+
+        return $this->backToEvent();
     }
 
     public function deleteHappyHourAsManager()
     {
-        $this->authorize('deleteAsManager', [$this->hhForm->event->happy_hour, $this->hhForm->event]);
-        $this->hhForm->deleteHappyHour();
-        $this->hhForm->setSuccessMessage('Happy hour deleted', false);
+        $hh = $this->event->happy_hours()->findOrFail($this->hhForm->happyHourId);
+        $this->authorize('deleteAsManager', [$hh, $this->event]);
+        $hh->delete();
+        flash(__('Happy hour deleted'))->success();
+
+        return $this->backToEvent();
+    }
+
+    private function auditDelete(HappyHour $hh): void
+    {
+        $eventName = $this->event->name;
+        $hh->delete();
+        event(
+            new SecurityAuditEvent(
+                action: 'happy_hour.deleted',
+                description: "Happy hour '{$hh->drink}' (ID: {$hh->id}) of event '{$eventName}' deleted by user ID: ".auth()->id(),
+                userId: auth()->id(),
+                realmId: $hh->realm_id,
+                context: ['happy_hour_id' => $hh->id, 'drink' => $hh->drink]
+            )
+        );
+        flash(__('Happy hour deleted'))->success();
     }
 
     public function render()

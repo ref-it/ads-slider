@@ -6,6 +6,7 @@ use App\Events\SecurityAuditEvent;
 use App\Livewire\Forms\EventForm;
 use App\Livewire\Traits\TrimStringsAndConvertEmptyStringsToNull;
 use App\Models\Event;
+use App\Models\HappyHour;
 use App\Models\Menu;
 use App\Models\Schedule;
 use Illuminate\Support\Facades\DB;
@@ -120,6 +121,32 @@ class UpdateEvent extends Component
         ]);
 
         return redirect()->route('events.index');
+    }
+
+    public function deleteHappyHour(int $happyHourId)
+    {
+        $hh = $this->form->event->happy_hours()->findOrFail($happyHourId);
+        $this->authorize('delete', $hh);
+        $eventName = $this->form->event->name;
+        $hh->delete();
+        event(
+            new SecurityAuditEvent(
+                action: 'happy_hour.deleted',
+                description: "Happy hour '{$hh->drink}' (ID: {$hh->id}) of event '{$eventName}' deleted by user ID: ".auth()->id(),
+                userId: auth()->id(),
+                realmId: $hh->realm_id,
+                context: ['happy_hour_id' => $hh->id, 'drink' => $hh->drink]
+            )
+        );
+        flash(__('Happy hour deleted'))->success();
+    }
+
+    public function deleteHappyHourAsManager(int $happyHourId)
+    {
+        $hh = $this->form->event->happy_hours()->findOrFail($happyHourId);
+        $this->authorize('deleteAsManager', [$hh, $this->form->event]);
+        $hh->delete();
+        flash(__('Happy hour deleted'))->success();
     }
 
     public function render()

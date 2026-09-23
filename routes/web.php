@@ -17,6 +17,7 @@ use App\Http\Controllers\Auth\OidcController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventsImportController;
+use App\Http\Controllers\HappyHourController;
 use App\Http\Controllers\LocalizationController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\MonitorController;
@@ -70,6 +71,8 @@ Route::middleware(['verified', 'auth'])->group(function () {
     Route::get('/events', EventsList::class)->name('events.index');
     Route::get('/events/create/{template_id}', [EventController::class, 'create'])->name('events.create.template');
     Route::resource('events', EventController::class)->only(['create', 'edit']);
+    Route::get('/events/{event}/happy-hours/create', [HappyHourController::class, 'create'])->name('events.happyHours.create');
+    Route::get('/events/{event}/happy-hours/{happyHour}/edit', [HappyHourController::class, 'edit'])->name('events.happyHours.edit');
 
     // Templates
     Route::resource('templates', TemplateController::class)->only(['index', 'create', 'edit']);
@@ -101,6 +104,8 @@ Route::middleware(['verified', 'auth'])->group(function () {
 Route::middleware('token')->group(function () {
     // Event API edits
     Route::get('/events/{event}/edit/{api_token}', [EventController::class, 'edit'])->name('events.avedit');
+    Route::get('/events/{event}/happy-hours/create/{api_token}', [HappyHourController::class, 'create'])->name('events.happyHours.avcreate');
+    Route::get('/events/{event}/happy-hours/{happyHour}/edit/{api_token}', [HappyHourController::class, 'edit'])->name('events.happyHours.avedit');
     // Route::put('/events/{event}/{api_token}', [EventController::class, 'update'])->name('events.avupdate');
 
     // Media views

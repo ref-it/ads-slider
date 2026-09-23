@@ -14,6 +14,7 @@ export interface SchedulerItem {
   until?: dayjs.Dayjs;
   scheduled?: boolean;
   priority: number; // higher: better
+  happy_hour_id?: number; // set when subject === EventStatuses.happy_hour, identifies which of the event's happy hours this item is for
 }
 
 interface SchedulerConfig {
@@ -254,19 +255,20 @@ function evaluateEvent(e: AdsEvent, now: dayjs.Dayjs): void {
   }
 
   if (config.show_happy_hours) {
-    const hh = eventStatus.happyHourStart();
-    const hhEnd = eventStatus.happyHourEnd();
-    if (hh && hhEnd) {
-      if (hh.isAfter(now) || hhEnd.isAfter(now)) {
+    eventStatus.happyHours().forEach(hh => {
+      const hhStart = dayjs(hh.start);
+      const hhEnd = dayjs(hh.end);
+      if (hhStart.isAfter(now) || hhEnd.isAfter(now)) {
         addScheduleItem({
           event_id: e.id,
           subject: EventStatuses.happy_hour,
-          deadline: hh,
+          deadline: hhStart,
           until: hhEnd,
-          priority: 90
+          priority: 90,
+          happy_hour_id: hh.id,
         });
       }
-    }
+    });
   }
 }
 

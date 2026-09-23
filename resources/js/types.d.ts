@@ -112,6 +112,7 @@ export interface Config extends Monitor {
 }
 
 export interface HappyHour {
+  id: number;
   price: string;
   drink: string;
   info: string;
@@ -148,7 +149,7 @@ export interface AdsEvent extends ElementWithRealStartDate {
   color: string;
   disabled: boolean;
   final_round_confirmed: boolean;
-  happy_hour: HappyHour | null;
+  happy_hours: HappyHour[];
   icon: string;
   is_karaoke: boolean;
   link: string | null;

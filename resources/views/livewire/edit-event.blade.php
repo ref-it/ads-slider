@@ -41,7 +41,7 @@
     @endisset
 
     <div class="row justify-content-center">
-        <div class="col-md-12">
+        <div class="col-lg-8">
             <form wire:submit="save">
                 <x-forms.inputs.text name="form.name" placeholder="{{ __('My Event Name') }}" required />
                 <x-forms.inputs.time name="form.start_time" required label="{{ __('Start Time') }}" />
@@ -136,12 +136,40 @@
                     text="{{ __('Delete Event') }}" />
                 @endisset
             </form>
+        </div>
 
-            <hr class="mt-5">
-
-            <h4 class="mt-4">{{ __('Happy Hour') }}</h4>
+        <div class="col-lg-4">
+            <h4>{{ __('Happy Hours') }}</h4>
             @isset($event)
-            <livewire:edit-happy-hour :event="$event" :isManagerUpdating="$avUpdating" />
+            @php
+                $eventHappyHours = $event->happy_hours()->orderBy('start')->get();
+                $hhDeleteButton = 'deleteHappyHour'.($avUpdating ? 'AsManager' : '');
+            @endphp
+
+            <a href="{{ $avUpdating ? route('events.happyHours.avcreate', [$event, $event->api_token]) : route('events.happyHours.create', $event) }}"
+                class="btn btn-primary mb-3"><i class="fas fa-plus"></i> {{ __('Add Happy Hour') }}</a>
+
+            @if ($eventHappyHours->isNotEmpty())
+            @foreach ($eventHappyHours as $hh)
+            <div class="card mb-2">
+                <div class="card-body">
+                    <div class="fw-bold">{{ $hh->drink }} &ndash; {{ $hh->price }}</div>
+                    <div class="small text-muted mb-2">{{ \Carbon\Carbon::parse($hh->start)->format('Y-m-d H:i') }} &ndash; {{ \Carbon\Carbon::parse($hh->end)->format('Y-m-d H:i') }}</div>
+                    <div class="text-end">
+                        <div class="btn-group btn-group-sm">
+                            <a href="{{ $avUpdating ? route('events.happyHours.avedit', [$event, $hh, $event->api_token]) : route('events.happyHours.edit', [$event, $hh]) }}"
+                                class="btn btn-outline-secondary"><i class="fas fa-fw fa-pen-to-square"></i> {{ __('Edit') }}</a>
+                            <button type="button" class="btn btn-danger" wire:click="{{ $hhDeleteButton }}({{ $hh->id }})"
+                                wire:confirm="{{ __('Are you sure you want to delete this element?') }}"><i
+                                    class="fas fa-fw fa-trash-can"></i> {{ __('Delete') }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+            @else
+            <x-forms.helpers.help text="{{ __('No happy hours have been added yet.') }}" />
+            @endif
             @else
             <x-forms.helpers.help text="{{ __('To add an happy hour, first create the event, then edit it.') }}" />
             @endisset
