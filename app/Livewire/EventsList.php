@@ -79,6 +79,6 @@ class EventsList extends Component
         return view(
             'livewire.events-list')
             ->title(__('Events'))
-            ->layout('livewire.master', ['header' => __('Events')]);
+            ->layout('livewire.master', ['header' => null]);
     }
 }

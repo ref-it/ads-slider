@@ -1,15 +1,14 @@
 @extends('layouts.app')
 @section('content')
 <div class="container">
-    <h2>{{__('All Menus')}}</h2>
+    <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center gap-2 mb-3">
+        <h2 class="mb-0">{{__('All Menus')}}</h2>
+        <a href="{{ route('menus.create') }}">
+            <button class="btn btn-primary"><i class="fas fa-fw fa-plus"></i>&nbsp;{{__('Create New Menu')}}</button>
+        </a>
+    </div>
     <div class="row">
-        <div class="col col-lg-3 order-lg-1">
-            <a href="{{ route('menus.create') }}">
-                <button class="btn btn-primary btn-block">{{__('Create New Menu')}}</button>
-            </a>
-            <p>{{__('Click on a menu to edit or delete it.')}}</p>
-        </div>
-        <div class="col-lg-9 order-lg-0">
+        <div class="col-12">
             <div class="list-group">
                 @forelse ($menus as $menu)
                 <a href="{{ route('menus.edit', $menu->id) }}" class="list-group-item list-group-item-action">

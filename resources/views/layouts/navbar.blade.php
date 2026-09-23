@@ -26,31 +26,13 @@
                         </a>
                     </li>
                     <!-- Events actions -->
-                    <li class="nav-item dropdown">
-                        <a id="dropDownEvents"
-                            class="nav-link dropdown-toggle {{ request()->routeIs('events.*', 'templates.*', 'eventsImports.*') ? 'active' : '' }}"
-                            href="#" role="button"
-                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                            {{ __('Events') }} <span class="caret"></span>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('events.*', 'templates.*', 'eventsImports.*') ? 'active' : '' }}"
+                            href="{{ route('events.index') }}" data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" data-bs-title="{{ __('List Events') }}"
+                            @if (request()->routeIs('events.*', 'templates.*', 'eventsImports.*')) aria-current="page" @endif>
+                            {{ __('Events') }}
                         </a>
-                        <div class="dropdown-menu" aria-labelledby="dropDownEvents">
-                            <a class="dropdown-item" href="{{ route('events.index') }}" data-bs-toggle="tooltip"
-                                data-bs-placement="left" data-bs-title="{{ __('List Events') }}">
-                                <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Events') }}
-                            </a>
-                            <a class="dropdown-item" href="{{ route('templates.index') }}" data-bs-toggle="tooltip"
-                                data-bs-placement="left" data-bs-title="{{ __('List Templates') }}">
-                                <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Templates') }}
-                            </a>
-                            @if (Auth::user()->is_realm_admin)
-                                <hr>
-                                <a class="dropdown-item" href="{{ route('eventsImports.index') }}"
-                                    data-bs-toggle="tooltip" data-bs-placement="left"
-                                    data-bs-title="{{ __('List Events Imports') }}">
-                                    <i class="fa-solid fa-fw fa-list-ul"></i>&nbsp;{{ __('Events Imports') }}
-                                </a>
-                            @endif
-                        </div>
                     </li>
                     <!-- Menus -->
                     <li class="nav-item">

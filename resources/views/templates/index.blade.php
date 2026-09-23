@@ -1,17 +1,14 @@
 @extends('layouts.app')
 @section('content')
 <div class="container">
-    <h2>{{ __('All Templates') }}</h2>
+    <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center gap-2 mb-3">
+        <h2 class="mb-0">{{ __('All Templates') }}</h2>
+        <a href="{{ route('templates.create') }}">
+            <button class="btn btn-primary"><i class="fas fa-fw fa-plus"></i>&nbsp;{{ __('Create New Template') }}</button>
+        </a>
+    </div>
     <div class="row">
-        <div class="col col-lg-3 order-lg-1">
-            <a href="{{ route('templates.create') }}">
-                <button
-                    class="btn btn-primary btn-block">{{ __('Create New
-                                                            Template') }}</button>
-            </a>
-            <p>{{ __('Click on a template to edit or delete it.') }}</p>
-        </div>
-        <div class="col-lg-9 order-lg-0">
+        <div class="col-12">
             <div class="list-group">
                 @forelse ($templates as $template)
                 <a href="{{ route('templates.edit', $template->id) }}" class="list-group-item list-group-item-action">
