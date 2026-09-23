@@ -1,5 +1,5 @@
 <div>
-    <h2>{{ __('New Menu') }}</h2>
+    <h2>{{ __('Edit Menu') }}</h2>
     <x-forms.helpers.banner :bannerMessage="$form->errorMessage" :level="$form->level" />
 
     <form wire:submit="save">
@@ -42,7 +42,8 @@
         @include('livewire.partials.menu-products-editor')
 
         <div class="mt-3">
-            <x-forms.buttons.primary text="{{ __('Create Menu') }}" />
+            <x-forms.buttons.primary text="{{ __('Update Menu') }}" />
+            <x-forms.buttons.delete wire:click.prevent="deleteMenu" text="{{ __('Delete Menu') }}" />
         </div>
     </form>
 </div>

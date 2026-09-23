@@ -156,19 +156,20 @@ export class MenuSlide extends Slide {
             const el = clone.querySelector('div') as HTMLDivElement;
             el.classList.toggle('menu_item_special', product.special === true);
             el.classList.toggle('odd', i % 2 === 1);
-            el.innerText = product.name;
+            const name = document.createElement('span') as HTMLSpanElement;
+            name.className = 'menu_item_name';
+            name.innerText = product.name;
+            el.appendChild(name);
             const span = document.createElement('span') as HTMLSpanElement;
-            span.innerHTML = `${product.size}&nbsp;&nbsp;${product.price
+            span.className = 'menu_item_price';
+            span.innerHTML = `${product.size}&nbsp;&nbsp;&nbsp;${product.price
                 .padStart(5, '%')
-                .replaceAll('%', '&nbsp;')}${menu.currency}${(addLine && product.price2) ? `<br>${product.size2}&nbsp;&nbsp;${product.price2
+                .replaceAll('%', '&nbsp;')}&nbsp;${menu.currency}${(addLine && product.price2) ? `<br>${product.size2}&nbsp;&nbsp;&nbsp;${product.price2
                     .padStart(5, '%')
-                    .replaceAll('%', '&nbsp;')}${menu.currency}`
+                    .replaceAll('%', '&nbsp;')}&nbsp;${menu.currency}`
                     : ''
                 }`;
             el.appendChild(span);
-            if (addLine) {
-                el.appendChild(document.createElement('br'));
-            }
             mc.appendChild(el);
         });
         console.debug('[Menu] Extra rows in the menu', extraRows);

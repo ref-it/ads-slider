@@ -122,53 +122,7 @@ class MenuController extends Controller
      */
     public function edit(Menu $menu): View
     {
-        $monitors = Monitor::ofRealm(Auth::user()->realm_id)->orderBy('name')->get();
-
-        return view('menus.edit', compact('menu', 'monitors'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Menu $menu): RedirectResponse
-    {
-        $validated = $request->validate([
-            'name' => 'required|max:191',
-            'menu_content' => 'required|json',
-            'monitors' => 'nullable|array',
-            'monitors.*' => 'integer|exists:monitors,id',
-        ]);
-
-        DB::beginTransaction();
-        try {
-            $menuContent = $validated['menu_content'];
-            unset($validated['menu_content'], $validated['monitors']);
-            $menu->fill($validated);
-            // realm_id should not be changed upon updates. $menu->realm_id = Auth::user()->realm_id;
-            $menu->user_id = Auth::id();
-            Storage::disk('public')->put(config('ads.menu_basepath').$menu->path, $menuContent);
-            $menu->updateTimestamps(); // this forcing firing the updated event, otherwise file content changes are ignored
-            $menu->save();
-
-            if ($request->has('monitors')) {
-                $validMonitorIds = Monitor::ofRealm(auth()->user()->realm_id)
-                    ->whereIn('id', $request->input('monitors', []))
-                    ->pluck('id');
-                $menu->monitors()->sync($validMonitorIds);
-            }
-            DB::commit();
-            flash()->success('Menu Updated');
-            Log::channel('crud')->info('Menu updated', [
-                'menu' => $menu,
-                'user' => Auth::id(),
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            flash()->error('Menu could not be updated');
-            Log::error($e);
-        }
-
-        return redirect()->route('menus.index');
+        return view('menus.edit', compact('menu'));
     }
 
     /**

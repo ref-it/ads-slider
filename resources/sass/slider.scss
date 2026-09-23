@@ -715,9 +715,11 @@ div.fatal-error {
 }
 
 .menu_item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-size: 4.5vh;
     color: #ffffff;
-    clear: both;
     padding: 0.4rem 0;
 }
 
@@ -726,13 +728,11 @@ div.fatal-error {
     border-bottom: 1px solid #555555;
 }
 
-.menu_item span {
-    float: right;
+.menu_item_price {
     text-align: right;
-    display: block;
 }
 
-.menu_item_special::before {
+.menu_item_special .menu_item_name::before {
     content: '⭐';
 }
 

@@ -88,7 +88,7 @@ Route::middleware(['verified', 'auth'])->group(function () {
     Route::resource('slides', SlideController::class)->only(['index', 'create', 'edit']);
 
     // Menus
-    Route::resource('menus', MenuController::class)->only(['index', 'create', 'edit', 'update', 'destroy']);
+    Route::resource('menus', MenuController::class)->only(['index', 'create', 'edit', 'destroy']);
 
     // Canteens
     Route::resource('canteens', CanteenController::class)->only(['index', 'create', 'edit']);
