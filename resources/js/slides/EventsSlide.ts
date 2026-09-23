@@ -227,7 +227,6 @@ export class EventsSlide extends Slide {
         fillInComponentSafe(eventName, e.name);
         eventName.classList.toggle('cancelled', !!e.cancelled);
         addAnimationOnce(<HTMLDivElement>document.querySelector('#event-slide .event-details'), 'fadeInRight');
-        addAnimationOnce(eventName, 'flash');
     }
 
     private nextSlide(): void {
