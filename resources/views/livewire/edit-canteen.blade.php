@@ -1,4 +1,4 @@
-<div class="col-md-9">
+<div class="col-md-12">
     <div class="fixed-top loader-line" wire:loading.delay></div>
     <x-forms.helpers.banner :bannerMessage="$form->errorMessage" :level="$form->level" />
 

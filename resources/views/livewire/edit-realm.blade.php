@@ -3,7 +3,7 @@
     <x-forms.helpers.banner :bannerMessage="$form->errorMessage" :level="$form->level" />
 
     <div class="row justify-content-center">
-        <div class="col-md-9">
+        <div class="col-md-12">
             <form wire:submit="@if($form->realm) updateRealm @else createRealm @endif">
                 <x-forms.inputs.text name="form.name" placeholder="{{__('My Realm Name')}}" required label="{{__('Name')}}">
                     <x-forms.helpers.help
@@ -101,7 +101,7 @@
                 @endisset
             </form>
         </div>
-        <div class="col-md-9">
+        <div class="col-md-12">
             <h3>{{__('All Users of this realm')}}</h3>
             @forelse ($form->realm?->users as $user)
             <div class="card mb-2">

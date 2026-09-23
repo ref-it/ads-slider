@@ -6,7 +6,7 @@
     @else
     @if (isset($event) && $event)
     <div class="row justify-content-center">
-        <div class="col-md-9">
+        <div class="col-md-12">
             <x-forms.helpers.avlink :link="$event->api_token ? url('/events/' . $event->id . '/edit/' . $event->api_token) : ''" readonly>
                 <x-forms.helpers.help
                     text="{{ __('Share this link with the AV to allow them to make some changes to this event shortly before and during the event.') }}" />
@@ -18,7 +18,7 @@
     @isset($allTemplates)
     <div class="row justify-content-center">
         @if ($allTemplates->isEmpty())
-        <div class="col-md-9">
+        <div class="col-md-12">
             <h4>{{ __('You may select a Template…') }}</h4>
             {{-- TODO i18n --}}
             <p class="text-info-emphasis">There are none. Why don't you
@@ -27,7 +27,7 @@
             </p>
         </div>
         @else
-        <div class="col-md-9">
+        <div class="col-md-12">
             <h4>{{ __('You may select a Template…') }}</h4>
             <select id="templateSelect" class="form-control" data-live-search="true">
                 <option disabled selected value> -- {{ __('select a template') }} -- </option>
@@ -41,7 +41,7 @@
     @endisset
 
     <div class="row justify-content-center">
-        <div class="col-md-9">
+        <div class="col-md-12">
             <form wire:submit="save">
                 <x-forms.inputs.text name="form.name" placeholder="{{ __('My Event Name') }}" required />
                 <x-forms.inputs.time name="form.start_time" required label="{{ __('Start Time') }}" />

@@ -3,7 +3,7 @@
     <x-forms.helpers.banner :bannerMessage="$form->errorMessage" :level="$form->level" />
 
     <div class="row justify-content-center">
-        <div class="col-md-9">
+        <div class="col-md-12">
             <form wire:submit="@if($form->monitor) updateMonitor @else createMonitor @endif">
                 <x-forms.inputs.text name="form.name" placeholder="{{__('My Monitor Name')}}" required label="{{__('Name')}}" />
                 <x-forms.inputs.select name="form.locale" label="{{__('Locale')}}" >
