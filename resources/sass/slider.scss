@@ -718,15 +718,12 @@ div.fatal-error {
     font-size: 4.5vh;
     color: #ffffff;
     clear: both;
+    padding: 0.4rem 0;
 }
 
 // Separator only between entries, not below the last one.
 .menu_item:not(:last-child) {
     border-bottom: 1px solid #555555;
-}
-
-.menu_item.odd {
-    color: #c0c0c0;
 }
 
 .menu_item span {
