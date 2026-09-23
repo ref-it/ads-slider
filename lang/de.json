@@ -487,7 +487,6 @@
     "Execute import": "Import ausführen",
     "All events in this import will be overwritten. This should be used, for example, if you changed the import configuration.": "Alle Veranstaltungen in diesem Import werden überschrieben. Dies sollte z. B. verwendet werden, wenn du die Importkonfiguration geändert hast.",
     "Force update": "Aktualisierung erzwingen",
-    "No events imports yet, nothing to run": "Es sind noch keine Veranstaltungsimporte vorhanden, es gibt nichts auszuführen",
     "Edit Events Import": "Veranstaltungsimport bearbeiten",
     "Back": "Zurück",
     "New Events Import": "Neuer Veranstaltungsimport",

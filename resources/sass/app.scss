@@ -169,3 +169,37 @@ img.preview {
     height: 3px;
     background-color: var(--bs-primary);
 }
+
+// Bootstrap's raw warning/danger theme colors don't meet WCAG contrast as
+// button text on a light background (e.g. #ffc107 warning yellow is ~1.6:1
+// against white; needs 4.5:1). Bootstrap's own "-emphasis" colors fix the
+// contrast but read as a dull, muddy brown/maroon - replaced here with a
+// richer amber/red that still clears 4.5:1 (light: ~4.9:1 / ~6.5:1, dark:
+// ~9.2:1 / ~5.6:1 against this theme's dark background). Overriding
+// Bootstrap's own variables (rather than inventing new ones) means every
+// "-emphasis" consumer - these outline buttons and any .text-*-emphasis
+// utility - gets the same nicer color for free.
+:root,
+[data-bs-theme='light'] {
+    --bs-warning-text-emphasis: #a16207;
+    --bs-danger-text-emphasis: #b91c1c;
+}
+
+[data-bs-theme='dark'] {
+    --bs-warning-text-emphasis: #fbbf24;
+    --bs-danger-text-emphasis: #f87171;
+}
+
+.btn-outline-warning {
+    --bs-btn-color: var(--bs-warning-text-emphasis);
+    --bs-btn-border-color: var(--bs-warning-text-emphasis);
+    --bs-btn-disabled-color: var(--bs-warning-text-emphasis);
+    --bs-btn-disabled-border-color: var(--bs-warning-text-emphasis);
+}
+
+.btn-outline-danger {
+    --bs-btn-color: var(--bs-danger-text-emphasis);
+    --bs-btn-border-color: var(--bs-danger-text-emphasis);
+    --bs-btn-disabled-color: var(--bs-danger-text-emphasis);
+    --bs-btn-disabled-border-color: var(--bs-danger-text-emphasis);
+}

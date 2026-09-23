@@ -487,7 +487,6 @@
     "Execute import": "Esegui l’importazione",
     "All events in this import will be overwritten. This should be used, for example, if you changed the import configuration.": "Tutti gli eventi di questa importazione verranno sovrascritti. Si dovrebbe usare, per esempio, quando vengono cambiate le configurazioni di una importatione.",
     "Force update": "Aggiornamento forzato",
-    "No events imports yet, nothing to run": "Ancora nessuna importazione di eventi, niente da eseguire",
     "Edit Events Import": "Modifica import di eventi",
     "Back": "Indietro",
     "New Events Import": "Nuovo import di eventi",

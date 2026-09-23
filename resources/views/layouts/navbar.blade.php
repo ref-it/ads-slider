@@ -71,9 +71,9 @@
                                 {{ __('Admin') }} <span class="caret"></span>
                             </a>
                             <div class="dropdown-menu" aria-labelledby="dropDownAdmin">
-                                <a class="dropdown-item text-danger" href="{{ route('alerts.index') }}"><i
+                                <a class="dropdown-item text-danger-emphasis" href="{{ route('alerts.index') }}"><i
                                         class="fa-solid fa-fw fa-bell"></i>&nbsp;{{ __('Send Alert') }}</a>
-                                <a class="dropdown-item text-warning" href="{{ route('register') }}"><i
+                                <a class="dropdown-item text-warning-emphasis" href="{{ route('register') }}"><i
                                         class="fa-solid fa-fw fa-user-plus"></i>&nbsp;{{ __('Register User') }}</a>
                                 <hr>
                                 @if (auth()->user()->is_admin)

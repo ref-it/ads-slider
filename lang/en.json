@@ -487,7 +487,6 @@
     "Execute import": "Execute import",
     "All events in this import will be overwritten. This should be used, for example, if you changed the import configuration.": "All events in this import will be overwritten. This should be used, for example, if you changed the import configuration.",
     "Force update": "Force update",
-    "No events imports yet, nothing to run": "No events imports yet, nothing to run",
     "Edit Events Import": "Edit Events Import",
     "Back": "Back",
     "New Events Import": "New Events Import",
