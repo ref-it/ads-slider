@@ -19,9 +19,13 @@ class Localization
     {
         if (session()->has('locale')) {
             $locale = session('locale', config('app.locale', 'en'));
-            App::setLocale($locale);
-            Carbon::setLocale($locale);
+        } else {
+            $locale = $request->getPreferredLanguage(config('ads.supported_locales', ['en']))
+                ?? config('app.locale', 'en');
         }
+
+        App::setLocale($locale);
+        Carbon::setLocale($locale);
 
         return $next($request);
     }
