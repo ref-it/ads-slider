@@ -2,6 +2,7 @@ import dayjs from 'dayjs/esm/index.js'
 import { Manager, SlideEvents } from "../manager.js";
 import { AdsEvent } from "../types.js";
 import { addAnimationOnce } from "../utilities/animations.js";
+import { getContrastTextColor } from "../utilities/color.js";
 import { fillInComponentSafe, hideElement, showElement } from "../utilities/misc.js";
 import { getDisplayDate } from "../utilities/time.js";
 import { Slide } from "./Slide.js";
@@ -13,6 +14,7 @@ export class EventsSlide extends Slide {
     private currentSlideIndex = -1;
 
     private progressBar: HTMLDivElement | null = null;
+    private progressCells: HTMLDivElement | null = null;
     private qrCanvas: HTMLCanvasElement | null = null;
 
     private events: AdsEvent[] = [];
@@ -125,6 +127,7 @@ export class EventsSlide extends Slide {
         this.hideSlide();
         //this.hideSlideWithAnimation('zoomOutRight');
         this.progressBar = null;
+        this.progressCells = null;
         this.qrCanvas = null;
 
         Manager.Instance.resetClockBackgroundColor();
@@ -151,8 +154,6 @@ export class EventsSlide extends Slide {
     }
 
     private fillInEvent(): void {
-        this.highlightProgressBarElement();
-
         const e = this.filteredEvents[this.currentSlideIndex];
 
         if (e.color) {
@@ -160,6 +161,8 @@ export class EventsSlide extends Slide {
         } else {
             Manager.Instance.restoreMainColor();
         }
+
+        this.highlightProgressBarElement();
 
         if (Manager.Instance.areAnimationsEnabled()) {
             if (this.currentSlideIndex === 0) {
@@ -279,8 +282,11 @@ export class EventsSlide extends Slide {
 
     private highlightProgressBarElement(): void {
         const index = this.currentSlideIndex;
-        const el = this.progressBar?.children;
+        const el = this.progressCells?.children;
         if (!el) return;
+
+        const mainColor = getComputedStyle(document.documentElement).getPropertyValue('--main-color').trim();
+        document.documentElement.style.setProperty('--active-indicator-text-color', getContrastTextColor(mainColor));
 
         for (let i = 0; i < el.length; i += 1) {
             if (i === index) {
@@ -296,22 +302,26 @@ export class EventsSlide extends Slide {
             throw new Error("Progress bar not found");
         }
         this.progressBar.innerHTML = ""
+
+        if (Manager.Instance.areAnimationsEnabled()) {
+            const bar = document.createElement('div');
+            bar.id = 'progress';
+            bar.style.transition = `width ${this.slidesSpeedMs}ms linear, background-color 2s linear`; // this second part should have the same value in slider.scss!
+            this.progressBar.appendChild(bar);
+        }
+
+        const cells = document.createElement('div');
+        cells.id = 'progress-cells';
         for (let i = 0; i < elNumber; i += 1) {
             const pbEl = document.createElement('div');
             pbEl.id = `pb_${i}`;
             pbEl.classList.add('pb_element');
             pbEl.innerHTML = `${i + 1 < 10 ? '&nbsp;' : ''}${i + 1}`;
-            this.progressBar.appendChild(pbEl);
+            cells.appendChild(pbEl);
         }
+        this.progressBar.appendChild(cells);
+        this.progressCells = cells;
 
-        // If animations are enabled and the progress bar line was not created yet
-        if (Manager.Instance.areAnimationsEnabled() && !document.getElementById('progress')) {
-            // create the progress bar line
-            const bar = document.createElement('div');
-            bar.id = 'progress';
-            this.progressBar.appendChild(bar);
-            bar.style.transition = `width ${this.slidesSpeedMs}ms linear, background-color 2s linear`; // this second part should have the same value in slider.scss!
-        }
         console.log("[Events] Progress bar initialized");
     }
 }

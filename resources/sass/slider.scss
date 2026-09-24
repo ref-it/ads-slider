@@ -183,12 +183,11 @@ hr {
 }
 
 #progress-bar {
-    display: table;
-    left: 20vw;
+    left: 1vh;
     position: absolute;
     font-size: 2vh;
     top: 1vh;
-    width: 78vw;
+    width: calc(100vw - 2vh);
 }
 
 .shrink {
@@ -197,22 +196,35 @@ hr {
 
 #progress {
     background-color: var(--main-color);
-    display: table-caption;
-    width: 78vw;
+    width: 100%;
     height: 0.8vh;
+    margin-bottom: 0.3vh;
+}
+
+#progress-cells {
+    display: flex;
+    width: 100%;
 }
 
 .pb_element {
-    border-top: 1px solid var(--main-color);
-    display: table-cell;
+    flex: 1 1 0;
+    box-sizing: border-box;
+    border: 1px solid transparent;
+    border-top: 2px solid var(--main-color);
+    border-radius: 0 0 4px 4px;
     text-align: center;
+    padding: 0.8vh 0;
+}
+
+#progress-bar .pb_element {
+    transition: none;
 }
 
 .pb_element.active {
-    background-color: gray;
-    border-bottom: 2px solid var(--main-color);
-    border-top: none;
-    color: black;
+    background-color: var(--main-color);
+    border-color: var(--main-color);
+    border-top-color: transparent;
+    color: var(--active-indicator-text-color, white);
     font-weight: bold;
 }
 
