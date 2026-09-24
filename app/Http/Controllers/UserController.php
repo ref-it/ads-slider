@@ -123,7 +123,7 @@ class UserController extends Controller
             realmId: $realm->id,
         ));
 
-        flash(__('Switched to :realm_name', ['realm_name' => $realm->name]))->success();
+        flash(__('Switched to :realm_name', ['realm_name' => e($realm->name)]))->success();
 
         return back();
     }

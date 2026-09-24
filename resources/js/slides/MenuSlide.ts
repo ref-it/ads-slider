@@ -1,6 +1,7 @@
 import { Manager, SlideEvents } from "../manager.js";
 import Filter2 from "../modules/filters.js";
 import { AdsEvent, Menu, MenuSimple, Product } from "../types.js";
+import { escapeHtml } from "../utilities/misc.js";
 import { Slide } from "./Slide.js";
 import dayjs from 'dayjs/esm/index.js';
 
@@ -162,11 +163,11 @@ export class MenuSlide extends Slide {
             el.appendChild(name);
             const span = document.createElement('span') as HTMLSpanElement;
             span.className = 'menu_item_price';
-            span.innerHTML = `${product.size}&nbsp;&nbsp;&nbsp;${product.price
+            span.innerHTML = `${escapeHtml(product.size)}&nbsp;&nbsp;&nbsp;${escapeHtml(product.price)
                 .padStart(5, '%')
-                .replaceAll('%', '&nbsp;')}&nbsp;${menu.currency}${(addLine && product.price2) ? `<br>${product.size2}&nbsp;&nbsp;&nbsp;${product.price2
+                .replaceAll('%', '&nbsp;')}&nbsp;${escapeHtml(menu.currency)}${(addLine && product.price2) ? `<br>${escapeHtml(product.size2 ?? '')}&nbsp;&nbsp;&nbsp;${escapeHtml(product.price2)
                     .padStart(5, '%')
-                    .replaceAll('%', '&nbsp;')}&nbsp;${menu.currency}`
+                    .replaceAll('%', '&nbsp;')}&nbsp;${escapeHtml(menu.currency)}`
                     : ''
                 }`;
             el.appendChild(span);

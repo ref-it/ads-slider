@@ -220,8 +220,7 @@
                 <div id="templateWeatherColumn" class="dailyColumn hourColumn" style="display: none">
                     <div class="dailyDate">12:00</div>
                     <div class="dailyIcon">
-                        <img src="https://openweathermap.org/img/wn/01n@2x.png" alt="?" data-icon="01n"
-                            onerror="this.onerror=null;if(this.dataset.icon){this.src='https://openweathermap.org/img/wn/'+this.dataset.icon+'@2x.png';this.dataset.icon = null;}" />
+                        <img src="https://openweathermap.org/img/wn/01n@2x.png" alt="?" data-icon="01n" />
                     </div>
                     <div class="dailyTemps">
                         <span class="weatherTemp">23</span><span class="superscript">°C</span>
@@ -253,8 +252,7 @@
                 <div id="templateWeatherDailyColumn" class="dailyColumn" style="display: none">
                     <div class="dailyDate">Mon</div>
                     <div class="dailyIcon">
-                        <img src="https://openweathermap.org/img/wn/01d@2x.png" alt="?" data-icon="01d"
-                            onerror="this.onerror=null;if(this.dataset.icon){this.src='https://openweathermap.org/img/wn/'+this.dataset.icon+'@2x.png';this.dataset.icon = null;}" />
+                        <img src="https://openweathermap.org/img/wn/01d@2x.png" alt="?" data-icon="01d" />
                     </div>
                     <div class="dailyTemps">
                         <span class="dailyMax">23</span><span class="superscript">°C</span><br>
@@ -311,7 +309,7 @@
             </div>
         </div>
     </div>
-    <script>
+    <script @cspNonce>
         window.getData = () => {
             return {!! json_encode($data, JSON_HEX_TAG) !!}
         };

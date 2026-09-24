@@ -100,7 +100,7 @@ class EventsImportForm extends Form
                 'user' => auth()->id(),
             ]);
         } catch (\Exception $e) {
-            $this->setErrorMessage($e->getMessage());
+            $this->setErrorMessage('The events import could not be updated, please report this error.');
             Log::error($e->getMessage());
 
             return false;
@@ -127,7 +127,7 @@ class EventsImportForm extends Form
                 'user' => auth()->id(),
             ]);
         } catch (\Exception $e) {
-            $this->setErrorMessage($e->getMessage());
+            $this->setErrorMessage('The events import could not be created, please report this error.');
             Log::error($e->getMessage());
 
             return false;

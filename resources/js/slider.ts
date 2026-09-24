@@ -55,7 +55,7 @@ import { LastCallSlide } from './slides/LastCallSlide.js';
 import { HappyHourSlide } from './slides/HappyHourSlide.js';
 import { MenuSlide } from './slides/MenuSlide.js';
 import { OrdersListSlide } from './slides/OrdersListSlide.js';
-import { fillInComponentSafe } from './utilities/misc.js';
+import { escapeHtml, fillInComponentSafe } from './utilities/misc.js';
 //import * as WeatherSlide from './slides/weather';
 
 const data: InitialServerData = window.getData();
@@ -526,6 +526,20 @@ function updateMenu(menu: Menu) {
 }
 
 /* End: Menus */
+
+// Falls back to the OpenWeatherMap-hosted icon when the locally bundled one
+// (set via .dailyIcon img's src, see prepareWeatherSlide/prepareWeatherDailySlide)
+// fails to load. Delegated on the capture phase, since 'error' on <img> doesn't
+// bubble; this replaces an inline onerror= attribute, which nonces can't cover.
+document.addEventListener('error', (event) => {
+  const img = event.target;
+  if (!(img instanceof HTMLImageElement) || !img.dataset.icon) {
+    return;
+  }
+  const icon = img.dataset.icon;
+  delete img.dataset.icon;
+  img.src = `https://openweathermap.org/img/wn/${icon}@2x.png`;
+}, true);
 
 /**
  * @deprecated TODO: move to Slide
@@ -1531,9 +1545,9 @@ function displayMultipleNinaAlerts(alerts: NinaAlert[]) {
     const isOdd = index % 2 !== 0; // Alternating
     let titleText = "";
     if (config.locale === 'de') {
-      titleText = alert.title;
+      titleText = escapeHtml(alert.title);
     } else {
-      titleText = alert.title_en ? alert.title_en : alert.title;
+      titleText = escapeHtml(alert.title_en ? alert.title_en : alert.title);
     }
 
     const timeText = formatAlertDuration(alert.start, alert.end);
@@ -1647,10 +1661,10 @@ function prepareNinaAlert(alert: NinaAlert): void {
   }
 
   if (config.locale === 'de') {
-    message += alert.message;
+    message += escapeHtml(alert.message);
     setAlertTitle("NINA: " + alert.title);
   } else {
-    message += alert.message_en ? alert.message_en : alert.message;
+    message += escapeHtml(alert.message_en ? alert.message_en : alert.message);
     setAlertTitle("NINA: " + (alert.title_en ? alert.title_en : alert.title));
   }
   if (message.length > 500) {

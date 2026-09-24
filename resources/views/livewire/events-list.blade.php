@@ -62,11 +62,12 @@
                         <span class="fw-bolder">{{ $event->name }}</span>
                     </span>
                     <small>
-                        {!! $event->user
-                        ? $event->user->name
-                        : '<i class="fas fa-fw fa-robot" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="' .
-                                    __('Imported') .
-                                    '"></i>' !!}
+                        @if ($event->user)
+                            {{ $event->user->name }}
+                        @else
+                            <i class="fas fa-fw fa-robot" data-bs-toggle="tooltip" data-bs-placement="left"
+                                data-bs-title="{{ __('Imported') }}"></i>
+                        @endif
                     </small>
                 </a>
                 <div class="card-body py-2">

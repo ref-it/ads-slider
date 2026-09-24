@@ -46,7 +46,7 @@
                 </div>
             </div>
             <div class="card-footer text-body-secondary">
-                <form action="{{ route('pics.destroySource', $source) }}" method="POST" onsubmit="return confirm('{{ __('Delete this format?') }}');">
+                <form action="{{ route('pics.destroySource', $source) }}" method="POST" data-confirm="{{ __('Delete this format?') }}">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-sm btn-danger" {{ $picture->sources->count() <= 1 ? 'disabled' : '' }}>{{ __('Delete format') }}</button>
@@ -66,7 +66,7 @@
     </div>
 </form>
 
-<script>
+<script @cspNonce>
     (function() {
         function setPosition(text, val) {
             text.css('top', '').css('bottom', '').css('left', '').css('right', '').css('transform', '');

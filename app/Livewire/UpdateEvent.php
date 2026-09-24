@@ -31,6 +31,12 @@ class UpdateEvent extends Component
         $this->form->exceptionDates = $dates;
     }
 
+    #[On('rrule-updated')]
+    public function syncRrule(?string $rrule): void
+    {
+        $this->form->rrule = $rrule;
+    }
+
     public function mount(Event $event, $avUpdating)
     {
         if ($avUpdating && ! auth()->check()) {

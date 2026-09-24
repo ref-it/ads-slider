@@ -223,9 +223,7 @@
                                 @endforeach
                             @endif
                             <hr>
-                            <a class="dropdown-item text-danger" href="{{ route('logout') }}"
-                                onclick="event.preventDefault();
-                                             document.getElementById('logout-form').submit();">
+                            <a class="dropdown-item text-danger" href="{{ route('logout') }}" data-submit-form="logout-form">
                                 <i class="fa-solid fa-fw fa-person-through-window"></i>&nbsp;{{ __('Logout') }}
                             </a>
 

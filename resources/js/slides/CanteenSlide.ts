@@ -5,6 +5,7 @@ dayjs.extend(isBetween);
 import { CanteenMeal, CanteenSlideData } from "../types.js";
 import { Mediator } from "../patterns/Mediator.js";
 import { Manager, SlideEvents } from '../manager.js';
+import { escapeHtml } from "../utilities/misc.js";
 import { Slide } from "./Slide.js";
 
 interface CanteenPage {
@@ -150,7 +151,7 @@ export class CanteenSlide extends Slide {
 
         return `
             <div class="${boxClass}">
-                <span class="canteenMealName">${meal.name}</span>
+                <span class="canteenMealName">${escapeHtml(meal.name)}</span>
                 ${prices}
             </div>
         `;

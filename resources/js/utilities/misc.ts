@@ -1,3 +1,5 @@
+export { default as escapeHtml } from 'lodash/escape.js';
+
 /**
  *
  * @param {string} text The text to fix

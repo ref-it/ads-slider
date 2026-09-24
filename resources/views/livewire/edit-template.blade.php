@@ -70,7 +70,7 @@
     </div>
 </div>
 
-<script>
+<script @cspNonce>
     document.addEventListener('alpine:init', () => {
         Alpine.store('ui', {
             isDeleting: false,

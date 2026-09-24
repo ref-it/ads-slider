@@ -229,7 +229,7 @@
 @endsection
 
 @section('scripts')
-<script type="module">
+<script type="module" @cspNonce>
     document.querySelectorAll('.copy-deployment-link').forEach((btn) => {
         btn.addEventListener('click', () => {
             navigator.clipboard.writeText(btn.dataset.link).then(() => {

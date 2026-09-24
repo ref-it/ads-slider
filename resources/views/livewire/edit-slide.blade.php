@@ -23,7 +23,7 @@
 
         <div x-data="{ isDeleting: false }">
             <template x-if="!isDeleting">
-                <livewire:recurrence-editor wire:model.live="form.rrule" :exception-dates="$form->exceptionDates" />
+                <livewire:recurrence-editor :rrule="$form->rrule" :exception-dates="$form->exceptionDates" />
             </template>
 
             <x-forms.inputs.checkbox name="form.disabled" label="{{ __('Disabled') }}">
@@ -115,7 +115,7 @@
 </div>
 
 @if ($action === 'edit' && $form->media_type === 'picture')
-<script>
+<script @cspNonce>
     document.addEventListener('livewire:initialized', () => {
         const bgColor = document.getElementById('form.media_bg_color');
         const color = document.getElementById('form.media_color');

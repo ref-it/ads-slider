@@ -16,7 +16,7 @@
 
     <!-- Styles -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
-    <script>
+    <script @cspNonce>
         /*!
          * Color mode toggler for Bootstrap's docs (https://getbootstrap.com/)
          * Copyright 2011-2023 The Bootstrap Authors
@@ -142,7 +142,7 @@
     </div>
 
     <!-- Scripts -->
-    <script type="module">
+    <script type="module" @cspNonce>
         $('div.alert').not('.alert-important').delay(3000).fadeOut(350);
     </script>
     @yield('scripts')

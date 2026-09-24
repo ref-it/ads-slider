@@ -48,7 +48,7 @@
                 <x-forms.inputs.time name="form.end_time" required label="{{ __('End Time') }}" />
                 <div x-data>
                     <template x-if="!$store.ui.isDeleting">
-                        <livewire:recurrence-editor wire:model.live="form.rrule" :exception-dates="$form->exceptionDates" />
+                        <livewire:recurrence-editor :rrule="$form->rrule" :exception-dates="$form->exceptionDates" />
                     </template>
                 </div>
                 <x-forms.inputs.date name="form.start" label="{{ __('Start') }}" />
@@ -177,7 +177,7 @@
     </div>
 </div>
 
-<script>
+<script @cspNonce>
     document.addEventListener('alpine:init', () => {
         Alpine.store('ui', {
             isDeleting: false,

@@ -3,25 +3,19 @@
 namespace App\Livewire;
 
 use Carbon\Carbon;
-use Livewire\Attributes\Modelable;
 use Livewire\Component;
 
 /**
  * Edits a Schedule's recurrence as a custom RRULE (frequency, interval,
- * weekly weekdays, end date). Exception dates (RRULE EXDATE) are managed
- * here too, but - unlike $rrule - aren't Modelable, since Livewire only
- * binds one property via wire:model per component tag; the parent listens
- * for the 'exception-dates-updated' event instead.
+ * weekly weekdays, end date). $rrule is pushed up to the parent via the
+ * 'rrule-updated' event rather than a #[Modelable] wire:model binding:
+ * Livewire's Modelable synth for nested components relies on its eval-based
+ * expression evaluator, which breaks under Livewire's CSP-safe mode. Exception
+ * dates (RRULE EXDATE) already used this same dispatch pattern beforehand,
+ * since Livewire only binds one property via wire:model per component tag.
  */
 class RecurrenceEditor extends Component
 {
-    /**
-     * Nullable despite always being assigned a string internally: the
-     * generic TrimStringsAndConvertEmptyStringsToNull hook on the parent
-     * form coerces an empty-string push-up of this modelable binding back
-     * into null, which Livewire then reflects back down into this property.
-     */
-    #[Modelable]
     public ?string $rrule = '';
 
     /** @var string[] */
@@ -49,6 +43,7 @@ class RecurrenceEditor extends Component
     {
         if (in_array($name, ['frequency', 'interval', 'byDay', 'untilDate'], true) || str_starts_with($name, 'byDay.')) {
             $this->rrule = $this->buildRruleFromCustomFields();
+            $this->dispatch('rrule-updated', rrule: $this->rrule);
         }
     }
 

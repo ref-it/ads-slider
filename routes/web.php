@@ -21,6 +21,9 @@ use App\Http\Controllers\HappyHourController;
 use App\Http\Controllers\LocalizationController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\MonitorController;
+use App\Support\Csp\AdminPreset;
+use App\Support\Csp\MonitorPreset;
+use Spatie\Csp\AddCspHeaders;
 use App\Http\Controllers\PictureController;
 use App\Http\Controllers\RealmController;
 use App\Http\Controllers\SlideController;
@@ -33,7 +36,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/monitors');
-Route::get('lang/{locale}', [LocalizationController::class, 'index']);
 Route::get('status.json', function () {
     return ['status' => 'OK'];
 });
@@ -46,84 +48,92 @@ Route::get('/latest/{monitor:api_token}', [MonitorController::class, 'collectLas
 Route::get('/showEvents/{monitor:api_token}', [MonitorController::class, 'display'])->name('showEventsToken')
     ->missing(function (Request $request) {
         abort(403);
-    });
+    })
+    ->middleware(AddCspHeaders::class.':'.MonitorPreset::class);
 Route::get('Content/{monitor:api_token}/data.json', [MonitorController::class, 'getJson']);
-
-// Authentication routes
-Auth::routes(['register' => false, 'verify' => true]);
-
-// Optional OIDC login (the controller itself 404s unless services.openidconnect.enabled is true)
-Route::get('login/oidc/redirect', [OidcController::class, 'redirect'])->name('oidc.redirect');
-Route::get('login/oidc/callback', [OidcController::class, 'callback'])->name('oidc.callback');
 
 // Back-channel logout: server-to-server call from the IdP, not a browser request.
 Route::post('oidc/backchannel-logout', [OidcController::class, 'backchannelLogout'])
     ->name('oidc.backchannel-logout')
     ->withoutMiddleware(['web']);
 
-// Authenticated & verified users
-Route::middleware(['verified', 'auth'])->group(function () {
-    // User profile
-    Route::resource('users', UserController::class)->only(['edit', 'update']);
-    Route::post('realm-switch/{realm}', [UserController::class, 'switchRealm'])->name('realm.switch');
+// Everything below renders the admin panel (layouts/app.blade.php, Livewire/Alpine).
+Route::middleware(AddCspHeaders::class.':'.AdminPreset::class)->group(function () {
+    Route::get('lang/{locale}', [LocalizationController::class, 'index']);
 
-    // Events
-    Route::get('/events', EventsList::class)->name('events.index');
-    Route::get('/events/create/{template_id}', [EventController::class, 'create'])->name('events.create.template');
-    Route::resource('events', EventController::class)->only(['create', 'edit']);
-    Route::get('/events/{event}/happy-hours/create', [HappyHourController::class, 'create'])->name('events.happyHours.create');
-    Route::get('/events/{event}/happy-hours/{happyHour}/edit', [HappyHourController::class, 'edit'])->name('events.happyHours.edit');
+    // Authentication routes
+    Auth::routes(['register' => false, 'verify' => true]);
 
-    // Templates
-    Route::resource('templates', TemplateController::class)->only(['index', 'create', 'edit']);
+    // Optional OIDC login (the controller itself 404s unless services.openidconnect.enabled is true)
+    Route::get('login/oidc/redirect', [OidcController::class, 'redirect'])->name('oidc.redirect');
+    Route::get('login/oidc/callback', [OidcController::class, 'callback'])->name('oidc.callback');
 
-    // Picture sources (per-slide media formats; the picture itself is managed
-    // entirely through its Slide, see below)
-    Route::post('pics/{pic}/source', [PictureController::class, 'storeSource'])->name('pics.storeSource');
-    Route::put('pics/source/{source}', [PictureController::class, 'updateSource'])->name('pics.updateSource');
-    Route::delete('pics/source/{source}', [PictureController::class, 'destroySource'])->name('pics.destroySource');
+    // Authenticated & verified users
+    Route::middleware(['verified', 'auth'])->group(function () {
+        // User profile
+        Route::resource('users', UserController::class)->only(['edit', 'update']);
+        Route::post('realm-switch/{realm}', [UserController::class, 'switchRealm'])->name('realm.switch');
 
-    // Slides (picture & video, unified) - a Picture/Video belongs to exactly
-    // one Slide and is created/edited/deleted through it, not separately.
-    Route::resource('slides', SlideController::class)->only(['index', 'create', 'edit']);
+        // Events
+        Route::get('/events', EventsList::class)->name('events.index');
+        Route::get('/events/create/{template_id}', [EventController::class, 'create'])->name('events.create.template');
+        Route::resource('events', EventController::class)->only(['create', 'edit']);
+        Route::get('/events/{event}/happy-hours/create', [HappyHourController::class, 'create'])->name('events.happyHours.create');
+        Route::get('/events/{event}/happy-hours/{happyHour}/edit', [HappyHourController::class, 'edit'])->name('events.happyHours.edit');
 
-    // Menus
-    Route::resource('menus', MenuController::class)->only(['index', 'create', 'edit', 'destroy']);
+        // Templates
+        Route::resource('templates', TemplateController::class)->only(['index', 'create', 'edit']);
 
-    // Canteens
-    Route::resource('canteens', CanteenController::class)->only(['index', 'create', 'edit']);
+        // Picture sources (per-slide media formats; the picture itself is managed
+        // entirely through its Slide, see below)
+        Route::post('pics/{pic}/source', [PictureController::class, 'storeSource'])->name('pics.storeSource');
+        Route::put('pics/source/{source}', [PictureController::class, 'updateSource'])->name('pics.updateSource');
+        Route::delete('pics/source/{source}', [PictureController::class, 'destroySource'])->name('pics.destroySource');
 
-    // Monitors
-    Route::resource('monitors', MonitorController::class)->except(['destroy', 'store', 'update']);
-    Route::get('/show/{monitor}', [MonitorController::class, 'display'])
-        ->name('showEvents')
-        ->middleware('can:view,monitor');
-});
+        // Slides (picture & video, unified) - a Picture/Video belongs to exactly
+        // one Slide and is created/edited/deleted through it, not separately.
+        Route::resource('slides', SlideController::class)->only(['index', 'create', 'edit']);
 
-// Token-protected routes
-Route::middleware('token')->group(function () {
-    // Event API edits
-    Route::get('/events/{event}/edit/{api_token}', [EventController::class, 'edit'])->name('events.avedit');
-    Route::get('/events/{event}/happy-hours/create/{api_token}', [HappyHourController::class, 'create'])->name('events.happyHours.avcreate');
-    Route::get('/events/{event}/happy-hours/{happyHour}/edit/{api_token}', [HappyHourController::class, 'edit'])->name('events.happyHours.avedit');
-    // Route::put('/events/{event}/{api_token}', [EventController::class, 'update'])->name('events.avupdate');
+        // Menus
+        Route::resource('menus', MenuController::class)->only(['index', 'create', 'edit', 'destroy']);
 
-    // Media views
-    Route::get('pics/{pic}', [PictureController::class, 'show'])->name('pics.show');
-    Route::get('menus/{menu}', [MenuController::class, 'show'])->name('menus.show');
-    Route::get('videos/{video}', [VideoController::class, 'show'])->name('videos.show');
+        // Canteens
+        Route::resource('canteens', CanteenController::class)->only(['index', 'create', 'edit']);
 
-    // Monitor statistics
-    Route::post('monitors/stats/{monitor:api_token}', [MonitorController::class, 'storeStats']);
-});
+        // Monitors. This preview route also carries the outer group's AdminPreset,
+        // but MonitorPreset wins: it's the innermost middleware, so it sets the
+        // header first on the way out, and AddCspHeaders skips if one is already set.
+        Route::resource('monitors', MonitorController::class)->except(['destroy', 'store', 'update']);
+        Route::get('/show/{monitor}', [MonitorController::class, 'display'])
+            ->name('showEvents')
+            ->middleware(['can:view,monitor', AddCspHeaders::class.':'.MonitorPreset::class]);
+    });
 
-// Admins only
-Route::middleware(['verified', 'auth', 'isAdmin'])->group(function () {
-    Route::get('alerts', [AlertController::class, 'index'])->name('alerts.index');
-    Route::post('alerts', [AlertController::class, 'create']);
-    Route::resource('realms', RealmController::class)->only(['edit']);
-    Route::resource('eventsImports', EventsImportController::class)->only(['index', 'create', 'edit']);
-    Route::post('/eventsImports/run/{import}/{force?}/{disabled?}', [EventsImportController::class, 'runImport'])->name('eventsImports.run');
-    Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-    Route::post('register', [RegisterController::class, 'register']);
+    // Token-protected routes
+    Route::middleware('token')->group(function () {
+        // Event API edits
+        Route::get('/events/{event}/edit/{api_token}', [EventController::class, 'edit'])->name('events.avedit');
+        Route::get('/events/{event}/happy-hours/create/{api_token}', [HappyHourController::class, 'create'])->name('events.happyHours.avcreate');
+        Route::get('/events/{event}/happy-hours/{happyHour}/edit/{api_token}', [HappyHourController::class, 'edit'])->name('events.happyHours.avedit');
+        // Route::put('/events/{event}/{api_token}', [EventController::class, 'update'])->name('events.avupdate');
+
+        // Media views
+        Route::get('pics/{pic}', [PictureController::class, 'show'])->name('pics.show');
+        Route::get('menus/{menu}', [MenuController::class, 'show'])->name('menus.show');
+        Route::get('videos/{video}', [VideoController::class, 'show'])->name('videos.show');
+
+        // Monitor statistics
+        Route::post('monitors/stats/{monitor:api_token}', [MonitorController::class, 'storeStats']);
+    });
+
+    // Admins only
+    Route::middleware(['verified', 'auth', 'isAdmin'])->group(function () {
+        Route::get('alerts', [AlertController::class, 'index'])->name('alerts.index');
+        Route::post('alerts', [AlertController::class, 'create']);
+        Route::resource('realms', RealmController::class)->only(['edit']);
+        Route::resource('eventsImports', EventsImportController::class)->only(['index', 'create', 'edit']);
+        Route::post('/eventsImports/run/{import}/{force?}/{disabled?}', [EventsImportController::class, 'runImport'])->name('eventsImports.run');
+        Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+        Route::post('register', [RegisterController::class, 'register']);
+    });
 });

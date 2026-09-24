@@ -12,6 +12,6 @@ role="alert"
 </button>
 @endif
 
-{!! $bannerMessage !!}
+{{ $bannerMessage }}
 </div>
 @endif

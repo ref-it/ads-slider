@@ -26,6 +26,12 @@ class EditCanteen extends Component
         $this->form->exceptionDates = $dates;
     }
 
+    #[On('rrule-updated')]
+    public function syncRrule(?string $rrule): void
+    {
+        $this->form->rrule = $rrule;
+    }
+
     public function createCanteen()
     {
         $this->authorize('create', Schedule::class);

@@ -84,7 +84,7 @@ class EditRealm extends Component
 
         $this->form->dwd_station_id = $station['id'];
         flash(__('Nearest DWD station found: :name (:distance km away)', [
-            'name' => $station['name'],
+            'name' => e($station['name']),
             'distance' => $station['distance_km'],
         ]))->success();
     }
