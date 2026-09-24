@@ -10,7 +10,7 @@ export class WeatherDailyForecastSlide extends Slide {
     onStart(): void {
         super.onStart();
         Manager.Instance.restoreMainColor();
-        this.displaySlideWithAnimation('bounceInLeft');
+        this.displaySlideWithAnimation('fadeInLeft');
         console.log("WeatherDailyForecast started");
     }
 
@@ -26,7 +26,7 @@ export class WeatherDailyForecastSlide extends Slide {
     onStop(): void {
         super.onStop();
         this.clearTimeout();
-        this.hideSlideWithAnimation('bounceOutLeft');
+        this.hideSlideWithAnimation('fadeOutLeft');
     }
 
     onDestroy(): void {

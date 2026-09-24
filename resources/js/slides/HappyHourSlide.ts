@@ -40,7 +40,7 @@ export class HappyHourSlide extends UnskippableSlide {
 
     onStop(): void {
         super.onStop();
-        this.hideSlideWithAnimation('bounceOutUp');
+        this.hideSlideWithAnimation('fadeOutUp');
         this.countdown?.stop(true);
     }
 }
