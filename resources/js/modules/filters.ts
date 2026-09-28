@@ -50,7 +50,7 @@ export default class Filter2 {
     }
     const now = this.getNow();
     if (this.config.show_event_while_is_happening) {
-      if (event.repeat) {
+      if (event.repeat || event.rrule) {
         if (now.isSame(event.startDate, 'day')) {
           return now.isBefore(event.endDate);
         }
@@ -59,7 +59,7 @@ export default class Filter2 {
       return now.isBefore(event.endDate);
     }
 
-    if (event.repeat) {
+    if (event.repeat || event.rrule) {
       if (now.isSame(event.startDate, 'day')) {
         return now.isBefore(event.startDate);
       }
@@ -119,12 +119,8 @@ export default class Filter2 {
   isHappyHour(event : AdsEvent)  : boolean{
     // If the event was cancelled, the happy hour should also not be shown
     if (event.cancelled) return false;
-    if (event.happy_hour && typeof event.happy_hour === 'object' && event.cancelled === false) {
-      const happyHourStart = dayjs(event.happy_hour.start);
-      const happyHourEnd = dayjs(event.happy_hour.end);
-      return this.getNow().isBetween(happyHourStart, happyHourEnd);
-    }
-    return false;
+    if (!event.happy_hours || event.happy_hours.length === 0) return false;
+    return event.happy_hours.some(hh => this.getNow().isBetween(dayjs(hh.start), dayjs(hh.end)));
   }
 
   isHappeningNow(event : AdsEvent)  : boolean{

@@ -42,6 +42,9 @@ class MonitorForm extends Form
     public $show_cancelled_events = true;
 
     #[Validate('boolean')]
+    public $show_events = true;
+
+    #[Validate('boolean')]
     public $show_menus = true;
 
     #[Validate('boolean')]
@@ -51,6 +54,9 @@ class MonitorForm extends Form
     public $show_pictures = true;
 
     #[Validate('boolean')]
+    public $show_canteens = false;
+
+    #[Validate('boolean')]
     public $show_videos = true;
 
     #[Validate('boolean')]
@@ -58,6 +64,9 @@ class MonitorForm extends Form
 
     #[Validate('boolean')]
     public $show_weather_forecast = true;
+
+    #[Validate('boolean')]
+    public $show_weather_daily_forecast = false;
 
     #[Validate('boolean')]
     public $use_animations = true;
@@ -87,9 +96,13 @@ class MonitorForm extends Form
         }
 
         $realm = $this->monitor->realm ?? Auth::user()->realm;
-        if (empty($realm?->ow_api_key)) {
+        if (! $realm?->hasWeatherProviderConfigured()) {
             $this->show_weather_forecast = false;
             $validated['show_weather_forecast'] = false;
+        }
+        if (! $realm?->hasDailyWeatherProviderConfigured()) {
+            $this->show_weather_daily_forecast = false;
+            $validated['show_weather_daily_forecast'] = false;
         }
 
         if ($this->marketing_sentences) {
@@ -136,15 +149,20 @@ class MonitorForm extends Form
         $this->show_final_rounds = (bool) $m->show_final_rounds;
         $this->show_we_are_closing = (bool) $m->show_we_are_closing;
         $this->show_we_are_closed_marketing = (bool) $m->show_we_are_closed_marketing;
-        $this->marketing_sentences = is_array($m->marketing_sentences) ? implode("\n", $m->marketing_sentences) : '';
-        $this->schedule = is_array($m->schedule) ? implode("\n", $m->schedule) : '';
+        $this->marketing_sentences = is_array($m->marketing_sentences) ? implode("
+", $m->marketing_sentences) : '';
+        $this->schedule = is_array($m->schedule) ? implode("
+", $m->schedule) : '';
         $this->show_cancelled_events = (bool) $m->show_cancelled_events;
+        $this->show_events = (bool) $m->show_events;
         $this->show_menus = (bool) $m->show_menus;
         $this->show_happy_hours = (bool) $m->show_happy_hours;
         $this->show_pictures = (bool) $m->show_pictures;
+        $this->show_canteens = (bool) $m->show_canteens;
         $this->show_videos = (bool) $m->show_videos;
         $this->show_karaoke = (bool) $m->show_karaoke;
         $this->show_weather_forecast = (bool) $m->show_weather_forecast;
+        $this->show_weather_daily_forecast = (bool) $m->show_weather_daily_forecast;
         $this->use_animations = (bool) $m->use_animations;
         $this->show_marquee = (bool) $m->show_marquee;
         $this->show_event_while_is_happening = (bool) $m->show_event_while_is_happening;

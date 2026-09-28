@@ -29,7 +29,7 @@ import $ from 'jquery';
 import _ from './localization.js';
 import '../sass/slider.scss';
 import './bootstrap.mjs';
-import type { Config, PictureSlide, VideoSlide, AdsEvent, InitialServerData, Menu, ElementWithRealStartDate, ServerData, WeatherData, OrderslistData } from './types.js';
+import type { Config, PictureSlide, VideoSlide, CanteenSlideData, AdsEvent, InitialServerData, Menu, ElementWithRealStartDate, ServerData, WeatherData, OrderslistData } from './types.js';
 import QR from 'qrcode';
 import isSameOrAfter from 'dayjs/esm/plugin/isSameOrAfter/index.js';
 import localizedFormat from 'dayjs/esm/plugin/localizedFormat/index.js';
@@ -43,7 +43,9 @@ import { MarketingAfter } from './slides/MarketingAfter.js';
 import { InterruptionSlides, Manager, ScheduledSlideType } from './manager.js';
 import { EventStatuses, ScheduleReason } from './modules/eventStatus.js';
 import { WeatherForecastSlide } from './slides/WeatherForecastSlide.js';
+import { WeatherDailyForecastSlide } from './slides/WeatherDailyForecastSlide.js';
 import { PicsSlide } from './slides/PicsSlide.js';
+import { CanteenSlide } from './slides/CanteenSlide.js';
 import { VidsSlide } from './slides/VidsSlide.js';
 import { EventsSlide } from './slides/EventsSlide.js';
 import { PreparationSlide } from './slides/PreparationSlide.js';
@@ -53,7 +55,7 @@ import { LastCallSlide } from './slides/LastCallSlide.js';
 import { HappyHourSlide } from './slides/HappyHourSlide.js';
 import { MenuSlide } from './slides/MenuSlide.js';
 import { OrdersListSlide } from './slides/OrdersListSlide.js';
-import { fillInComponentSafe } from './utilities/misc.js';
+import { escapeHtml, fillInComponentSafe } from './utilities/misc.js';
 //import * as WeatherSlide from './slides/weather';
 
 const data: InitialServerData = window.getData();
@@ -117,13 +119,16 @@ const config: Config = {
   show_we_are_closing: !!data.m.show_we_are_closing,
   show_we_are_closed_marketing: !!data.m.show_we_are_closed_marketing && hasMarketingSentences,
   show_cancelled_events: !!data.m.show_cancelled_events,
+  show_events: !!data.m.show_events,
   show_menus: !!data.m.show_menus,
   show_orderslist: !!data.m.show_orderslist,
   show_happy_hours: !!data.m.show_happy_hours,
   show_pictures: !!data.m.show_pictures,
+  show_canteens: !!data.m.show_canteens,
   show_videos: !!data.m.show_videos,
   show_karaoke: false,// currently disabled !!data.m.show_karaoke,
   show_weather_forecast: !!data.m.show_weather_forecast,
+  show_weather_daily_forecast: !!data.m.show_weather_daily_forecast,
   use_animations: !!data.m.use_animations,
   show_marquee: false, // currently disabled !!data.m.show_marquee,
   show_event_while_is_happening: !!data.m.show_event_while_is_happening,
@@ -200,7 +205,9 @@ let schedulerWorker: Worker;
 let eventsSlide: EventsSlide | null;
 
 let weatherForecastSlide: WeatherForecastSlide | null;
+let weatherDailyForecastSlide: WeatherDailyForecastSlide | null;
 let picsSlide: PicsSlide | null;
+let canteenSlide: CanteenSlide | null;
 let vidsSlide: VidsSlide | null;
 let menuSlide: MenuSlide | null;
 let ordersListSlide: OrdersListSlide | null;
@@ -335,6 +342,11 @@ function updateData(data: ServerData): void {
     picsSlide.setPictures(pics);
   }
 
+  if (canteenSlide) {
+    const canteens = initDataWithStartAndEndDate(data.ca) as CanteenSlideData[];
+    canteenSlide.setCanteens(canteens);
+  }
+
   if (vidsSlide) {
     videos = initDataWithStartAndEndDate(data.v) as VideoSlide[];
     vidsSlide.setVideos(videos);
@@ -370,6 +382,7 @@ function updateData(data: ServerData): void {
 
   if (data?.weather) {
     prepareWeatherSlide(data.weather);
+    prepareWeatherDailySlide(data.weather);
   }
 
   if (ordersListSlide) {
@@ -532,13 +545,30 @@ function updateMenu(menu: Menu) {
 
 /* End: Menus */
 
+// Falls back to the OpenWeatherMap-hosted icon when the locally bundled one
+// (set via .dailyIcon img's src, see prepareWeatherSlide/prepareWeatherDailySlide)
+// fails to load. Delegated on the capture phase, since 'error' on <img> doesn't
+// bubble; this replaces an inline onerror= attribute, which nonces can't cover.
+document.addEventListener('error', (event) => {
+  const img = event.target;
+  if (!(img instanceof HTMLImageElement) || !img.dataset.icon) {
+    return;
+  }
+  const icon = img.dataset.icon;
+  delete img.dataset.icon;
+  img.src = `https://openweathermap.org/img/wn/${icon}@2x.png`;
+}, true);
+
 /**
  * @deprecated TODO: move to Slide
- * Fills in the given data in the weather slide
+ * Fills in the given data in the weather slide, one card per hour (styled
+ * like the daily slide's cards, see prepareWeatherDailySlide).
  */
 function prepareWeatherSlide(data: WeatherData): void {
-  const wRows = $('#weatherRows');
-  wRows.html('');
+  const columns = $('#weatherColumns');
+  // #sunRise/#sunSet live in the same row and aren't re-created, so only
+  // the per-hour cards from the last update are cleared out here.
+  columns.find('.hourColumn').remove();
 
   $('#placeName').text(data.city.name);
   const sunRise = new Date(data.city.sunrise * 1000);
@@ -550,55 +580,136 @@ function prepareWeatherSlide(data: WeatherData): void {
     getFormattedTime(sunSet.getHours(), sunSet.getMinutes()),
   );
 
-  let currentDay = -1;
-  for (let i = 0; i < data.list.length; i += 1) {
-    const row = $('#templateWeather').clone();
-    row.prop('id', `weather_${i}`);
-    const entry = data.list[i];
+  // DWD doesn't provide a perceived temperature; used here to also detect
+  // which provider the data came from, since DWD's hourly cloud cover isn't
+  // reliable enough to show either (unlike its daily sunshine total, shown
+  // on the daily slide instead).
+  const showFeelsLike = data.list.some(
+    (entry) => entry.main.feels_like !== undefined && entry.main.feels_like !== null,
+  );
+  // Toggled on #weatherColumns rather than #weather: Slide's start
+  // animation resets #weather's class attribute on every rotation
+  // (see Slide.displaySlideWithAnimation), which would otherwise wipe this.
+  $('#weatherColumns').toggleClass('weather-dwd', !showFeelsLike);
+
+  const sourceName = showFeelsLike
+    ? _._('weather_source_owm', config.locale)
+    : _._('weather_source_dwd', config.locale);
+  $('#weatherSource').text(`${_._('weather_source_label', config.locale)}: ${sourceName}`);
+
+  data.list.forEach((entry, i) => {
+    const column = $('#templateWeatherColumn').clone();
+    column.prop('id', `weather_${i}`);
     const infos = entry.main;
     const date = new Date(entry.dt * 1000);
-    const day = date.getDay();
-    if (i === 0) {
-      currentDay = day;
-      if (day === new Date().getDay()) {
-        wRows.append($(`<h4>${_._('today', config.locale)}</h4>`));
-      } else {
-        wRows.append($(`<h4>${_._('tomorrow', config.locale)}</h4>`));
-      }
-    } else if (currentDay !== day) {
-      currentDay = day;
-      wRows.append($(`<h4>${_._('tomorrow', config.locale)}</h4>`));
-    }
-    const hours = date.getHours();
-    row.find('.time').text(`${hours}:00`);
-    // row.find(".weatherIcon img").attr("src", "https://openweathermap.org/img/wn/"+entry.weather[0].icon+"@2x.png");
 
-    // Show the weather icon, animated or not
-    row
-      .find('.weatherIcon img')
+    column.find('.dailyDate').text(getFormattedTime(date.getHours(), 0));
+
+    column
+      .find('.dailyIcon img')
       .attr('data-icon', entry.weather[0].icon)
       .attr(
         'src',
         `${config.base_root}img/amcharts_weather_icons/${config.use_animations ? 'animated' : 'static'}/${entry.weather[0].icon}.${config.use_animations ? 'svg' : 'png'}`,
       );
 
-    row
-      .find('.weatherTemperature span:first-of-type')
-      .text(infos.temp.toFixed(1))
-      .css('color', getTemperatureColor(infos.temp));
-    row
-      .find('.weatherTemperature span.temp_feels')
-      .text(infos.feels_like.toFixed(1))
-      .css('color', getTemperatureColor(infos.feels_like));
-    row.find('.weatherDescr').text(entry.weather[0].description);
-    row.find('.weatherCloud span:first-of-type').text(entry.clouds.all);
-    if (i % 2) {
-      row.addClass('even');
+    // Rounded once and reused for both the label and its color, so a value
+    // that rounds up (e.g. 21.6) can't end up shown as "22" while still
+    // being colored as if it were 21.
+    const temp = Math.round(infos.temp);
+    column.find('.weatherTemp').text(temp).css('color', getTemperatureColor(temp));
+    if (infos.feels_like !== undefined && infos.feels_like !== null) {
+      const feelsLike = Math.round(infos.feels_like);
+      column
+        .find('.temp_feels')
+        .text(feelsLike)
+        .css('color', getTemperatureColor(feelsLike));
+      column.find('.temp_feels_row').show();
+    } else {
+      column.find('.temp_feels_row').hide();
     }
-    row.show();
-    wRows.append(row);
-  }
+
+    column.find('.weatherCloudValue').text(entry.clouds.all);
+
+    if (entry.wind?.speed !== undefined && entry.wind?.speed !== null) {
+      column.find('.weatherWindValue').text((entry.wind.speed * 3.6).toFixed(0));
+      column.find('.weatherWind').show();
+    } else {
+      column.find('.weatherWind').hide();
+    }
+
+    // #sunTimes should stay the rightmost column, so hour cards are
+    // inserted right before it instead of appended to the end.
+    column.show().insertBefore('#sunTimes');
+  });
   weatherDataLastUpdate = getNow();
+}
+
+/**
+ * Fills in the multi-day weather outlook, one column per day. DWD-only:
+ * data.daily is absent for OpenWeatherMap-sourced data, in which case the
+ * slide keeps whatever it last showed (it stays hidden, see manager.ts).
+ */
+function prepareWeatherDailySlide(data: WeatherData): void {
+  if (!data.daily || data.daily.length === 0) {
+    return;
+  }
+
+  $('#dailyPlaceName').text(data.city.name);
+
+  const columns = $('#weatherDailyColumns');
+  columns.html('');
+
+  const todayLabel = new Date().toDateString();
+
+  data.daily.forEach((day, i) => {
+    const column = $('#templateWeatherDailyColumn').clone();
+    column.prop('id', `weather-daily-${i}`);
+
+    const date = day.date ? new Date(day.date) : null;
+    const isToday = date !== null && date.toDateString() === todayLabel;
+    column
+      .find('.dailyDate')
+      .text(isToday ? _._('today', config.locale) : date ? dayjs(date).format('ddd') : '');
+
+    const icon = day.weather[0]?.icon ?? 'unknown';
+    column
+      .find('.dailyIcon img')
+      .attr('data-icon', icon)
+      .attr(
+        'src',
+        `${config.base_root}img/amcharts_weather_icons/${config.use_animations ? 'animated' : 'static'}/${icon}.${config.use_animations ? 'svg' : 'png'}`,
+      );
+
+    const tempMax = day.temp_max !== null ? Math.round(day.temp_max) : null;
+    column
+      .find('.dailyMax')
+      .text(tempMax !== null ? tempMax : '–')
+      .css('color', tempMax !== null ? getTemperatureColor(tempMax) : '');
+    const tempMin = day.temp_min !== null ? Math.round(day.temp_min) : null;
+    column
+      .find('.dailyMin')
+      .text(tempMin !== null ? tempMin : '–')
+      .css('color', tempMin !== null ? getTemperatureColor(tempMin) : '');
+
+    if (day.sunshine !== null && day.sunshine !== undefined) {
+      column.find('.dailySunshine').show();
+      column.find('.dailySunshineValue').text((day.sunshine / 60).toFixed(1));
+      column.find('.dailySunshine span.superscript').text(_._('hour_abbr', config.locale));
+    } else {
+      column.find('.dailySunshine').hide();
+    }
+
+    if (day.wind_speed !== null && day.wind_speed !== undefined) {
+      column.find('.dailyWind').show();
+      column.find('.dailyWindValue').text((day.wind_speed * 3.6).toFixed(0));
+    } else {
+      column.find('.dailyWind').hide();
+    }
+
+    column.show();
+    columns.append(column);
+  });
 }
 
 /**
@@ -771,17 +882,29 @@ function pullTimeDeltaFromServer(): void {
 }
 
 function initalizeSlides(): void {
-  eventsSlide = new EventsSlide(manager, document.getElementById('event-slide') as HTMLDivElement);
-  manager.registerSlide(eventsSlide, ScheduledSlideType.EVENTS);
+  if (config.show_events) {
+    eventsSlide = new EventsSlide(manager, document.getElementById('event-slide') as HTMLDivElement);
+    manager.registerSlide(eventsSlide, ScheduledSlideType.EVENTS);
+  }
 
   if (config.show_weather_forecast) {
     weatherForecastSlide = new WeatherForecastSlide(manager, document.getElementById('weather') as HTMLDivElement);
     manager.registerSlide(weatherForecastSlide, ScheduledSlideType.WEATHER);
   }
 
+  if (config.show_weather_daily_forecast) {
+    weatherDailyForecastSlide = new WeatherDailyForecastSlide(manager, document.getElementById('weather-daily') as HTMLDivElement);
+    manager.registerSlide(weatherDailyForecastSlide, ScheduledSlideType.WEATHER_DAILY);
+  }
+
   if (config.show_pictures) {
     picsSlide = new PicsSlide(manager, document.getElementById('pics-container') as HTMLDivElement, config.base_root, config.api_token);
     manager.registerSlide(picsSlide, ScheduledSlideType.PICS);
+  }
+
+  if (config.show_canteens) {
+    canteenSlide = new CanteenSlide(manager, document.getElementById('canteen') as HTMLDivElement);
+    manager.registerSlide(canteenSlide, ScheduledSlideType.CANTEEN);
   }
 
   if (config.show_videos) {
@@ -834,7 +957,7 @@ function startFromEvent(schedule: SchedulerItem, forceRefresh = false) {
         if (!e)
           throw new Error(`Event with ID ${schedule.event_id} not found`);
         prepSlide.initSlide(e.name, e.icon);
-        prepSlide.setDeadline(e.startDate);
+        prepSlide.setDeadline(e.startDate, e.startDate.subtract(e.preparation_time ?? 30, 'minutes'));
         manager.startSlide(prepSlide, forceRefresh);
       }
       break;
@@ -843,7 +966,8 @@ function startFromEvent(schedule: SchedulerItem, forceRefresh = false) {
         const e = getEventById(schedule.event_id);
         if (!e)
           throw new Error(`Event with ID ${schedule.event_id} not found`);
-        happyHourSlide.initHappyHour(e.happy_hour);
+        const hh = e.happy_hours.find(h => h.id === schedule.happy_hour_id) ?? null;
+        happyHourSlide.initHappyHour(hh);
         manager.startSlide(happyHourSlide, forceRefresh);
       }
       break;
@@ -852,7 +976,7 @@ function startFromEvent(schedule: SchedulerItem, forceRefresh = false) {
         const e = getEventById(schedule.event_id);
         if (!e)
           throw new Error(`Event with ID ${schedule.event_id} not found`);
-        lastCallSlide.initSlide(e.endDate.subtract(15, 'minutes'));
+        lastCallSlide.initSlide(e.endDate.subtract(15, 'minutes'), e.endDate.subtract(30, 'minutes'), e.name);
         manager.startSlide(lastCallSlide, forceRefresh);
       }
       break;
@@ -1046,6 +1170,7 @@ function init(): void {
       console.log('[WS] WEATHER UPDATED');
       console.dir(response);
       prepareWeatherSlide(response.data);
+      prepareWeatherDailySlide(response.data);
       weatherOffline = false;
     });
   //alert(`alerts-${config.realm_id}`);
@@ -1121,6 +1246,9 @@ function init(): void {
           break;
         case 'k':
           manager.skipScheduleTo(ScheduledSlideType.KARAOKE);
+          break;
+        case 'c':
+          manager.skipScheduleTo(ScheduledSlideType.CANTEEN);
           break;
         default:
         //
@@ -1435,9 +1563,9 @@ function displayMultipleNinaAlerts(alerts: NinaAlert[]) {
     const isOdd = index % 2 !== 0; // Alternating
     let titleText = "";
     if (config.locale === 'de') {
-      titleText = alert.title;
+      titleText = escapeHtml(alert.title);
     } else {
-      titleText = alert.title_en ? alert.title_en : alert.title;
+      titleText = escapeHtml(alert.title_en ? alert.title_en : alert.title);
     }
 
     const timeText = formatAlertDuration(alert.start, alert.end);
@@ -1551,10 +1679,10 @@ function prepareNinaAlert(alert: NinaAlert): void {
   }
 
   if (config.locale === 'de') {
-    message += alert.message;
+    message += escapeHtml(alert.message);
     setAlertTitle("NINA: " + alert.title);
   } else {
-    message += alert.message_en ? alert.message_en : alert.message;
+    message += escapeHtml(alert.message_en ? alert.message_en : alert.message);
     setAlertTitle("NINA: " + (alert.title_en ? alert.title_en : alert.title));
   }
   if (message.length > 500) {

@@ -3,7 +3,7 @@
     <x-forms.helpers.banner :bannerMessage="$form->errorMessage" :level="$form->level" />
 
     <div class="row justify-content-center">
-        <div class="col-md-9">
+        <div class="col-md-12">
             <form wire:submit="@if($form->realm) updateRealm @else createRealm @endif">
                 <x-forms.inputs.text name="form.name" placeholder="{{__('My Realm Name')}}" required label="{{__('Name')}}">
                     <x-forms.helpers.help
@@ -34,6 +34,14 @@
                     </div>
                 </div>
 
+                <x-forms.inputs.select name="form.weather_provider" label="{{__('Weather provider')}}">
+                    <x-slot:options>
+                        <option value="">—</option>
+                        <option value="openweathermap">OpenWeatherMap</option>
+                        <option value="dwd">DWD (Deutscher Wetterdienst)</option>
+                    </x-slot>
+                </x-forms.inputs.select>
+
                 <x-forms.inputs.text name="form.ow_api_key" placeholder="<your secret>" label="{{__('Openweather API key')}}">
                     <x-forms.helpers.help
                         text="{{__('Further information: https://openweathermap.org/appid')}}" />
@@ -41,6 +49,26 @@
                 <x-forms.inputs.text name="form.ow_city_id" label="{{__('Openweather City ID')}}">
                     <x-forms.helpers.help
                         text="{{__('Find your city ID at https://openweathermap.org/find')}}" />
+                </x-forms.inputs.text>
+
+                <div class="row align-items-end">
+                    <div class="col-md-9">
+                        <x-forms.inputs.text name="form.dwd_station_id" placeholder="10865" label="{{__('DWD station ID')}}">
+                            <x-forms.helpers.help
+                                text="{{__('Find your station ID at https://www.dwd.de/DE/leistungen/klimadatendeutschland/stationsliste.html, or determine it from the latitude/longitude above.')}}" />
+                        </x-forms.inputs.text>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <button class="btn btn-outline-secondary" type="button" wire:click="findNearestDwdStation"
+                            wire:loading.attr="disabled" wire:target="findNearestDwdStation">
+                            <i class="fas fa-fw fa-location-crosshairs"></i> {{ __('Find from coordinates') }}
+                        </button>
+                    </div>
+                </div>
+
+                <x-forms.inputs.text name="form.oidc_required_group" placeholder="{{__('e.g. ads-slider-users')}}" label="{{__('OIDC required group')}}">
+                    <x-forms.helpers.help
+                        text="{{__('Users must belong to this group at the identity provider to gain access to this realm via OIDC login. Leave empty to disable OIDC access for this realm.')}}" />
                 </x-forms.inputs.text>
                 <x-forms.inputs.text name="form.orders_pull" readonly label="{{__('Orders pull')}}">
                     <x-forms.helpers.help
@@ -83,7 +111,7 @@
                 @endisset
             </form>
         </div>
-        <div class="col-md-9">
+        <div class="col-md-12">
             <h3>{{__('All Users of this realm')}}</h3>
             @forelse ($form->realm?->users as $user)
             <div class="card mb-2">

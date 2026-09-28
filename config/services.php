@@ -31,4 +31,27 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'openidconnect' => [
+        'enabled' => env('OIDC_ENABLED', false),
+        'client_id' => env('OIDC_CLIENT_ID'),
+        'client_secret' => env('OIDC_CLIENT_SECRET'),
+        'redirect' => env('OIDC_REDIRECT_URI', rtrim(env('APP_URL', 'http://localhost'), '/').'/login/oidc/callback'),
+        'base_url' => env('OIDC_BASE_URL'),
+
+        // Laravel Socialite's generic driver bootstrapping (SocialiteManager::buildProvider())
+        // passes this straight into ->scopes(), which casts a string to a single scope token
+        // instead of splitting it - so this must be a real array, not a comma-separated string.
+        'scopes' => array_values(array_filter(preg_split(
+            '/[\s,]+/',
+            env('OIDC_SCOPES', 'openid,email,profile,groups')
+        ))),
+
+        // Display name of the identity provider, shown on the login button (e.g. "StuMV").
+        'provider_name' => env('OIDC_PROVIDER_NAME', 'SSO'),
+        'require_email' => true,
+
+        // Name of the claim holding group/role membership (IdP-specific, dot-notation, e.g. "realm_access.roles").
+        'group_claim' => env('OIDC_GROUP_CLAIM', 'groups'),
+    ],
+
 ];

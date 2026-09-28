@@ -3,7 +3,7 @@
     <x-forms.helpers.banner :bannerMessage="$form->errorMessage" :level="$form->level" />
 
     <div class="row justify-content-center">
-        <div class="col-md-9">
+        <div class="col-md-12">
             <form wire:submit="@if($form->monitor) updateMonitor @else createMonitor @endif">
                 <x-forms.inputs.text name="form.name" placeholder="{{__('My Monitor Name')}}" required label="{{__('Name')}}" />
                 <x-forms.inputs.select name="form.locale" label="{{__('Locale')}}" >
@@ -27,6 +27,8 @@
                 <x-forms.inputs.checkbox name="form.show_we_are_closing" label="{{__('Show -we are closing- messages')}}"/>
 
                 <x-forms.inputs.checkbox name="form.show_we_are_closed_marketing" label="{{__('Show -we are closed- message')}}"/>
+
+                <x-forms.inputs.checkbox name="form.show_events" label="{{__('Show events')}}"/>
 
                 <x-forms.inputs.textarea name="form.marketing_sentences" rows="6" label="{{__('Marketing sentences (leave empty to use realm standard)')}}">
                     <x-forms.helpers.help
@@ -52,19 +54,35 @@
 
                 <x-forms.inputs.checkbox name="form.show_pictures" label="{{__('Show pictures')}}"/>
 
+                <x-forms.inputs.checkbox name="form.show_canteens" label="{{__('Show canteens')}}">
+                    <x-forms.helpers.help text="{{ __('Only canteens explicitly assigned to this monitor are shown.') }}" />
+                </x-forms.inputs.checkbox>
+
                 <x-forms.inputs.checkbox name="form.show_videos" label="{{__('Show videos')}}"/>
 
                 <h4 class="mt-3">{{__('Integrations')}}</h4>
 
                 <x-forms.inputs.checkbox disabled name="form.show_karaoke" label="{{__('Show karaoke'). ' (' . __('Currently deprecated') . ')'}}"/>
 
-                <x-forms.inputs.checkbox :disabled="!$hasOpenweatherApiKey" name="form.show_weather_forecast" label="{{__('Show weather forecast')}}">
-                    @if (!$hasOpenweatherApiKey)
+                <x-forms.inputs.checkbox :disabled="!$hasWeatherProviderConfigured" name="form.show_weather_forecast" label="{{__('Show weather forecast')}}">
+                    @if (!$hasWeatherProviderConfigured)
                         <x-forms.helpers.help>
                             @if ($realm && (auth()->user()->is_admin || auth()->user()->is_realm_admin))
-                                {{ __('Please set up the Openweather API Key in the') }} <a href="{{ route('realms.edit', $realm->id) }}">{{ __('settings') }}</a>.
+                                {{ __('Please set up a weather provider (OpenWeatherMap or DWD) in the') }} <a href="{{ route('realms.edit', $realm->id) }}">{{ __('settings') }}</a>.
                             @else
-                                {{ __('Please set up the Openweather API Key in the settings.') }}
+                                {{ __('Please set up a weather provider (OpenWeatherMap or DWD) in the settings.') }}
+                            @endif
+                        </x-forms.helpers.help>
+                    @endif
+                </x-forms.inputs.checkbox>
+
+                <x-forms.inputs.checkbox :disabled="!$hasDailyWeatherProviderConfigured" name="form.show_weather_daily_forecast" label="{{__('Show multi-day weather outlook')}}">
+                    @if (!$hasDailyWeatherProviderConfigured)
+                        <x-forms.helpers.help>
+                            @if ($realm && (auth()->user()->is_admin || auth()->user()->is_realm_admin))
+                                {{ __('Only available with DWD as weather provider. Please set it up in the') }} <a href="{{ route('realms.edit', $realm->id) }}">{{ __('settings') }}</a>.
+                            @else
+                                {{ __('Only available with DWD as weather provider. Please set it up in the settings.') }}
                             @endif
                         </x-forms.helpers.help>
                     @endif

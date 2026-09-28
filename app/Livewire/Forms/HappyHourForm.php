@@ -5,6 +5,7 @@ namespace App\Livewire\Forms;
 use App\Livewire\Traits\ErrorBanner;
 use App\Models\Event;
 use App\Models\HappyHour;
+use Carbon\Carbon;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 
@@ -13,6 +14,8 @@ class HappyHourForm extends Form
     use ErrorBanner;
 
     public ?Event $event = null;
+
+    public ?int $happyHourId = null;
 
     #[Validate('required|max:20')]
     public $drink = '';
@@ -32,13 +35,25 @@ class HappyHourForm extends Form
     public function setParentEvent(Event $event)
     {
         $this->event = $event;
-        if ($event->happy_hour) {
-            $this->setHappyHour($event->happy_hour);
-        }
     }
 
-    private function setHappyHour(HappyHour $hh)
+    /**
+     * Pre-fill start/end for a new Happy Hour: starting when the event
+     * (next occurrence) starts, running for one hour, so the form isn't
+     * blank and the picked defaults stay within the event's timeframe.
+     */
+    public function fillDefaults(): void
     {
+        $start = $this->event?->real_start_date ? Carbon::parse($this->event->real_start_date) : now();
+        $end = $start->copy()->addHour();
+
+        $this->start = $start->format('Y-m-d\TH:i');
+        $this->end = $end->format('Y-m-d\TH:i');
+    }
+
+    public function loadHappyHour(HappyHour $hh)
+    {
+        $this->happyHourId = $hh->id;
         $this->drink = $hh->drink;
         $this->price = $hh->price;
         $this->info = $hh->info;
@@ -46,10 +61,9 @@ class HappyHourForm extends Form
         $this->end = $hh->end;
     }
 
-    public function deleteHappyHour()
+    public function resetForm()
     {
-        $this->event->happy_hour->delete();
-        $this->event->happy_hour = null;
+        $this->happyHourId = null;
         $this->drink = '';
         $this->price = '';
         $this->info = '';
@@ -57,16 +71,25 @@ class HappyHourForm extends Form
         $this->end = '';
     }
 
-    public function saveHappyHour()
+    public function saveHappyHour(): HappyHour
     {
         $this->validate();
-        $this->event->happy_hour()->updateOrCreate(['event_id' => $this->event->id], [
+
+        $attributes = [
             'drink' => $this->drink,
             'price' => $this->price,
             'info' => $this->info,
             'start' => $this->start,
             'end' => $this->end,
-            'event_id' => $this->event->id,
-        ]);
+        ];
+
+        if ($this->happyHourId) {
+            $hh = $this->event->happy_hours()->findOrFail($this->happyHourId);
+            $hh->update($attributes);
+
+            return $hh;
+        }
+
+        return $this->event->happy_hours()->create($attributes);
     }
 }

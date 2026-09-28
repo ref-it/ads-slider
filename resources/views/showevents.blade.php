@@ -12,7 +12,6 @@
 
     @include('layouts.favicon')
     <title>NEW Ads</title>
-    <script src="{{ config('ads.fontAwesomeKitURL') }}" crossorigin="anonymous"></script>
     @vite(['resources/js/slider.ts'])
 </head>
 
@@ -39,8 +38,18 @@
         </div>
 
         <div id="final-round-container" style="display:none">
-            <div class="finalText animate__animated animate__jello animate__infinite animate__slow">{{__('Final round!')}}</div>
-            <div class="countdown"><span class="minutes">&nbsp;</span>:<span class="seconds">&nbsp;</span></div>
+            <div id="final-round-band">
+                <div class="countdown"><span class="minutes">&nbsp;</span>:<span class="seconds">&nbsp;</span></div>
+                <div id="final-round-band-label-wrap">
+                    <span id="final-round-band-label">{{__('Final round!')}}</span>
+                </div>
+            </div>
+            <div id="final-round-countdown-track">
+                <div id="final-round-countdown-bar"></div>
+            </div>
+            <div id="final-round-content">
+                <div class="event-name"></div>
+            </div>
         </div>
 
         <div id="orderslist-container" style="display:none">
@@ -68,7 +77,7 @@
 
 
         <div id="menu-container" style="display:none">
-            <div><span class="menu-name">
+            <div class="menuPageTitle"><span class="menu-name">
                     <!-- -->
                 </span><span class="menu-icon">
                     <!-- -->
@@ -108,20 +117,34 @@
         </div>
 
         <div id="preparations" style="display:none">
-            <div class="event-name"></div>
-            <i id="preparations-icon"></i>
-            <div id="in">{{__('in')}}</div>
-            <div class="countdown"><span class="minutes">&nbsp;</span>:<span class="seconds">&nbsp;</span></div>
+            <div id="preparations-band">
+                <div class="countdown"><span class="minutes">&nbsp;</span>:<span class="seconds">&nbsp;</span></div>
+                <i id="preparations-icon"></i>
+            </div>
+            <div id="preparations-countdown-track">
+                <div id="preparations-countdown-bar"></div>
+            </div>
+            <div id="preparations-content">
+                <div class="event-name"></div>
+            </div>
         </div>
 
         <div id="happy-hour-container" style="display:none">
-            <div class="happyhour animate__animated animate__jello animate__infinite animate__slow">{{__('Happy Hour!')}}</div>
-            <div id="happy-hour-drink"></div>
-            <div id="happy-hour-priceline"><span>für</span>&nbsp;<span id="price"></span></div>
-            <div id="happy-hour-extra">&nbsp;</div>
-            <div class="countdown">
-                <span class="hours">&nbsp;</span>
-                <span class="minutes">&nbsp;</span>:<span class="seconds">&nbsp;</span>
+            <div id="happy-hour-band">
+                <div class="countdown">
+                    <span class="hours">&nbsp;</span><span class="minutes">&nbsp;</span>:<span class="seconds">&nbsp;</span>
+                </div>
+                <div id="happy-hour-band-label-wrap">
+                    <span id="happy-hour-band-label">{{__('Happy Hour!')}}</span>
+                </div>
+            </div>
+            <div id="happy-hour-countdown-track">
+                <div id="happy-hour-countdown-bar"></div>
+            </div>
+            <div id="happy-hour-content">
+                <div id="happy-hour-drink"></div>
+                <div id="happy-hour-priceline"><span id="price"></span></div>
+                <div id="happy-hour-extra">&nbsp;</div>
             </div>
         </div>
 
@@ -178,59 +201,78 @@
         </div>
         <div id="weather" style="display:none">
             <div>
-                <div id="weatherTitle">
-                    <div id="theWeather">{{ __('The weather in') }}&nbsp;</div>
-                    <div id="placeName">Ilmenau</div>
+                <div id="weatherTitle" class="weatherPageTitle">
+                    <div>{{ __('The weather in') }}&nbsp;</div>
+                    <div id="placeName" class="weatherPlaceName">Ilmenau</div>
                 </div>
-                <div id="sunTimes">
-                    <div id="sunRise" class="sunTime"><i class="fas fa-sun">
-                            <!-- -->
-                        </i><i class="fas fa-arrow-circle-up">
-                            <!-- -->
-                        </i><time>6:07</time></div>
-                    <div id="sunSet" class="sunTime"><i class="fas fa-sun">
-                            <!-- -->
-                        </i><i class="fas fa-arrow-circle-down">
-                            <!-- -->
-                        </i><time>18:09</time></div>
-                </div>
-                <div class="resp-table">
-                    <div id="weatherHeader" class="resp-table-header">
-                        <div class="time table-header-cell">
-                            <i class="fas fa-clock">&nbsp;</i>
+                <div id="weatherColumns" class="weatherColumnsRow">
+                    <div id="sunTimes">
+                        <div id="sunRise" class="dailyColumn sunTimeColumn">
+                            <div class="sunTimeIcon"><i class="fas fa-sun">&nbsp;</i><i class="fas fa-arrow-circle-up">&nbsp;</i></div>
+                            <div class="dailyDate"><time>6:07</time></div>
                         </div>
-                        <div class="weatherIcon table-header-cell">&nbsp;</div>
-                        <div class="weatherTemperature table-header-cell">
-                            <i class="fas fa-temperature-low">&nbsp;</i>{{__('(feels)')}}
+                        <div id="sunSet" class="dailyColumn sunTimeColumn">
+                            <div class="sunTimeIcon"><i class="fas fa-sun">&nbsp;</i><i class="fas fa-arrow-circle-down">&nbsp;</i></div>
+                            <div class="dailyDate"><time>18:09</time></div>
                         </div>
-                        <div class="weatherCloud table-header-cell">
-                            <i class="fas fa-cloud">&nbsp;</i>
-                        </div>
-                        <div class="weatherDescr table-header-cell"></div>
-                    </div>
-
-                    <div id="weatherRows" class="resp-table-body">
-
                     </div>
                 </div>
-                <div id="templateWeather" class="weatherRow resp-table-row" style="display: none">
-                    <div class="time table-body-cell">
-                        12:00
+                <div id="templateWeatherColumn" class="dailyColumn hourColumn" style="display: none">
+                    <div class="dailyDate">12:00</div>
+                    <div class="dailyIcon">
+                        <img src="https://openweathermap.org/img/wn/01n@2x.png" alt="?" data-icon="01n" />
                     </div>
-                    <div class="weatherIcon table-body-cell">
-                        <img src="https://openweathermap.org/img/wn/01n@2x.png" alt="?" data-icon="01n"
-                            onerror="this.onerror=null;if(this.dataset.icon){this.src='https://openweathermap.org/img/wn/'+this.dataset.icon+'@2x.png';this.dataset.icon = null;}" />
+                    <div class="dailyTemps">
+                        <span class="weatherTemp">23</span><span class="superscript">°C</span>
+                        <div class="temp_feels_row">
+                            <span class="temp_feels dailyMin">25</span><span class="superscript">°C</span>
+                        </div>
                     </div>
-                    <div class="weatherTemperature table-body-cell">
-                        <span>23</span><span class="temp_feels">25</span><span class="superscript">°C</span>
+                    <div class="weatherCloud weatherMetric">
+                        <i class="fas fa-cloud">&nbsp;</i><span class="weatherCloudValue">55</span><span class="superscript">%</span>
                     </div>
-                    <div class="weatherCloud table-body-cell">
-                        <span>55</span><span class="superscript">%</span>
+                    <div class="weatherWind weatherMetric">
+                        <i class="fas fa-wind">&nbsp;</i><span class="weatherWindValue">12</span><span class="superscript">km/h</span>
                     </div>
-                    <div class="weatherDescr table-body-cell">Very Very Sunny</div>
                 </div>
             </div>
             <div id="noWarranty">{{ __('Information without guarantee') }}</div>
+            <div id="weatherSource"></div>
+        </div>
+
+        <div id="weather-daily" style="display:none">
+            <div>
+                <div id="weatherDailyTitle" class="weatherPageTitle">
+                    <div>{{ __('The weather in') }}&nbsp;</div>
+                    <div id="dailyPlaceName" class="weatherPlaceName">Ilmenau</div>
+                </div>
+                <div id="weatherDailyColumns" class="weatherColumnsRow">
+
+                </div>
+                <div id="templateWeatherDailyColumn" class="dailyColumn" style="display: none">
+                    <div class="dailyDate">Mon</div>
+                    <div class="dailyIcon">
+                        <img src="https://openweathermap.org/img/wn/01d@2x.png" alt="?" data-icon="01d" />
+                    </div>
+                    <div class="dailyTemps">
+                        <span class="dailyMax">23</span><span class="superscript">°C</span><br>
+                        <span class="dailyMin">12</span><span class="superscript">°C</span>
+                    </div>
+                    <div class="dailySunshine weatherMetric">
+                        <i class="fas fa-sun">&nbsp;</i><span class="dailySunshineValue">6.8</span><span class="superscript">h</span>
+                    </div>
+                    <div class="dailyWind weatherMetric">
+                        <i class="fas fa-wind">&nbsp;</i><span class="dailyWindValue">12</span><span class="superscript">km/h</span>
+                    </div>
+                </div>
+            </div>
+            <div id="noWarrantyDaily">{{ __('Information without guarantee') }}</div>
+            <div id="weatherSourceDaily">{{ __('Source') }}: {{ __('German Weather Service (DWD)') }}</div>
+        </div>
+
+        <div id="canteen" style="display:none" data-students-label="{{ __('Students') }}" data-employees-label="{{ __('Employees') }}" data-guests-label="{{ __('Guests') }}">
+            <div id="canteenTitle" class="weatherPageTitle"></div>
+            <div id="canteenItems" class="canteenItemsColumn"></div>
         </div>
 
         <div id="pics-container" style="display:none">
@@ -267,7 +309,7 @@
             </div>
         </div>
     </div>
-    <script>
+    <script @cspNonce>
         window.getData = () => {
             return {!! json_encode($data, JSON_HEX_TAG) !!}
         };

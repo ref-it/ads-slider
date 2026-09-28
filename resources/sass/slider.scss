@@ -1,3 +1,6 @@
+// Icons
+@use 'fontawesome' as *;
+
 // Bootstrap
 @import 'bootstrap/scss/bootstrap';
 //TODO: do I need bootstrap here? Yes
@@ -17,48 +20,27 @@
 }
 
 @font-face {
-    font-family: 'Fira Sans';
-    font-style: normal;
+    font-family: WebInriaSans;
     font-weight: 400;
-    font-display: swap;
-    src: url('/resources/assets/fonts/FiraSans/FiraSans-Regular.woff2') format('woff2'),
-         url('/resources/assets/fonts/FiraSans/FiraSans-Regular.woff') format('woff');
-}
-
-@font-face {
-    font-family: 'Fira Sans';
     font-style: normal;
-    font-weight: 600;
     font-display: swap;
-    src: url('/resources/assets/fonts/FiraSans/FiraSans-SemiBold.woff2') format('woff2'),
-         url('/resources/assets/fonts/FiraSans/FiraSans-SemiBold.woff') format('woff');
+    src: url('@fontsource/inria-sans/files/inria-sans-latin-400-normal.woff2') format('woff2');
 }
 
 @font-face {
-    font-family: 'Fira Sans';
-    font-style: normal;
-    font-weight: 700;
-    font-display: swap;
-    src: url('/resources/assets/fonts/FiraSans/FiraSans-Bold.woff2') format('woff2'),
-         url('/resources/assets/fonts/FiraSans/FiraSans-Bold.woff') format('woff');
-}
-
-@font-face {
-    font-family: 'Fira Sans';
-    font-style: italic;
+    font-family: WebInriaSans;
     font-weight: 400;
+    font-style: italic;
     font-display: swap;
-    src: url('/resources/assets/fonts/FiraSans/FiraSans-Italic.woff2') format('woff2'),
-         url('/resources/assets/fonts/FiraSans/FiraSans-Italic.woff') format('woff');
+    src: url('@fontsource/inria-sans/files/inria-sans-latin-400-italic.woff2') format('woff2');
 }
 
 @font-face {
-    font-family: 'Fira Sans';
-    font-style: italic;
+    font-family: WebInriaSans;
     font-weight: 700;
+    font-style: normal;
     font-display: swap;
-    src: url('/resources/assets/fonts/FiraSans/FiraSans-BoldItalic.woff2') format('woff2'),
-         url('/resources/assets/fonts/FiraSans/FiraSans-BoldItalic.woff') format('woff');
+    src: url('@fontsource/inria-sans/files/inria-sans-latin-700-normal.woff2') format('woff2');
 }
 
 html,
@@ -68,7 +50,8 @@ body {
     cursor: none;
     height: 100%;
     overflow: hidden;
-    font-family: "Fira Sans", Helvetica, sans-serif;
+    font-family: "Inria Sans", WebInriaSans, Helvetica, sans-serif;
+    font-variant-numeric: tabular-nums;
 
     /* Prevent the blinking cursor */
     /* Safari / Chrome Kiosk engines */
@@ -98,7 +81,7 @@ hr {
     display: table;
     height: 100%;
     width: 100%;
-    max-width: 125vh;
+    max-width: 180vh;
     min-width: 125vh;
     padding: 1vh;
     margin: auto;
@@ -111,6 +94,8 @@ hr {
     position: fixed;
     left: 0;
     top: 0;
+    padding: 1.5rem;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: space-around;
@@ -146,16 +131,23 @@ hr {
     margin-bottom: 2vh;
 }
 
+// Mirrors .weatherPageTitle (same size/weight, same margin-bottom) as
+// closely as the menu's single dynamic title span allows.
+.menuPageTitle {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
 .menu-name {
     display: inline-block;
     width: 100vh;
     color: var(--main-color);
-    font-size: 10.5vh;
-    margin-bottom: 2vh;
+    font-size: 6.5vh;
+    font-weight: bold;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-
 }
 
 .menu-icon {
@@ -180,6 +172,7 @@ hr {
 
 
 .event-details {
+    position: relative;
     flex-grow: 4;
     display: inline-block;
     font-size: 5.8vh;
@@ -190,12 +183,11 @@ hr {
 }
 
 #progress-bar {
-    display: table;
-    left: 20vw;
+    left: 1vh;
     position: absolute;
     font-size: 2vh;
     top: 1vh;
-    width: 78vw;
+    width: calc(100vw - 2vh);
 }
 
 .shrink {
@@ -203,24 +195,36 @@ hr {
 }
 
 #progress {
-    border-radius: 0.4vh;
     background-color: var(--main-color);
-    display: table-caption;
-    width: 78vw;
+    width: 100%;
     height: 0.8vh;
+    margin-bottom: 0.3vh;
+}
+
+#progress-cells {
+    display: flex;
+    width: 100%;
 }
 
 .pb_element {
-    border-top: 1px solid var(--main-color);
-    display: table-cell;
+    flex: 1 1 0;
+    box-sizing: border-box;
+    border: 1px solid transparent;
+    border-top: 2px solid var(--main-color);
+    border-radius: 0 0 4px 4px;
     text-align: center;
+    padding: 0.8vh 0;
+}
+
+#progress-bar .pb_element {
+    transition: none;
 }
 
 .pb_element.active {
-    background-color: gray;
-    border-bottom: 2px solid var(--main-color);
-    border-top: none;
-    color: black;
+    background-color: var(--main-color);
+    border-color: var(--main-color);
+    border-top-color: transparent;
+    color: var(--active-indicator-text-color, white);
     font-weight: bold;
 }
 
@@ -292,25 +296,95 @@ div.fatal-error {
 }
 
 /*Final-round*/
+// Same left-edge band style as Happy Hour: label bottom, countdown top,
+// both positioned explicitly rather than via flex order (flex-direction:
+// column with a writing-mode: vertical-rl child is unreliable across
+// browsers).
 #final-round-container {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
     text-align: center;
 }
 
-.finalText {
-    font-size: 14vh;
+#final-round-band {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 11vw;
+    height: 100%;
+    background-color: #262626;
+    overflow: hidden;
 }
 
-.countdown {
+#final-round-band>div.countdown {
     position: absolute;
-    font-size: 39vh;
-    line-height: 39vh;
-    font-weight: bolder;
-    height: 39vh;
-    width: 110vh;
-    left: 50%;
-    margin-left: -55vh;
+    left: 0;
+    top: 2vh;
+    bottom: auto;
+    margin-left: 0;
+    width: 100%;
+    height: auto;
+    text-align: center;
+    font-size: 5vh;
+    line-height: normal;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+#final-round-band-label-wrap {
+    position: absolute;
+    left: 0;
     bottom: 4vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+// font-size is in vh, not vw: with writing-mode: vertical-rl the text runs
+// along the screen's height, so sizing it off the width could make it taller
+// than the band itself.
+#final-round-band-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    color: var(--text-color);
+    font-size: 11vh;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+#final-round-countdown-track {
+    position: absolute;
+    left: 11vw;
+    top: 0;
+    width: 0.6vw;
+    height: 100%;
+    background-color: #404040;
     overflow: hidden;
+}
+
+#final-round-countdown-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--main-color);
+    transition: height 1s linear;
+}
+
+#final-round-content {
+    position: fixed;
+    left: 13vw;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
 }
 
 /*Final 15 minutes*/
@@ -420,110 +494,257 @@ div.fatal-error {
 }
 
 /*Preparations*/
-#preparations .event-name {
+// Same left-edge band style as Happy Hour/Final-round, but the icon (not a
+// vertical label) sits at the bottom of the band, horizontal and upright.
+#preparations {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    text-align: center;
+}
+
+#preparations-band {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 11vw;
+    height: 100%;
+    background-color: #262626;
+    overflow: hidden;
+}
+
+#preparations-band>div.countdown {
+    position: absolute;
+    left: 0;
+    top: 2vh;
+    bottom: auto;
+    margin-left: 0;
+    width: 100%;
+    height: auto;
+    text-align: center;
+    font-size: 5vh;
+    line-height: normal;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+#preparations-icon {
+    position: absolute;
+    left: 0;
+    bottom: 4vh;
+    width: 100%;
+    text-align: center;
+    color: var(--text-color);
+    font-size: 11vh;
+}
+
+#preparations-countdown-track {
+    position: absolute;
+    left: 11vw;
+    top: 0;
+    width: 0.6vw;
+    height: 100%;
+    background-color: #404040;
+    overflow: hidden;
+}
+
+#preparations-countdown-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--main-color);
+    transition: height 1s linear;
+}
+
+#preparations-content {
+    position: fixed;
+    left: 13vw;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+// Same box for both: autosizeText() computes the rendered font-size from
+// this box's height/width, so matching constraints here is what actually
+// keeps the two event names the same size (a shared font-size wouldn't,
+// since autosizeText overrides it with an inline style anyway).
+#preparations .event-name,
+#final-round-content .event-name {
     font-weight: bold;
     line-height: 90%;
     margin: 2vh auto 0 auto;
     text-align: center;
-    justify-content: center;
     max-height: 41vh;
     height: 41vh;
-    width: 98%;
-    max-width: 98%;
+    width: 90%;
+    max-width: 90%;
     display: block;
-    align-items: center;
     overflow: hidden;
-    text-shadow: 3px 6px 4px #cec9c9;
-}
-
-#preparations-icon {
-    color: #ffffff;
-    display: block;
-    font-size: 10vh;
-    position: absolute;
-    top: 45vh;
-    left: 54vh;
-}
-
-#in {
-    font-size: 12vh;
-    line-height: 12vh;
-    position: absolute;
-    left: 3vh;
-    top: 49vh;
 }
 
 /* Happy Hour*/
 #happy-hour-container {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
     text-align: center;
 }
 
-.happyhour {
-    font-size: 15vh;
-    line-height: 17vh;
+// Static label band, always full height. The countdown and the label are
+// positioned explicitly (not via flex order) because flex-direction: column
+// combined with a writing-mode: vertical-rl child is unreliable across
+// browsers - it was rendering the label at the top and the countdown at the
+// bottom, the opposite of the DOM order.
+#happy-hour-band {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 11vw;
+    height: 100%;
+    background-color: #262626;
+    overflow: hidden;
+}
+
+// Overrides every property the generic .countdown rule sets (it's written
+// for the full-screen Last Call/preparations countdown: bottom-anchored,
+// left: 50% + a negative margin-left to self-center, fixed width/height) -
+// left unset, those leaked through and pushed this countdown off-screen.
+#happy-hour-band>div.countdown {
+    position: absolute;
+    left: 0;
+    top: 2vh;
+    bottom: auto;
+    margin-left: 0;
+    width: 100%;
+    height: auto;
+    text-align: center;
+    font-size: 5vh;
+    line-height: normal;
     font-weight: bold;
+    white-space: nowrap;
+}
+
+#happy-hour-band-label-wrap {
+    position: absolute;
+    left: 0;
+    bottom: 4vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+// font-size is in vh, not vw: with writing-mode: vertical-rl the text runs
+// along the screen's height, so sizing it off the width could make it taller
+// than the band itself.
+#happy-hour-band-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    color: var(--text-color);
+    font-size: 11vh;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+// Full-height track for the countdown, reduced to a thin border between the
+// band and the rest of the slide, always visible so the drained (already
+// elapsed) part stands out against the slide's black background.
+#happy-hour-countdown-track {
+    position: absolute;
+    left: 11vw;
+    top: 0;
+    width: 0.6vw;
+    height: 100%;
+    background-color: #404040;
+    overflow: hidden;
+}
+
+// Red fill, shrinks from the top down as the Happy Hour countdown runs out
+// (height is set from Countdown.ts).
+#happy-hour-countdown-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--main-color);
+    transition: height 1s linear;
+}
+
+#happy-hour-content {
+    position: fixed;
+    left: 13vw;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
 }
 
 #happy-hour-drink {
     color: var(--main-color);
-    font-size: 11vh;
-    line-height: 16vh;
+    font-size: 18vh;
+    line-height: 21vh;
+    font-weight: bold;
     margin-top: 2vh;
+    padding: 0 3vw;
     word-break: normal;
     word-wrap: break-word;
-    text-shadow: 3px 6px 4px #cec9c9;
 }
 
 #happy-hour-priceline {
-    font-size: 9vh;
-    line-height: 11vh;
+    font-size: 14vh;
+    line-height: 16vh;
+    margin-top: 3vh;
 }
 
 #happy-hour-extra {
-    font-size: 5vh;
+    font-size: 6vh;
 }
 
-#happy-hour-container>div.countdown {
-    font-size: 34vh;
-    font-weight: normal;
-}
-
-#happy-hour-container>div.countdown>span.hours {
-    vertical-align: text-top;
-    font-size: 10vh;
-    position: relative;
-    top: -9vh;
-    left: -1vh;
-}
-
-#happy-hour-container>div.countdown>span.hours::after {
-    content: 'h';
+// The colon lives in ::after so it disappears along with the hours span
+// once less than an hour remains (JS hides .hours via display:none then).
+#happy-hour-band>div.countdown>span.hours::after {
+    content: ':';
 }
 
 /*Menu*/
+// rem (not vh) on all sides to exactly match #weather's padding, regardless
+// of viewport size.
 #menu-container {
-    padding-left: 1.8vh;
-    padding-right: 1.8vh;
+    padding: 1.5rem;
 }
 
 .menu_item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-size: 4.5vh;
-    border-bottom: 1px solid #ffffff;
-    clear: both;
+    color: #ffffff;
+    padding: 0.4rem 0;
 }
 
-.menu_item.odd {
-    color: #80ffff;
-    border-bottom: 1px solid #80ffff;
+// Separator only between entries, not below the last one.
+.menu_item:not(:last-child) {
+    border-bottom: 1px solid #555555;
 }
 
-.menu_item span {
-    float: right;
+.menu_item_price {
     text-align: right;
-    display: block;
 }
 
-.menu_item_special::before {
+.menu_item_special .menu_item_name::before {
     content: '⭐';
 }
 
@@ -578,57 +799,63 @@ div#pics-container {
 
 /*Weather Forecast*/
 #weather {
-    padding: 1vh;
+    padding: 1.5rem;
     background-color: #000000;
 }
 
-#weatherTitle {
-    line-height: 10vh;
-    font-size: 5vh;
-    display: inline-block;
+// Shared by the hourly and daily weather slides, so both titles read the
+// same: same size, bold, and at least as large as the card date labels.
+.weatherPageTitle {
+    font-size: 6.5vh;
+    font-weight: bold;
     color: white;
+    display: flex;
+    // Same gap below as .weatherColumnsRow has, so the heading-to-weather
+    // and weather-to-footer spacing match.
+    margin-bottom: 2rem;
 }
 
-#theWeather {
-    display: inline-block;
+.weatherPlaceName {
+    font-size: 6.5vh;
+    color: var(--main-color);
+    font-weight: bold;
 }
 
 .superscript {
     vertical-align: super;
     font-size: 60%;
+    margin-left: 0.3rem;
 }
 
-#placeName {
-    color: var(--main-color);
-    max-width: 65vh;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: inline-block;
-    font-size: 7vh;
-    font-weight: bold;
-    vertical-align: bottom;
-}
-
+// One grid column within .weatherColumnsRow, so it gets the same 1rem gap
+// to the hour cards; sunrise/sunset stack inside it instead of sitting side by side.
 #sunTimes {
-    float: right;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
 }
 
-.sunTime time {
-    margin-left: 1vh;
+.sunTimeIcon {
+    font-size: 5.5vh;
+    margin-bottom: 1.5vh;
+    // Keep the sun and up/down-arrow icons on one line rather than
+    // wrapping if the column is ever narrower than both icons combined.
+    white-space: nowrap;
 }
 
-#sunSet {
-    margin-top: 1vh;
+.sunTimeColumn {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-.sunTime {
-    font-size: 4.5vh;
-    line-height: 4.5vh;
+.sunTimeColumn .dailyDate {
+    font-weight: normal;
 }
 
-.temp_feels {
-    font-size: 3.3vh;
+.sunTimeIcon i + i {
+    margin-left: 0.3rem;
 }
 
 .temp_feels::before {
@@ -639,119 +866,196 @@ div#pics-container {
     content: ')';
 }
 
-.time.table-header-cell {
-    width: 12vh;
+// DWD doesn't reliably provide hourly cloud cover; the whole row is hidden
+// rather than showing misleading data (unlike its daily sunshine total,
+// shown on the daily slide instead).
+#weatherColumns.weather-dwd .weatherCloud {
+    display: none;
 }
 
-.weatherIcon.table-header-cell {
-    width: 8vh;
+/*Weather Daily Forecast*/
+#weather-daily {
+    padding: 1.5rem;
+    background-color: #000000;
 }
 
-.weatherTemperature.table-header-cell {
-    width: 23vh;
+// Shared by the hourly (#weatherColumns) and daily (#weatherDailyColumns)
+// card rows, so both slides lay out identically. Grid rather than flex:
+// grid-auto-columns: 1fr gives every column exactly the same width
+// regardless of its content, which nested flex containers (like #sunTimes)
+// couldn't guarantee.
+.weatherColumnsRow {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
 }
 
-.weatherCloud.table-header-cell {
-    width: 12vh;
-}
-
-.weatherDescr.table-header-cell {
-    width: 45vh;
-}
-
-.time {
-    text-align: right;
-    padding-right: 1vh;
-}
-
-.weatherIcon img {
-    width: 8.9vh;
-}
-
-.weatherTemperature {
-    text-align: right;
-    padding-right: 2vh;
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-.weatherDescr {
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-.weatherCloud {
+.dailyColumn {
+    min-width: 0;
     text-align: center;
-    padding-right: 2vh;
+    color: white;
+    padding: 1.25rem;
+    border: 0.15rem solid gray;
+    border-radius: 0.5rem;
 }
 
-
-.resp-table {
-    width: 100%;
-    display: table;
-    font-size: 5vh;
-    table-layout: fixed;
-    border-collapse: collapse;
-}
-
-.resp-table-caption {
-    display: table-caption;
-    text-align: center;
+.dailyDate {
     font-weight: bold;
-}
-
-.resp-table-header {
-    display: table-header-group;
-    border-bottom: 0.5vh solid var(--main-color);
-    font-weight: bold;
+    // "Heute" is the longest label this ever shows (vs. the short weekday
+    // abbreviations); at 6vh it nearly filled the card's full width with
+    // almost no margin, which read as off-center even though it was
+    // technically centered.
     font-size: 5vh;
-    line-height: 5vh;
-    max-height: 5vh;
+    margin-bottom: 1vh;
+    text-transform: capitalize;
 }
 
-.table-header-cell {
-    display: table-cell;
-    padding: 1vh;
-    text-align: center;
-    border-bottom: 0.5vh solid black;
-    overflow: hidden;
+.dailyIcon img {
+    width: 20vh;
+    max-width: 100%;
+    height: auto;
 }
 
-.resp-table-body {
-    display: table-row-group;
+.dailyTemps {
+    margin-top: 1vh;
+    font-size: 6.5vh;
 }
 
-.resp-table-row {
-    display: table-row;
-    font-size: 5.5vh;
-    line-height: 8vh;
-    max-height: 10vh;
-    background-color: #303030;
+// #c0c0c0 rather than opacity or CSS "gray" (#808080), which doesn't reach
+// the 4.5:1 WCAG AA contrast ratio against this slide's black background.
+.dailyMin {
+    color: #c0c0c0;
 }
 
-.resp-table-row.even {
-    background-color: unset;
+// Uniformly gray unit labels (°C, h), matching the sunshine value's color.
+.dailyColumn .superscript {
+    color: #c0c0c0;
 }
 
-.table-body-cell {
-    display: table-cell;
-    overflow: hidden;
+// Shared look for the small secondary rows below the main temperature
+// (sunshine, cloud cover, wind, ...). Kept separate from .dailySunshine
+// itself, which JS also uses as a query target for that row specifically -
+// sharing this class there caused its selectors (e.g. for the sunshine
+// unit label) to also match the other rows.
+.weatherMetric {
+    margin-top: 1vh;
+    // Smaller than the other values so the icon, number and unit still fit
+    // on one line on narrower (e.g. 16:10) screens.
+    font-size: 4vh;
+    color: #c0c0c0;
 }
 
-#noWarranty {
+.weatherMetric i {
+    margin-right: 0.5rem;
+    // The sun icon's glyph fills more of its em-box than the surrounding
+    // digits, so it reads as oversized at the same literal font-size.
+    font-size: 0.8em;
+}
+
+#noWarranty,
+#weatherSource,
+#noWarrantyDaily,
+#weatherSourceDaily {
     color: gray;
     font-size: 3vh;
 }
 
-#weather h4 {
-    margin-top: 0.7vh;
-    min-width: 100%;
-    font-weight: bolder;
-    font-size: 3.5vh;
-    border-bottom: 0.4vh solid var(--main-color);
-    padding-bottom: 1vh;
-    margin-bottom: 0;
+/* Canteen menu */
+// A flex/overflow-hidden height constraint here previously hid the whole
+// list on some screens instead of just clipping the last item - the
+// flex-basis:0 column ended up computing to near-zero height rather than
+// shrinking gracefully. A generous fixed padding-bottom is less elegant
+// but fails safely (content stays visible) if the estimate is imperfect.
+#canteen {
+    padding: 1.5rem;
+    background-color: #000000;
 }
+
+// Same card look as .dailyColumn, but a 2-column grid of boxes instead of
+// the weather slides' single horizontal row - fits more dishes per page
+// without the per-box height stacking up as much vertically.
+.canteenItemsColumn {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.canteenMealBox {
+    min-width: 0;
+    color: white;
+    // These boxes are much wider than tall, so equal padding on all sides
+    // reads as more vertical whitespace than horizontal; less top/bottom
+    // padding balances that out.
+    padding: 1rem 1.5rem;
+    border: 0.15rem solid gray;
+    border-radius: 0.5rem;
+    // Grid items stretch to the tallest box in their row by default, so
+    // when a neighbouring dish name wraps to more lines, this keeps the
+    // price row pinned to the bottom instead of floating right under a
+    // shorter name.
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.canteenMealName {
+    display: block;
+    font-size: 4vh;
+    font-weight: bold;
+}
+
+// All three prices in a row below the dish name/allergens, each with its
+// own label above it - flatter than stacking them in a tall right-hand
+// column, which kept overflowing into the clock at smaller screen sizes.
+.canteenPriceRow {
+    display: flex;
+    gap: 2rem;
+    // Minimum gap below the dish name; .canteenMealBox's space-between
+    // pushes this further down to the box's bottom edge when there's
+    // extra room (e.g. a shorter name next to a wrapped one in the grid).
+    margin-top: 1.5vh;
+}
+
+.canteenPriceEntry {
+    display: flex;
+    flex-direction: column;
+}
+
+.canteenPriceLabel {
+    white-space: nowrap;
+    font-size: 2.6vh;
+    color: gray;
+}
+
+.canteenPrice {
+    white-space: nowrap;
+    font-size: 4vh;
+    font-weight: bold;
+    color: #c0c0c0;
+}
+
+// Same size as the student price, just not bold - keeps the three prices
+// visually equal-weight in size while still marking the student price
+// (the target audience's own price) as the one that stands out.
+.canteenPrice--secondary {
+    font-weight: normal;
+}
+
+// Vegetarian/vegan dishes are marked by the box's border color instead of
+// a badge - yellow vs. green reads as a clearly different color rather
+// than two shades of the same one. Both verified >=7:1 contrast against
+// the black background (WCAG 1.4.11 non-text contrast needs only 3:1).
+// Muted gold rather than a saturated yellow, which read as too eye-catching.
+.canteenMealBox--vegetarian {
+    border-color: #c9a227;
+}
+
+.canteenMealBox--vegan {
+    border-color: #4caf50;
+}
+
 
 /* Event small */
 #event-slide-small {

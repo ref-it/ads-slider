@@ -8,9 +8,11 @@ export const ScheduledSlideType = {
     PICS: "PICS",
     VIDEOS: "VIDEOS",
     WEATHER: "WEATHER",
+    WEATHER_DAILY: "WEATHER_DAILY",
     MENUS: "MENUS",
     KARAOKE: "KARAOKE",
     ORDERSLIST: "ORDERSLIST",
+    CANTEEN: "CANTEEN",
 } as const;
 
 export type ScheduledSlideType = (typeof ScheduledSlideType)[keyof typeof ScheduledSlideType] | string;
@@ -49,6 +51,7 @@ export class Manager implements Mediator {
 
     private rawSchedule: ScheduledSlideType[] = [
         ScheduledSlideType.WEATHER,
+        ScheduledSlideType.WEATHER_DAILY,
         ScheduledSlideType.ORDERSLIST,
         ScheduledSlideType.EVENTS,
         ScheduledSlideType.ORDERSLIST,
@@ -56,6 +59,7 @@ export class Manager implements Mediator {
         ScheduledSlideType.EVENTS,
         ScheduledSlideType.ORDERSLIST,
         ScheduledSlideType.PICS,
+        ScheduledSlideType.CANTEEN,
         ScheduledSlideType.VIDEOS,
         ScheduledSlideType.ORDERSLIST,
         ScheduledSlideType.EVENTS,
@@ -190,6 +194,18 @@ export class Manager implements Mediator {
         if (this.conf) {
             if (!this.conf.show_weather_forecast) {
                 filtered = filtered.filter(slide => slide !== ScheduledSlideType.WEATHER);
+            }
+
+            if (!this.conf.show_weather_daily_forecast) {
+                filtered = filtered.filter(slide => slide !== ScheduledSlideType.WEATHER_DAILY);
+            }
+
+            if (!this.conf.show_events) {
+                filtered = filtered.filter(slide => slide !== ScheduledSlideType.EVENTS);
+            }
+
+            if (!this.conf.show_canteens) {
+                filtered = filtered.filter(slide => slide !== ScheduledSlideType.CANTEEN);
             }
 
             if (!this.conf.show_menus) {
@@ -344,7 +360,7 @@ export class Manager implements Mediator {
 
     /**
      * Skip the schedule execution to the given type
-     * @param type 
+     * @param type
      */
     skipScheduleTo(type: ScheduledSlideType) {
         if (this.schedule.length === 0) {

@@ -9,11 +9,12 @@ export function getFormattedTime(hours: number, minutes: number): string {
     return `${addLeadingZero(hours)}:${addLeadingZero(minutes)}`;
 }
 
-/** 
- * @param eventDate 
+/**
+ * @param eventDate
+ * @param alwaysFull skip the abbreviated fallbacks (kept for narrow displays, e.g. MiniSlides) and always spell out the weekday/month in full
  * @returns the formatted start date of the event or today in the local language
  */
-export function getDisplayDate(eventDate: dayjs.Dayjs, locale = "en"): string {
+export function getDisplayDate(eventDate: dayjs.Dayjs, locale = "en", alwaysFull = false): string {
     const now = dayjs();
     if (eventDate.isSame(now, 'day') && now.hour() > 6) {
         return _._('today', locale) + "!";
@@ -22,7 +23,7 @@ export function getDisplayDate(eventDate: dayjs.Dayjs, locale = "en"): string {
         case "de":
             {
                 const longVersion = eventDate.format('dddd, D. MMMM');
-                if (longVersion.length < 17)
+                if (alwaysFull || longVersion.length < 17)
                     return longVersion;
                 const mediumVersion = eventDate.format('dd, D. MMMM');
                 if (mediumVersion.length < 17)
@@ -32,7 +33,7 @@ export function getDisplayDate(eventDate: dayjs.Dayjs, locale = "en"): string {
         case "it":
             {
                 const longVersion = eventDate.format('dddd D MMMM');
-                if (longVersion.length < 17)
+                if (alwaysFull || longVersion.length < 17)
                     return longVersion;
                 const mediumVersion = eventDate.format('ddd. D MMMM');
                 if (mediumVersion.length < 17)
@@ -43,7 +44,7 @@ export function getDisplayDate(eventDate: dayjs.Dayjs, locale = "en"): string {
         default:
             {
                 const longVersion = eventDate.format('dddd D MMMM');
-                if (longVersion.length < 17)
+                if (alwaysFull || longVersion.length < 17)
                     return longVersion;
                 const mediumVersion = eventDate.format('dd. D MMMM');
                 if (mediumVersion.length < 17)
