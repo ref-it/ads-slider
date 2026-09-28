@@ -1,7 +1,7 @@
 import { Manager, SlideEvents } from "../manager.js";
 import Filter2 from "../modules/filters.js";
 import { AdsEvent, Menu, MenuSimple, Product } from "../types.js";
-import { addAnimationOnce } from "../utilities/animations.js";
+import { escapeHtml } from "../utilities/misc.js";
 import { Slide } from "./Slide.js";
 import dayjs from 'dayjs/esm/index.js';
 
@@ -131,7 +131,6 @@ export class MenuSlide extends Slide {
         }
         const menuName = mc.querySelector('.menu-name') as HTMLSpanElement;
         menuName.innerText = menu.category_name;
-        addAnimationOnce(menuName, 'jackInTheBox');
 
         const icon = mc.querySelector('.menu-icon') as HTMLSpanElement;
         icon.removeAttribute('class');
@@ -158,25 +157,27 @@ export class MenuSlide extends Slide {
             const el = clone.querySelector('div') as HTMLDivElement;
             el.classList.toggle('menu_item_special', product.special === true);
             el.classList.toggle('odd', i % 2 === 1);
-            el.innerText = product.name;
+            const name = document.createElement('span') as HTMLSpanElement;
+            name.className = 'menu_item_name';
+            name.innerText = product.name;
+            el.appendChild(name);
             const span = document.createElement('span') as HTMLSpanElement;
-            span.innerHTML = `${product.size}&nbsp;&nbsp;${product.price
+            span.className = 'menu_item_price';
+            span.innerHTML = `${escapeHtml(product.size)}&nbsp;&nbsp;&nbsp;${escapeHtml(product.price)
                 .padStart(5, '%')
-                .replaceAll('%', '&nbsp;')}${menu.currency}${(addLine && product.price2) ? `<br>${product.size2}&nbsp;&nbsp;${product.price2
+                .replaceAll('%', '&nbsp;')}&nbsp;${escapeHtml(menu.currency)}${(addLine && product.price2) ? `<br>${escapeHtml(product.size2 ?? '')}&nbsp;&nbsp;&nbsp;${escapeHtml(product.price2)
                     .padStart(5, '%')
-                    .replaceAll('%', '&nbsp;')}${menu.currency}`
+                    .replaceAll('%', '&nbsp;')}&nbsp;${escapeHtml(menu.currency)}`
                     : ''
                 }`;
             el.appendChild(span);
-            if (addLine) {
-                el.appendChild(document.createElement('br'));
-            }
             mc.appendChild(el);
         });
         console.debug('[Menu] Extra rows in the menu', extraRows);
         let fontSize = 47.0 / (pr.length + extraRows);
-        if (fontSize > 7.5) {
-            fontSize = 7;
+        if (fontSize > 6.5) {
+            // Never larger than the heading (.menu-name/.weatherPageTitle is 6.5vh).
+            fontSize = 6.5;
         }
 
         (mc.querySelectorAll('.menu_item') as NodeListOf<HTMLDivElement>).forEach((item) => {

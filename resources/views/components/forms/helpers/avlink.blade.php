@@ -18,14 +18,3 @@
     </div>
     {{ $slot }}
 </div>
-
-@script
-<script>
-    const button = document.getElementById("copyAVLink");
-    button.addEventListener("click", function() {
-        const input = document.getElementById("av_link");
-        input.select();
-        navigator.clipboard.writeText(input.value);
-    });
-</script>
-@endscript

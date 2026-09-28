@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Canteen;
 use App\Models\Event;
 use App\Models\Picture;
 use App\Models\Template;
@@ -52,6 +53,7 @@ class AppServiceProvider extends ServiceProvider
             'TE' => Template::class,
             'VI' => Video::class,
             'PI' => Picture::class,
+            'CA' => Canteen::class,
         ]);
 
         Schema::defaultStringLength(191);

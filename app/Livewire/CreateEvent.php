@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\Menu;
 use App\Models\Schedule;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class CreateEvent extends Component
@@ -19,6 +20,18 @@ class CreateEvent extends Component
     private $allTemplates;
 
     private $template;
+
+    #[On('exception-dates-updated')]
+    public function syncExceptionDates(array $dates): void
+    {
+        $this->form->exceptionDates = $dates;
+    }
+
+    #[On('rrule-updated')]
+    public function syncRrule(?string $rrule): void
+    {
+        $this->form->rrule = $rrule;
+    }
 
     public function save()
     {
@@ -41,7 +54,7 @@ class CreateEvent extends Component
     #[Computed]
     public function duration()
     {
-        return Schedule::calculateDuration($this->form->start, $this->form->end, $this->form->start_time, $this->form->end_time, $this->form->repeat);
+        return Schedule::calculateDuration($this->form->start, $this->form->end, $this->form->start_time, $this->form->end_time, null, null, $this->form->rrule, $this->form->exceptionDates);
     }
 
     public function render()

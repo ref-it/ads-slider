@@ -1,31 +1,28 @@
 @extends('layouts.app')
 @section('content')
 <div class="container">
-    <h2>{{ __('All Monitors') }}</h2>
+    <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center gap-2 mb-3">
+        <h2 class="mb-0">{{ __('All Monitors') }}</h2>
+        <a href="{{ route('monitors.create') }}">
+            <button class="btn btn-primary"><i class="fas fa-fw fa-plus"></i>&nbsp;{{ __('Create New Monitor') }}</button>
+        </a>
+    </div>
     <div class="row">
-        <div class="col col-lg-3 order-lg-1">
-            <a href="{{ route('monitors.create') }}">
-                <button class="btn btn-primary btn-block">{{ __('Create New Monitor') }}</button>
-            </a>
-            <p>{{ __('Click on a monitor to edit or delete it.') }}</p>
-            <p>{{ __('Click on a link under a monitor element to see the result.') }}</p>
-        </div>
-        <div class="col-lg-9 order-lg-0">
-            <div class="list-group">
+        <div class="col-12">
+            <div class="row row-cols-1 row-cols-xl-2 g-3">
                 @forelse ($monitors as $monitor)
-                <div class="list-group-item">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h4>
+                <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="fw-bolder">
                             @if ($monitor->trashed())
-                            <i data-bs-title="Deleted" class="fas fa-fw fa-trash-can-arrow-up"></i>
+                            <i data-bs-toggle="tooltip" data-bs-title="{{ __('Deleted') }}" class="fas fa-fw fa-trash-can-arrow-up"></i>
                             @endif
-                            <span
-                                class="fw-bolder">{{ $monitor->name }}</span>&nbsp;({{ $monitor->events_to_show }}&nbsp;events)
-                        </h4>
-                        <small>{{ $monitor->user->name }}</small>
-
+                            {{ $monitor->name }}
+                        </span>
                     </div>
-                    <div class="d-flex w-100 justify-content-around">
+                    <div class="card-body">
+                    <div class="d-flex flex-wrap justify-content-center gap-3 pb-3 mb-3 border-bottom">
                         <i class="fas fa-fw fa-cloud-sun @if ($monitor->show_weather_forecast) feature-enabled @else feature-disabled @endif"
                             data-bs-toggle="tooltip" data-bs-placement="bottom"
                             data-bs-title="{{ __('Weather Forecast') }}"></i>
@@ -38,6 +35,9 @@
                         <i class="fas fa-fw fa-images @if ($monitor->show_pictures) feature-enabled @else feature-disabled @endif"
                             data-bs-toggle="tooltip" data-bs-placement="bottom"
                             data-bs-title="{{ __('Pictures') }}"></i>
+                        <i class="fas fa-fw fa-utensils @if ($monitor->show_canteens) feature-enabled @else feature-disabled @endif"
+                            data-bs-toggle="tooltip" data-bs-placement="bottom"
+                            data-bs-title="{{ __('Canteens') }}"></i>
                         <i class="fas fa-fw fa-text-width @if ($monitor->show_marquee) feature-enabled @else feature-disabled @endif"
                             data-bs-toggle="tooltip" data-bs-placement="bottom"
                             data-bs-title="{{ __('Marquee text') }}"></i>
@@ -67,45 +67,53 @@
                             data-bs-title="{{ __('Use animations') }}"></i>
                     </div>
 
-                    <div class="row my-1">
-                        <div class="col-md-3 text-md-end">{{ __('Last restart:') }}</div>
-                        <div class="col-md-3">
-                            <span
-                                @if ($monitor->last_restarted_at) data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{ $monitor->last_restarted_at }}" @endif
-                                @class([
-                                'badge',
-                                'mx-1',
-                                'text-bg-secondary' => is_null($monitor->last_restarted_at),
-                                'text-bg-success' =>
-                                $monitor->last_restarted_at?->diffInHours(\Carbon\Carbon::now()) > 0,
-                                'text-bg-warning' =>
-                                $monitor->last_restarted_at?->diffInHours(\Carbon\Carbon::now()) >= 24,
-                                'text-bg-danger' =>
-                                $monitor->last_restarted_at?->diffInHours(\Carbon\Carbon::now()) > 72,
-                                ])>&nbsp;</span>
-                            {{ $monitor->last_restarted_at?->diffForHumans() }}
+                    <div class="d-flex flex-wrap gap-4 mb-3">
+                        <div>
+                            <div class="text-muted small">{{ __('Events shown') }}</div>
+                            <div>{{ $monitor->events_to_show }}</div>
                         </div>
-                        <div class="col-md-3 text-md-end">{{ __('Data last update:') }}</div>
-                        <div class="col-md-3">
-                            <span
-                                @if ($monitor->last_ping) data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{ $monitor->last_ping }}" @endif
-                                @class([
-                                'badge',
-                                'mx-1',
-                                'text-bg-secondary' => is_null($monitor->last_ping),
-                                'text-bg-success' =>
-                                $monitor->last_ping?->diffInHours(\Carbon\Carbon::now()) > 0,
-                                'text-bg-warning' =>
-                                $monitor->last_ping?->diffInHours(\Carbon\Carbon::now()) >= 24,
-                                'text-bg-danger' =>
-                                $monitor->last_ping?->diffInHours(\Carbon\Carbon::now()) > 72,
-                                ])>&nbsp;</span>
-                            {{ $monitor->last_ping?->diffForHumans() }}
+                        <div>
+                            <div class="text-muted small">{{ __('Last restart') }}</div>
+                            <div>
+                                <span
+                                    @if ($monitor->last_restarted_at) data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{ $monitor->last_restarted_at }}" @endif
+                                    @class([
+                                    'badge',
+                                    'me-1',
+                                    'text-bg-secondary' => is_null($monitor->last_restarted_at),
+                                    'text-bg-success' =>
+                                    $monitor->last_restarted_at?->diffInHours(\Carbon\Carbon::now()) > 0,
+                                    'text-bg-warning' =>
+                                    $monitor->last_restarted_at?->diffInHours(\Carbon\Carbon::now()) >= 24,
+                                    'text-bg-danger' =>
+                                    $monitor->last_restarted_at?->diffInHours(\Carbon\Carbon::now()) > 72,
+                                    ])>&nbsp;</span>
+                                {{ $monitor->last_restarted_at?->diffForHumans() ?? __('Never') }}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-muted small">{{ __('Data last update') }}</div>
+                            <div>
+                                <span
+                                    @if ($monitor->last_ping) data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{ $monitor->last_ping }}" @endif
+                                    @class([
+                                    'badge',
+                                    'me-1',
+                                    'text-bg-secondary' => is_null($monitor->last_ping),
+                                    'text-bg-success' =>
+                                    $monitor->last_ping?->diffInHours(\Carbon\Carbon::now()) > 0,
+                                    'text-bg-warning' =>
+                                    $monitor->last_ping?->diffInHours(\Carbon\Carbon::now()) >= 24,
+                                    'text-bg-danger' =>
+                                    $monitor->last_ping?->diffInHours(\Carbon\Carbon::now()) > 72,
+                                    ])>&nbsp;</span>
+                                {{ $monitor->last_ping?->diffForHumans() ?? __('Never') }}
+                            </div>
                         </div>
                     </div>
-                    <div class="row my-2">
+                    <div>
                         @if ($monitor->stats)
-                        <p class="text-muted mt-2">
+                        <p class="text-muted small mb-2">
                             {{ __('Data collected :when_ago', ['when_ago' => \Carbon\Carbon::parse($monitor->stats['timestamp'])->diffForHumans()]) }}
                         </p>
                         <details>
@@ -187,18 +195,29 @@
                         </p>
                         @endif
                     </div>
-                    <a class="btn btn-primary float-end" href="{{ route('monitors.edit', $monitor->id) }}"><i
-                            class="fas fa-fw fa-pencil"></i></a>
+                    </div>
+                    <div class="card-footer d-flex flex-wrap gap-2">
+                        <a class="btn btn-sm btn-outline-secondary" target="_blank"
+                            href="{{ route('monitors.show', $monitor->id) }}" data-bs-toggle="tooltip"
+                            data-bs-placement="top" data-bs-title="{{ __('Open the monitor as a logged-in user, to test it') }}">
+                            <i class="fas fa-fw fa-arrow-up-right-from-square"></i>&nbsp;{{ __('Test link') }}
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-secondary copy-deployment-link"
+                            data-link="{{ route('showEventsToken', $monitor->api_token) }}" data-bs-toggle="tooltip"
+                            data-bs-placement="top" data-bs-title="{{ __('Copy the deployment link to set up the physical monitor') }}">
+                            <i class="fas fa-fw fa-copy"></i>&nbsp;{{ __('Deployment link') }}
+                        </button>
+                        <a href="{{ route('monitors.edit', $monitor->id) }}" class="btn btn-sm btn-primary ms-auto"
+                            data-bs-toggle="tooltip" data-bs-title="{{ __('Edit Monitor') }}">
+                            <i class="fas fa-fw fa-pen-to-square"></i>
+                        </a>
+                    </div>
                 </div>
-                <p class="text-muted"><a
-                        href="{{ route('monitors.show', $monitor->id) }}">{{ __('Test link for logged-in users') }}</a>
-                </p>
-                <p class="text-muted">{{ __('Deployment link:') }}
-                    {{ route('showEventsToken', 'token_here') }}<br><a
-                        href="{{ route('showEventsToken', $monitor->api_token) }}">{{ $monitor->api_token }}</a>
-                </p>
+                </div>
                 @empty
-                <h3>{{ __('No monitors yet, what about adding one?') }}</h3>
+                <div class="col">
+                    <h3>{{ __('No monitors yet, what about adding one?') }}</h3>
+                </div>
                 @endforelse
             </div>
         </div>
@@ -207,5 +226,21 @@
         {{ $monitors->links() }}
     </div>
 </div>
-</div>
+@endsection
+
+@section('scripts')
+<script type="module" @cspNonce>
+    document.querySelectorAll('.copy-deployment-link').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            navigator.clipboard.writeText(btn.dataset.link).then(() => {
+                const icon = btn.querySelector('i');
+                const original = icon.className;
+                icon.className = 'fas fa-fw fa-check text-success';
+                setTimeout(() => {
+                    icon.className = original;
+                }, 1200);
+            });
+        });
+    });
+</script>
 @endsection

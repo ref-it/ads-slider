@@ -6,6 +6,7 @@ use App\Traits\RealmTrait;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -20,7 +21,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'realm_id', 'user_type',
+        'name', 'email', 'password', 'realm_id', 'user_type', 'oidc_sub',
     ];
 
     /**
@@ -29,7 +30,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token', 'user_type', 'realm_id',
+        'password', 'remember_token', 'user_type', 'realm_id', 'oidc_sub',
     ];
 
     /**
@@ -95,6 +96,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function monitors(): HasMany
     {
         return $this->hasMany(Monitor::class);
+    }
+
+    /**
+     * Realms this user has access to (via OIDC group membership or manual assignment),
+     * separate from realm_id which is the currently active realm.
+     */
+    public function realms(): BelongsToMany
+    {
+        return $this->belongsToMany(Realm::class)->withTimestamps();
     }
 
     /**

@@ -18,7 +18,7 @@ class Menu extends Model
 
     protected $guarded = ['id', 'user_id'];
 
-    protected $hidden = ['name', 'created_at', 'updated_at', 'user_id', 'path', 'pivot', 'realm_id'];
+    protected $hidden = ['name', 'description', 'created_at', 'updated_at', 'user_id', 'path', 'pivot', 'realm_id'];
 
     protected $with = ['monitors:monitors.id'];
 

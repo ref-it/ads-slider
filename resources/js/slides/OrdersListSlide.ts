@@ -1,6 +1,7 @@
 import dayjs from 'dayjs/esm/index.js'
 import { SlideEvents } from "../manager.js";
 import { OrderslistData, OrdersListDataWihthTimestamp, OrderslistItem } from "../types.js";
+import { escapeHtml } from "../utilities/misc.js";
 import { Slide } from "./Slide.js";
 
 export class OrdersListSlide extends Slide {
@@ -132,13 +133,14 @@ export class OrdersListSlide extends Slide {
     }
 
     private getListItem(el: OrderslistItem, cat: ('ful' | 'pick' | 'pen')): string {
+        const label = escapeHtml(el.label ?? '');
         if (el.status === "new") {
-            return `<span id="ol-item-${cat}-${el.label}" class="ol-item ${OrdersListSlide.animationClasses.join(' ')}">
-                ${el.label}
+            return `<span id="ol-item-${cat}-${label}" class="ol-item ${OrdersListSlide.animationClasses.join(' ')}">
+                ${label}
                 </span>`;
         }
-        return `<span id="ol-item-${el.label}" class="ol-item">
-                ${el.label}
+        return `<span id="ol-item-${label}" class="ol-item">
+                ${label}
                 </span>` ;
     }
 
@@ -188,7 +190,7 @@ export class OrdersListSlide extends Slide {
         counters.innerHTML = "";
         if (this.data.counters) {
             this.data.counters.forEach(counter => {
-                counters.innerHTML += (counter.label + ": " + counter.value + " ");
+                counters.innerHTML += (escapeHtml(counter.label) + ": " + escapeHtml(String(counter.value)) + " ");
             });
         }
 

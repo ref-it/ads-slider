@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -19,7 +19,7 @@ class Event extends Model
 
     protected $guarded = ['user_id', 'id', 'api_token', 'realm_id'];
 
-    protected $appends = ['real_start_date', 'real_end_date', 'start_time', 'end_time', 'start_date', 'end_date', 'repeat'];
+    protected $appends = ['real_start_date', 'real_end_date', 'start_time', 'end_time', 'start_date', 'end_date', 'repeat', 'rrule', 'recurrence_description'];
 
     protected $hidden = ['user_id', 'created_at', 'updated_at', 'api_token', 'import_id', 'events_import_id'];
 
@@ -97,6 +97,24 @@ class Event extends Model
     public function getRepeatAttribute(): ?string
     {
         return $this->schedule?->repeat;
+    }
+
+    /**
+     * Get the event's RRULE string, if it recurs via the new recurrence
+     * editor rather than (or in addition to) the legacy weekday mask.
+     */
+    public function getRruleAttribute(): ?string
+    {
+        return $this->schedule?->rrule;
+    }
+
+    /**
+     * Human-readable recurrence summary (legacy digit mask or rrule), or
+     * null for a non-repeating event. See Schedule::getRecurrenceDescriptionAttribute().
+     */
+    public function getRecurrenceDescriptionAttribute(): ?string
+    {
+        return $this->schedule?->recurrence_description;
     }
 
     public function removeApiToken(): bool
@@ -185,11 +203,11 @@ class Event extends Model
     }
 
     /**
-     * get the happy hour owned by the event
+     * get the happy hours owned by the event
      */
-    public function happy_hour(): HasOne
+    public function happy_hours(): HasMany
     {
-        return $this->hasOne(HappyHour::class);
+        return $this->hasMany(HappyHour::class);
     }
 
     protected static function booted()
@@ -203,7 +221,7 @@ class Event extends Model
 
         static::deleted(function ($event) {
             $event->schedule()->delete();
-            $event->happy_hour()->delete();
+            $event->happy_hours()->delete();
         });
     }
 

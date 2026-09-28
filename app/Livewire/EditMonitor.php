@@ -23,8 +23,11 @@ class EditMonitor extends Component
 
         $this->form->setMonitor($monitor);
         $realm = $this->form->monitor?->realm ?? auth()->user()->realm;
-        if (empty($realm?->ow_api_key)) {
+        if (! $realm?->hasWeatherProviderConfigured()) {
             $this->form->show_weather_forecast = false;
+        }
+        if (! $realm?->hasDailyWeatherProviderConfigured()) {
+            $this->form->show_weather_daily_forecast = false;
         }
     }
 
@@ -65,8 +68,9 @@ class EditMonitor extends Component
     public function render()
     {
         $realm = $this->form->monitor?->realm ?? auth()->user()->realm;
-        $hasOpenweatherApiKey = ! empty($realm?->ow_api_key);
+        $hasWeatherProviderConfigured = $realm?->hasWeatherProviderConfigured() ?? false;
+        $hasDailyWeatherProviderConfigured = $realm?->hasDailyWeatherProviderConfigured() ?? false;
 
-        return view('livewire.edit-monitor', compact('hasOpenweatherApiKey', 'realm'));
+        return view('livewire.edit-monitor', compact('hasWeatherProviderConfigured', 'hasDailyWeatherProviderConfigured', 'realm'));
     }
 }

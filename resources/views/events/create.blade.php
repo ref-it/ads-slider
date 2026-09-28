@@ -9,7 +9,7 @@
 @endsection
 
 @section('scripts')
-<script type="module">
+<script type="module" @cspNonce>
     $('#templateSelect').change((e) => {
         const templateID = $(e.target).val();
         document.location = "{{route('events.create')}}" + '/' + templateID;

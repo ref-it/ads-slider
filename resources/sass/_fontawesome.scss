@@ -1,0 +1,4 @@
+// Self-hosted Font Awesome Free (only the "solid" style is used in this project)
+@use '@fortawesome/fontawesome-free/scss/variables' with ($font-path: '@fortawesome/fontawesome-free/webfonts');
+@use '@fortawesome/fontawesome-free/scss/fontawesome';
+@use '@fortawesome/fontawesome-free/scss/solid';

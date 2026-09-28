@@ -20,13 +20,22 @@ export class Countdown {
     private static m: HTMLSpanElement | null = null;
     private static h: HTMLSpanElement | null = null;
     private static d: HTMLSpanElement | null = null;
+    private static bar: HTMLElement | null = null;
+    private static barStartDateTime: number | null = null;
+    private static totalDuration = 1;
 
-    constructor(endDate: string, seconds: HTMLSpanElement, minutes: HTMLSpanElement | null = null, hours: HTMLSpanElement | null = null, days: HTMLSpanElement | null = null) {
+    // barStartDate is the actual start of the tracked period (e.g. the Happy
+    // Hour's start time), used to size the bar's total range. Without it, the
+    // bar's range would be "now until end", so activating the monitor midway
+    // through would wrongly show a full bar instead of the true elapsed share.
+    constructor(endDate: string, seconds: HTMLSpanElement, minutes: HTMLSpanElement | null = null, hours: HTMLSpanElement | null = null, days: HTMLSpanElement | null = null, bar: HTMLElement | null = null, barStartDate: string | null = null) {
         this.setEndDate(endDate);
         Countdown.s = seconds;
         Countdown.m = minutes;
         Countdown.h = hours;
         Countdown.d = days;
+        Countdown.bar = bar;
+        Countdown.barStartDateTime = barStartDate ? new Date(barStartDate).getTime() : null;
 
         Countdown.countdownIsRunning = false;
         Countdown.countdownRuntimeIsRunning = false;
@@ -50,6 +59,9 @@ export class Countdown {
             return;
         }
         Countdown.countdownIsRunning = true;
+        Countdown.totalDuration = Countdown.barStartDateTime !== null
+            ? Math.max((Countdown.endDateTime - Countdown.barStartDateTime) / 1000, 1)
+            : Math.max((Countdown.endDateTime - Date.now()) / 1000, 1);
         //const $countdownDiv = $('.countdown');
         //$countdownDiv.css('color', 'inherit');
 
@@ -80,6 +92,9 @@ export class Countdown {
 
     private static cleanUp() {
         document.body.style.removeProperty('background'); // color is defined in background-color
+        if (Countdown.bar) {
+            Countdown.bar.style.removeProperty('height');
+        }
     }
 
     private static calculate(timestamp: DOMHighResTimeStamp): void {
@@ -110,14 +125,28 @@ export class Countdown {
         const startDate: number = dayjs().toDate().getTime();
         Countdown.timeRemaining = (Countdown.endDateTime - startDate) / 1000;
         if (Countdown.timeRemaining > 0 && Countdown.countdownIsRunning) {
-            document.body.style.background = `linear-gradient(90deg, #000000 ${100 - Countdown.timeRemaining / 9}%, #56647a 0%)`;
-            if (Countdown.timeRemaining <= 300 /* 5 minutes */) {
-                if (Countdown.s) {
-                    (Countdown.s.parentNode as HTMLDivElement).style.color = 'red';
-                }
+            if (Countdown.bar) {
+                // Dedicated shrinking bar (e.g. the Happy Hour band) already visualizes
+                // the remaining time, so the whole-page background sweep below is skipped.
+                const fraction = Math.max(0, Math.min(1, Countdown.timeRemaining / Countdown.totalDuration));
+                Countdown.bar.style.height = `${fraction * 100}%`;
             } else {
-                if (Countdown.s) {
-                    (Countdown.s.parentNode as HTMLDivElement).style.removeProperty('color');
+                // #141824 keeps the gradient's blue-grey hue but stays dark enough that
+                // the red urgency text (main-color/red) still clears WCAG AA contrast (>=3:1)
+                document.body.style.background = `linear-gradient(90deg, #000000 ${100 - Countdown.timeRemaining / 9}%, #141824 0%)`;
+            }
+            // Skipped when a dedicated bar exists (e.g. Happy Hour): that bar already
+            // shows urgency, and red text would sit on the band's own red/grey fill
+            // with too little contrast to stay legible.
+            if (!Countdown.bar) {
+                if (Countdown.timeRemaining <= 300 /* 5 minutes */) {
+                    if (Countdown.s) {
+                        (Countdown.s.parentNode as HTMLDivElement).style.color = 'red';
+                    }
+                } else {
+                    if (Countdown.s) {
+                        (Countdown.s.parentNode as HTMLDivElement).style.removeProperty('color');
+                    }
                 }
             }
             Countdown.days = Math.floor(Countdown.timeRemaining / 86400);
@@ -125,8 +154,14 @@ export class Countdown {
 
             Countdown.hours = Math.floor(Countdown.timeRemaining / 3600);
             Countdown.timeRemaining %= 3600;
-            if (Countdown.h && Countdown.hours < 1) {
-                hideElement(Countdown.h);
+            if (Countdown.h) {
+                // Based on the countdown's total length, not the remaining time, so the
+                // format (00:00:00 vs 00:00) doesn't change partway through the countdown.
+                if (Countdown.totalDuration <= 3600) {
+                    hideElement(Countdown.h);
+                } else {
+                    showElement(Countdown.h);
+                }
             }
             if (Countdown.d && Countdown.days < 1) {
                 hideElement(Countdown.d);
@@ -141,7 +176,7 @@ export class Countdown {
                 Countdown.d.innerText = String(Countdown.days);
             }
             if (Countdown.h) {
-                Countdown.h.innerText = String(Countdown.hours);
+                Countdown.h.innerText = addLeadingZero(Countdown.hours);
             }
             if (Countdown.m) {
                 Countdown.m.innerText = addLeadingZero(Countdown.minutes);

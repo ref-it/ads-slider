@@ -5,10 +5,12 @@ namespace App\Enums;
 enum ScheduledSlideType: string
 {
     case WEATHER = 'WEATHER';
+    case WEATHER_DAILY = 'WEATHER_DAILY';
     case ORDERSLIST = 'ORDERSLIST';
     case EVENTS = 'EVENTS';
     case MENUS = 'MENUS';
     case PICS = 'PICS';
+    case CANTEEN = 'CANTEEN';
     case VIDEOS = 'VIDEOS';
     case KARAOKE = 'KARAOKE';
 
@@ -31,10 +33,12 @@ enum ScheduledSlideType: string
     {
         return [
             self::WEATHER->value => __('Weather Forecast'),
+            self::WEATHER_DAILY->value => __('Daily Weather Forecast'),
             self::ORDERSLIST->value => __('Orders List'),
             self::EVENTS->value => __('Events'),
             self::MENUS->value => __('Menus'),
             self::PICS->value => __('Pictures'),
+            self::CANTEEN->value => __('Canteen'),
             self::VIDEOS->value => __('Videos'),
             self::KARAOKE->value => __('Karaoke'),
         ];
@@ -49,6 +53,7 @@ enum ScheduledSlideType: string
     {
         return [
             self::WEATHER->value,
+            self::WEATHER_DAILY->value,
             self::ORDERSLIST->value,
             self::EVENTS->value,
             self::ORDERSLIST->value,
@@ -56,6 +61,7 @@ enum ScheduledSlideType: string
             self::EVENTS->value,
             self::ORDERSLIST->value,
             self::PICS->value,
+            self::CANTEEN->value,
             self::VIDEOS->value,
             self::ORDERSLIST->value,
             self::EVENTS->value,

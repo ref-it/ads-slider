@@ -28,6 +28,7 @@ class Kernel extends ConsoleKernel
             ->appendOutputTo(storage_path('logs/importEvents.log'));
         $schedule->command('orderslist:fetch-all --isolated')->everyMinute()->withoutOverlapping();
         $schedule->command('weather:fetchAll --isolated')->everyFifteenMinutes();
+        $schedule->command('canteens:fetch --isolated')->everyFifteenMinutes();
         $schedule->command('nina:fetchAll --isolated')->everyFiveMinutes();
 
         $schedule->command('telescope:prune')->daily()->environments(['local']);

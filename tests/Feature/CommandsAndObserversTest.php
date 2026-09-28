@@ -19,6 +19,7 @@ use App\Providers\OrderslistUpdated;
 use App\Providers\WeatherDataUpdated;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event as EventFacade;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -39,9 +40,14 @@ class CommandsAndObserversTest extends TestCase
         Storage::fake('local');
         Storage::fake('public');
 
+        // The DWD station catalogue is cached on the "array" store, which
+        // outlives RefreshDatabase and would leak between tests otherwise.
+        Cache::flush();
+
         $this->realm = Realm::factory()->create([
             'ow_city_id' => '2867714',
             'ow_api_key' => 'valid_api_key',
+            'weather_provider' => 'openweathermap',
             'orders_link' => 'https://orders.example.com/data.json',
             'lat' => 51.2,
             'lon' => 6.8,
@@ -89,6 +95,155 @@ class CommandsAndObserversTest extends TestCase
 
         $exitCode = Artisan::call('weather:fetchAll');
         $this->assertEquals(0, $exitCode);
+
+        Http::assertSent(fn ($request) => str_contains($request->url(), 'api.openweathermap.org'));
+    }
+
+    public function test_weather_fetch_dwd_command(): void
+    {
+        EventFacade::fake([WeatherDataUpdated::class]);
+
+        Http::fake([
+            'https://app-prod-ws.warnwetter.de/*' => Http::response([
+                '10865' => [
+                    'forecast1' => [
+                        // Anchored to "now" (rather than a fixed past
+                        // epoch) so the normalizer's "start from the
+                        // current hour" window lands on index 0 here.
+                        'start' => now()->valueOf(),
+                        'timeStep' => 3600000,
+                        'temperature' => [141, 127, 128, 126, 124, 122],
+                        'icon' => [8, 8, 8, 8, 8, 4],
+                        'windSpeed' => [180, null, 108, 108, 108, 108],
+                        'windDirection' => [2200, null, 900, 900, 900, 900],
+                        'windGust' => [360, null, 144, 144, 144, 144],
+                    ],
+                    'days' => [
+                        ['dayDate' => '2026-09-21', 'temperatureMin' => 102, 'temperatureMax' => 173, 'sunshine' => 5220, 'icon' => 4, 'windSpeed' => 144, 'windGust' => 288],
+                        ['dayDate' => '2026-09-22', 'temperatureMin' => 75, 'temperatureMax' => 158, 'sunshine' => 4110, 'icon' => 2],
+                    ],
+                ],
+            ], 200),
+            // The realm is at lat=51.2, lon=6.8; this station sits right next to it.
+            'https://www.dwd.de/*' => Http::response(
+                "ID    ICAO NAME                 LAT    LON     ELEV\n".
+                "----- ---- -------------------- -----  ------- -----\n".
+                "10400 EDDL DUESSELDORF           51.12    6.48    38\n",
+                200
+            ),
+        ]);
+
+        $exitCode = Artisan::call('weather:fetchDwd', [
+            '--realm' => $this->realm->id,
+            '--station_id' => '10865',
+        ]);
+
+        $this->assertEquals(0, $exitCode);
+        Storage::disk('local')->assertExists('weather-dwd-10865.json');
+
+        EventFacade::assertDispatched(WeatherDataUpdated::class, function (WeatherDataUpdated $event) {
+            $first = $event->data['list'][0] ?? null;
+            $firstDay = $event->data['daily'][0] ?? null;
+
+            $secondHour = $event->data['list'][1] ?? null;
+            $secondDay = $event->data['daily'][1] ?? null;
+
+            return $first
+                && $first['main']['temp'] === 14.1
+                // DWD doesn't provide a perceived temperature.
+                && $first['main']['feels_like'] === null
+                // 180 tenths of km/h => 5.0 m/s; 2200 tenths of a degree => 220°.
+                && $first['wind']['speed'] === 5.0
+                && $first['wind']['deg'] === 220
+                && $first['wind']['gust'] === 10.0
+                // Hourly wind is null for this index; omitted rather than showing 0.
+                && $secondHour
+                && $secondHour['wind']['speed'] === null
+                && $secondHour['wind']['deg'] === null
+                && ! array_key_exists('gust', $secondHour['wind'])
+                // The nearest DWD station's name (title-cased, umlauts restored), not the realm's own name.
+                && $event->data['city']['name'] === 'Düsseldorf'
+                && $firstDay
+                && $firstDay['date'] === '2026-09-21'
+                && $firstDay['temp_min'] === 10.2
+                && $firstDay['temp_max'] === 17.3
+                // 5220 tenths of a minute of sunshine => 522 minutes.
+                && $firstDay['sunshine'] === 522
+                // 144 tenths of km/h => 4.0 m/s; 288 tenths of km/h => 8.0 m/s.
+                && $firstDay['wind_speed'] === 4.0
+                && $firstDay['wind_gust'] === 8.0
+                && $firstDay['weather'][0]['icon'] === '04d'
+                // No wind data provided for this day.
+                && $secondDay
+                && $secondDay['wind_speed'] === null
+                && $secondDay['wind_gust'] === null;
+        });
+    }
+
+    public function test_weather_fetch_dwd_command_falls_back_to_realm_name_without_station_catalog(): void
+    {
+        EventFacade::fake([WeatherDataUpdated::class]);
+
+        Http::fake([
+            'https://app-prod-ws.warnwetter.de/*' => Http::response([
+                '10865' => [
+                    'forecast1' => [
+                        'start' => now()->valueOf(),
+                        'timeStep' => 3600000,
+                        'temperature' => [141],
+                        'icon' => [8],
+                    ],
+                ],
+            ], 200),
+            'https://www.dwd.de/*' => Http::response('Service Unavailable', 503),
+        ]);
+
+        Artisan::call('weather:fetchDwd', [
+            '--realm' => $this->realm->id,
+            '--station_id' => '10865',
+        ]);
+
+        EventFacade::assertDispatched(WeatherDataUpdated::class, function (WeatherDataUpdated $event) {
+            return $event->data['city']['name'] === $this->realm->name;
+        });
+    }
+
+    public function test_weather_fetch_all_command_branches_to_dwd(): void
+    {
+        EventFacade::fake([WeatherDataUpdated::class]);
+
+        $dwdRealm = Realm::factory()->create([
+            'weather_provider' => 'dwd',
+            'dwd_station_id' => '10865',
+            'lat' => 52.4685,
+            'lon' => 13.4021,
+        ]);
+
+        Http::fake([
+            'https://api.openweathermap.org/*' => Http::response(['weather' => 'sunny'], 200),
+            'https://app-prod-ws.warnwetter.de/*' => Http::response([
+                '10865' => [
+                    'forecast1' => [
+                        'start' => now()->valueOf(),
+                        'timeStep' => 3600000,
+                        'temperature' => [141],
+                        'icon' => [1],
+                    ],
+                ],
+            ], 200),
+            'https://www.dwd.de/*' => Http::response(
+                "ID    ICAO NAME                 LAT    LON     ELEV\n".
+                "----- ---- -------------------- -----  ------- -----\n".
+                "10382 EDDT BERLIN-TEGEL           52.28   13.24    36\n",
+                200
+            ),
+        ]);
+
+        $exitCode = Artisan::call('weather:fetchAll');
+        $this->assertEquals(0, $exitCode);
+
+        Storage::disk('local')->assertExists('weather-dwd-10865.json');
+        Storage::disk('local')->assertExists("weather-{$this->realm->ow_city_id}.json");
     }
 
     public function test_orderslist_fetch_command(): void

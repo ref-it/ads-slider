@@ -16,7 +16,7 @@
 
     <!-- Styles -->
     @vite(['resources/sass/app.scss', 'resources/js/app.mjs'])
-    <script>
+    <script @cspNonce>
         /*!
          * Color mode toggler for Bootstrap's docs (https://getbootstrap.com/)
          * Copyright 2011-2023 The Bootstrap Authors
@@ -106,17 +106,23 @@
 
 
 
-        @if (session('error'))
-            <div class="alert alert-danger">
-                <strong>{{ __('An error has occurred') }}</strong><br>
-                {{ session('error') }}
-            </div>
-        @endif
-        @if (session('success'))
-            <div class="alert alert-success">
-                <strong>{{ __('Success!') }}</strong><br>
-                {{ session('success') }}
-            </div>
+        @if (session('error') || session('success'))
+        <div class="container mt-3">
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>{{ __('An error has occurred') }}</strong><br>
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('Close') }}"></button>
+                </div>
+            @endif
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <strong>{{ __('Success!') }}</strong><br>
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('Close') }}"></button>
+                </div>
+            @endif
+        </div>
         @endif
 
         @include('flash::message')
@@ -136,10 +142,9 @@
     </div>
 
     <!-- Scripts -->
-    <script type="module">
+    <script type="module" @cspNonce>
         $('div.alert').not('.alert-important').delay(3000).fadeOut(350);
     </script>
-    <script async src="{{ config('ads.fontAwesomeKitURL') }}" crossorigin="anonymous"></script>
     @yield('scripts')
 </body>
 

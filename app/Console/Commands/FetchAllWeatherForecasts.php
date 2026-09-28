@@ -29,14 +29,19 @@ class FetchAllWeatherForecasts extends Command implements Isolatable
     public function handle(): void
     {
         Realm::all()->each(function ($realm) {
-            $cityID = $realm->ow_city_id;
-            $apiKey = $realm->ow_api_key;
-            if (! $apiKey || ! $cityID) {
-                $this->warn("Realm {$realm->name}: no api key ({$apiKey}) or city id({$cityID}) set.");
+            if (! $realm->hasWeatherProviderConfigured()) {
+                $this->warn("Realm {$realm->name}: no weather provider configured.");
 
                 return;
             }
-            Artisan::call('weather:fetch', ['--realm' => $realm->id, '--city_id' => $cityID, '--api_key' => $apiKey]);
+
+            if ($realm->effectiveWeatherProvider() === 'dwd') {
+                Artisan::call('weather:fetchDwd', ['--realm' => $realm->id, '--station_id' => $realm->dwd_station_id]);
+
+                return;
+            }
+
+            Artisan::call('weather:fetch', ['--realm' => $realm->id, '--city_id' => $realm->ow_city_id, '--api_key' => $realm->ow_api_key]);
         });
     }
 }

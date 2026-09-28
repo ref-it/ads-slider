@@ -1,5 +1,6 @@
 // Fonts
-@use 'googleFonts' as *;
+@use 'fonts' as *;
+@use 'fontawesome' as *;
 
 // Variables
 @use 'variables' as vars;
@@ -12,6 +13,12 @@
 //input[required]:placeholder-shown {
 //    border-color:red !important;
 //}
+
+.form-label {
+    margin-bottom: .25rem;
+    font-size: .9rem;
+    font-weight: bold;
+}
 
 .loader-line {
     width: 100vw;
@@ -58,12 +65,17 @@
     margin-top: 8px;
 }
 
+// inline-flex (not table-cell) so the icon glyph centers reliably both
+// inline with surrounding text (eventsImports) and as a flex item inside
+// another flex container (events-list) - table-cell's vertical-align only
+// works in the former case, since flex items get their display blockified.
 .event-icon {
     width: 27px;
     height: 27px;
-    display: table-cell;
-    vertical-align: middle;
-    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
 }
 
 img.preview {
@@ -104,4 +116,90 @@ img.preview {
     text-align: center;
     width: 1.25em;
     display: inline-block;
+}
+
+// Highlight the navbar item for the section currently being viewed
+// (including a dropdown toggle when one of its sub-pages is active), with
+// the marker flush against the navbar's own visible bottom edge.
+//
+// Getting there takes two separate fixes:
+// 1. Bootstrap centers (rather than stretches) .container's children, then
+//    .navbar-collapse's children, so a nav-item is only as tall as its own
+//    text+padding and floats in the middle of the (taller) navbar. Forcing
+//    align-self/align-items: stretch down this chain makes .nav-link's own
+//    box reach the bottom of .navbar-collapse/.container.
+// 2. .container itself sits *inside* the navbar's own vertical padding
+//    (--bs-navbar-padding-y), so even a fully stretched .nav-link still
+//    stops short of the navbar's true outer edge by that amount - no
+//    descendant's size can reach into an ancestor's padding. The marker is
+//    therefore an absolutely positioned pseudo-element (not a border, which
+//    can't extend past its own box without changing the link's layout
+//    size), offset down by exactly that padding to bridge the remaining,
+//    fixed gap. It's a ::before, not ::after: dropdown toggles already use
+//    ::after for their caret arrow, and a same-element pseudo-element only
+//    exists once - reusing ::after would merge our positioning with the
+//    caret's border-triangle styling into one broken shape.
+// Scoped to the left-hand (.me-auto) nav, the only one that carries the
+// .active section markers - the right-hand nav is left centered as before.
+.navbar .navbar-collapse {
+    align-self: stretch;
+}
+
+.navbar .navbar-nav.me-auto {
+    align-self: stretch;
+    align-items: stretch;
+}
+
+.navbar .navbar-nav.me-auto .nav-item {
+    display: flex;
+}
+
+.navbar .navbar-nav.me-auto .nav-link {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.navbar-nav .nav-link.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(-1 * var(--bs-navbar-padding-y));
+    height: 3px;
+    background-color: var(--bs-primary);
+}
+
+// Bootstrap's raw warning/danger theme colors don't meet WCAG contrast as
+// button text on a light background (e.g. #ffc107 warning yellow is ~1.6:1
+// against white; needs 4.5:1). Bootstrap's own "-emphasis" colors fix the
+// contrast but read as a dull, muddy brown/maroon - replaced here with a
+// richer amber/red that still clears 4.5:1 (light: ~4.9:1 / ~6.5:1, dark:
+// ~9.2:1 / ~5.6:1 against this theme's dark background). Overriding
+// Bootstrap's own variables (rather than inventing new ones) means every
+// "-emphasis" consumer - these outline buttons and any .text-*-emphasis
+// utility - gets the same nicer color for free.
+:root,
+[data-bs-theme='light'] {
+    --bs-warning-text-emphasis: #a16207;
+    --bs-danger-text-emphasis: #b91c1c;
+}
+
+[data-bs-theme='dark'] {
+    --bs-warning-text-emphasis: #fbbf24;
+    --bs-danger-text-emphasis: #f87171;
+}
+
+.btn-outline-warning {
+    --bs-btn-color: var(--bs-warning-text-emphasis);
+    --bs-btn-border-color: var(--bs-warning-text-emphasis);
+    --bs-btn-disabled-color: var(--bs-warning-text-emphasis);
+    --bs-btn-disabled-border-color: var(--bs-warning-text-emphasis);
+}
+
+.btn-outline-danger {
+    --bs-btn-color: var(--bs-danger-text-emphasis);
+    --bs-btn-border-color: var(--bs-danger-text-emphasis);
+    --bs-btn-disabled-color: var(--bs-danger-text-emphasis);
+    --bs-btn-disabled-border-color: var(--bs-danger-text-emphasis);
 }
