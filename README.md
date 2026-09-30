@@ -124,6 +124,65 @@ npm run dev
 
 Or, in VS Code, use the configured task to start the full stack together.
 
+## NixOS / Flake
+
+The repository is a flake that provides the package and a NixOS module (`services.ads-slider`), e.g. for
+[ref-it/nixos-infra](https://github.com/ref-it/nixos-infra).
+
+`flake.nix` of the infrastructure repo:
+
+```nix
+inputs.ads-slider = {
+  url = "github:bedo2991/ads-slider";
+  inputs.nixpkgs.follows = "nixpkgs";
+};
+```
+
+Pass the input to the hosts (`specialArgs = { inherit inputs; }` is already done in `hive.nix`) and import the module
+in a profile or host:
+
+```nix
+{ inputs, config, ... }:
+{
+  imports = [ inputs.ads-slider.nixosModules.default ];
+
+  sops.secrets."ads-slider-env" = { };
+
+  services.ads-slider = {
+    enable = true;
+    domain = "slider.example.org";
+    brandName = "My Org";
+    environmentFile = config.sops.secrets."ads-slider-env".path;
+    settings = {
+      APP_LOCALE = "de";
+      OIDC_ENABLED = true;
+      OIDC_BASE_URL = "https://sso.example.org/realms/main";
+    };
+    # optional: custom TLS instead of ACME
+    # nginx.virtualHost = { sslCertificate = "..."; sslCertificateKey = "..."; forceSSL = true; };
+  };
+}
+```
+
+The secret file contains at least:
+
+```
+APP_KEY=base64:<openssl rand -base64 32>
+REVERB_APP_SECRET=<random string>
+```
+
+Plus optional secrets such as `OW_API_KEY` or `OIDC_CLIENT_SECRET`.
+
+The module sets up nginx + php-fpm, a local MariaDB (unix socket, can be disabled with `database.createLocally = false`),
+migrations on start, the queue worker, the Reverb websocket server (proxied at `/app`) and a systemd timer for the
+Laravel scheduler. State lives in `/var/lib/ads-slider`. Run artisan commands with `sudo ads-slider-artisan <command>`.
+
+`VITE_*` variables are baked into the frontend at build time; the module derives them from `domain`, `brandName` and
+`reverb.appKey`.
+
+After changing `composer.lock` or `package-lock.json`, update `vendorHash` / `npmDeps.hash` in `nix/package.nix`
+(set them to `lib.fakeHash` and copy the hash from the build error).
+
 ## Useful development commands
 
 ### Run the full local stack
